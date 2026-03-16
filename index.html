@@ -1,1 +1,860 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Investiční kalkulačka — Simulace portfolia na 40 let</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root{
+  --navy:#1a2332;--navy2:#243447;--blue:#4A9EE0;--teal:#4ECDA0;
+  --red-lt:#fff5f5;--red-bd:#fde8e8;--red-tx:#993C1D;
+  --grn-lt:#f0fdf8;--grn-bd:#d1f5e8;--grn-tx:#0F6E56;
+  --bg:#f7f8fa;--surface:#ffffff;--border:#e8eaed;--border2:#d0d3d8;
+  --txt:#1a2332;--txt2:#5a6475;--txt3:#9aa3b0;
+  --radius:10px;--font:'DM Sans',sans-serif;--mono:'DM Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:14px;line-height:1.6}
 
+/* TOPBAR */
+.topbar{background:var(--navy);height:54px;display:flex;align-items:center;padding:0 28px;justify-content:space-between;position:sticky;top:0;z-index:100}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.logo-mark{width:28px;height:28px;background:var(--blue);border-radius:7px;display:flex;align-items:center;justify-content:center}
+.logo-mark svg{width:15px;height:15px}
+.logo-name{font-size:14px;font-weight:500;color:#fff}
+.logo-sub{font-size:10px;color:rgba(255,255,255,.38);margin-top:1px}
+.topbar-actions{display:flex;gap:8px;align-items:center}
+.tb-btn{display:flex;align-items:center;gap:6px;padding:6px 12px;font-size:12px;font-family:var(--font);border-radius:6px;cursor:pointer;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.07);color:rgba(255,255,255,.8);transition:all .15s}
+.tb-btn:hover{background:rgba(255,255,255,.13);color:#fff}
+.tb-btn.print{border-color:rgba(78,205,160,.3);color:var(--teal)}
+.tb-btn.print:hover{background:rgba(78,205,160,.1)}
+.tb-btn svg{width:13px;height:13px;flex-shrink:0}
+.help-btn{width:24px;height:24px;border-radius:50%;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:rgba(255,255,255,.6);font-size:12px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;font-family:var(--font)}
+.help-btn:hover{background:rgba(255,255,255,.18);color:#fff;border-color:rgba(255,255,255,.4)}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.open{display:flex}
+.modal{background:var(--surface);border-radius:14px;max-width:480px;width:100%;padding:28px;position:relative}
+.modal h3{font-size:17px;font-weight:500;margin-bottom:5px;color:var(--txt)}
+.modal-sub{font-size:13px;color:var(--txt3);margin-bottom:22px;line-height:1.5}
+.modal-close{position:absolute;top:16px;right:16px;width:28px;height:28px;border-radius:50%;border:1px solid var(--border);background:none;cursor:pointer;font-size:15px;color:var(--txt2);display:flex;align-items:center;justify-content:center;font-family:var(--font);transition:all .15s}
+.modal-close:hover{background:var(--bg);color:var(--txt)}
+.modal-step{display:flex;gap:13px;margin-bottom:16px;align-items:flex-start}
+.modal-num{width:26px;height:26px;border-radius:50%;background:var(--navy);color:#fff;font-size:11px;font-weight:500;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.modal-text{font-size:13px;color:var(--txt2);line-height:1.65}
+.modal-text strong{color:var(--txt);font-weight:500}
+.modal-tip{background:#f0f7fd;border:1px solid #daeaf8;border-radius:8px;padding:13px 15px;font-size:12px;color:#2a5a85;line-height:1.65;margin-top:6px}
+.modal-tip strong{color:#1a3d5c;font-weight:500}
+.modal-actions{display:flex;gap:8px;margin-top:22px;justify-content:flex-end}
+
+/* HERO */
+.hero{background:var(--navy);padding:52px 28px 0;overflow:hidden;position:relative}
+.hero::before{content:'';position:absolute;right:-80px;top:-80px;width:360px;height:360px;border-radius:50%;background:rgba(74,158,224,.06);pointer-events:none}
+.hero-eyebrow{font-size:11px;color:var(--blue);font-weight:500;letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px}
+.hero-title{font-size:27px;font-weight:300;color:#fff;line-height:1.25;margin-bottom:14px;max-width:540px}
+.hero-title strong{font-weight:500;color:var(--teal)}
+.hero-body{font-size:13px;color:rgba(255,255,255,.5);line-height:1.75;max-width:480px;margin-bottom:28px}
+.hero-cta{display:inline-block;background:var(--blue);color:#fff;font-size:13px;font-weight:500;padding:11px 24px;border-radius:8px;cursor:pointer;text-decoration:none;transition:opacity .15s}
+.hero-cta:hover{opacity:.88}
+.kpi-strip{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid rgba(255,255,255,.07);margin-top:36px}
+.kpi{padding:18px 20px;border-right:1px solid rgba(255,255,255,.07)}
+.kpi:last-child{border-right:none}
+.kpi-label{font-size:10px;color:rgba(255,255,255,.38);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px}
+.kpi-val{font-size:19px;font-weight:500;color:#fff;font-family:var(--mono)}
+.kpi-val.blue{color:var(--blue)}
+.kpi-val.teal{color:var(--teal)}
+
+/* MAIN LAYOUT */
+.page{padding:28px;max-width:1100px;margin:0 auto}
+.grid-sidebar{display:grid;grid-template-columns:360px 1fr;gap:24px;align-items:start}
+
+/* CARDS */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:20px}
+.card:last-child{margin-bottom:0}
+.card-hdr{padding:13px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+.card-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.card-title{font-size:11px;font-weight:500;color:var(--txt2);text-transform:uppercase;letter-spacing:.05em}
+.card-body{padding:18px}
+
+/* INPUTS */
+.inp-group{margin-bottom:14px}
+.inp-group:last-child{margin-bottom:0}
+.inp-label{font-size:11px;color:var(--txt3);margin-bottom:5px;font-weight:500;display:block}
+.inp-wrap{position:relative}
+.inp-wrap input{width:100%;padding:9px 44px 9px 12px;font-size:13px;font-family:var(--mono);border:1px solid var(--border);border-radius:7px;background:var(--bg);color:var(--txt);outline:none;transition:border .15s}
+.inp-wrap input:focus{border-color:var(--blue);background:#fff}
+.inp-unit{position:absolute;right:11px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--txt3);pointer-events:none;font-family:var(--font)}
+
+/* PRESET BUTTONS */
+.preset-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.preset{padding:6px 12px;font-size:12px;font-family:var(--font);border:1px solid var(--border);border-radius:6px;background:none;color:var(--txt2);cursor:pointer;transition:all .15s;white-space:nowrap}
+.preset:hover{border-color:var(--border2);color:var(--txt)}
+.preset.sel{background:var(--navy);color:#fff;border-color:var(--navy)}
+.preset.custom-sel{background:var(--blue);color:#fff;border-color:var(--blue)}
+
+/* PHASE CARDS */
+.phases-wrap{display:flex;flex-direction:column;gap:10px}
+.phase-card{border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.phase-card-hdr{padding:10px 14px;background:var(--bg);display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none}
+.phase-card-hdr:hover{background:#f0f2f5}
+.phase-num{width:22px;height:22px;border-radius:50%;background:var(--navy);color:#fff;font-size:10px;font-weight:500;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.phase-label{font-size:12px;font-weight:500;color:var(--txt);flex:1}
+.phase-summary{font-size:11px;color:var(--txt3);font-family:var(--mono)}
+.phase-del{width:22px;height:22px;border-radius:50%;border:1px solid var(--border);background:none;cursor:pointer;font-size:14px;color:var(--txt3);display:flex;align-items:center;justify-content:center;transition:all .15s;font-family:var(--font);line-height:1}
+.phase-del:hover{border-color:var(--red-bd);color:var(--red-tx);background:var(--red-lt)}
+.phase-card-body{padding:14px;border-top:1px solid var(--border);display:none}
+.phase-card-body.open{display:block}
+.phase-row{display:flex;gap:8px;align-items:flex-end;margin-bottom:10px;flex-wrap:wrap}
+.phase-row:last-child{margin-bottom:0}
+.phase-field{display:flex;flex-direction:column;gap:4px}
+.phase-field label{font-size:10px;color:var(--txt3);font-weight:500}
+.phase-field input{padding:7px 10px;font-size:12px;font-family:var(--mono);border:1px solid var(--border);border-radius:6px;background:#fff;color:var(--txt);outline:none;width:90px}
+.phase-field input:focus{border-color:var(--blue)}
+.btn-add-phase{font-size:12px;color:var(--blue);background:none;border:1px dashed #b5d4f4;border-radius:7px;padding:9px 14px;cursor:pointer;width:100%;margin-top:4px;font-family:var(--font);transition:all .15s}
+.btn-add-phase:hover{background:#f0f7fd}
+
+/* TIMELINE */
+.tl-axis{display:flex;justify-content:space-between;font-size:10px;color:var(--txt3);margin-bottom:4px}
+.tl-track{position:relative;height:38px;border-radius:7px;background:var(--bg);border:1px solid var(--border);overflow:hidden;cursor:crosshair;user-select:none}
+.tl-seg{position:absolute;top:2px;bottom:2px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;cursor:pointer;overflow:hidden;white-space:nowrap}
+.tl-seg:hover{opacity:.85}
+.tl-seg.sel{outline:2px solid var(--txt);outline-offset:1px}
+.tl-handle{position:absolute;top:0;bottom:0;width:9px;cursor:ew-resize;z-index:2;display:flex;align-items:center;justify-content:center}
+.tl-handle::after{content:'';width:2px;height:14px;background:rgba(0,0,0,.2);border-radius:2px}
+.tl-handle.l{left:0}.tl-handle.r{right:0}
+.tl-editor{padding:12px;background:var(--bg);border-radius:7px;margin-top:8px;display:none;flex-wrap:wrap;gap:8px;align-items:flex-end}
+.tl-editor.open{display:flex}
+.tl-ef{display:flex;flex-direction:column;gap:3px;flex:1;min-width:80px}
+.tl-ef label{font-size:10px;color:var(--txt3);font-weight:500}
+.tl-ef input{padding:7px 9px;font-size:12px;font-family:var(--mono);border:1px solid var(--border);border-radius:6px;background:#fff;color:var(--txt);outline:none;width:100%}
+.tl-ef input:focus{border-color:var(--blue)}
+.hint{font-size:11px;color:var(--txt3);line-height:1.5;margin-top:6px}
+
+/* BUTTONS */
+.btn{padding:7px 14px;font-size:12px;font-family:var(--font);border:1px solid var(--border);border-radius:6px;background:none;color:var(--txt);cursor:pointer;transition:all .15s;align-self:flex-end}
+.btn:hover{background:var(--bg)}
+.btn.primary{background:var(--navy);color:#fff;border-color:transparent}
+.btn.primary:hover{opacity:.85}
+.btn.danger{color:var(--red-tx);border-color:var(--red-bd)}
+.btn.danger:hover{background:var(--red-lt)}
+.btn-add-seg{font-size:11px;color:var(--blue);background:none;border:1px dashed #b5d4f4;border-radius:6px;padding:5px 11px;cursor:pointer;margin-top:6px;font-family:var(--font)}
+.btn-add-seg:hover{background:#f0f7fd}
+
+/* TRANSACTIONS */
+.fill-bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:10px 13px;background:var(--bg);border-radius:7px;margin-bottom:12px;font-size:12px;color:var(--txt2)}
+.fill-bar input{padding:6px 8px;font-size:12px;font-family:var(--mono);border:1px solid var(--border);border-radius:6px;background:#fff;color:var(--txt);width:84px;outline:none}
+.fill-bar input:focus{border-color:var(--blue)}
+.tx-table{width:100%;border-collapse:collapse;font-size:12px}
+.tx-table th{padding:7px 8px;text-align:left;font-weight:500;font-size:10px;color:var(--txt3);border-bottom:1px solid var(--border);text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
+.tx-table th.r,.tx-table td.r{text-align:right}
+.tx-table td{padding:4px 6px;border-bottom:1px solid #f4f5f7;vertical-align:middle}
+.tx-table tr:last-child td{border-bottom:none}
+.tx-table tr:hover td{background:#fafbfc}
+.tx-table input[type=number],.tx-table input[type=text]{padding:4px 7px;font-size:12px;font-family:var(--mono);border:1px solid transparent;border-radius:5px;background:transparent;color:var(--txt);width:100%;outline:none;transition:all .12s}
+.tx-table input:hover{border-color:var(--border)}
+.tx-table input:focus{border-color:var(--blue);background:#fff}
+
+/* SIM TABLE */
+.sim-wrap{overflow-x:auto;max-height:500px;overflow-y:auto}
+.sim-table{width:100%;border-collapse:collapse;font-size:12px;min-width:580px}
+.sim-table th{position:sticky;top:0;background:var(--bg);padding:8px 10px;text-align:right;font-weight:500;font-size:10px;color:var(--txt3);border-bottom:1px solid var(--border);white-space:nowrap;text-transform:uppercase;letter-spacing:.04em;z-index:1}
+.sim-table th:first-child{text-align:center}
+.sim-table td{padding:5px 10px;text-align:right;border-bottom:1px solid #f4f5f7;font-variant-numeric:tabular-nums;font-family:var(--mono);font-size:11px}
+.sim-table td:first-child{text-align:center;font-family:var(--font);color:var(--txt3)}
+.sim-table tr.milestone td{background:#fafbfc;font-weight:500}
+.sim-table tr:hover td{background:#fafbfc}
+.pos{color:var(--grn-tx)}.neg{color:var(--red-tx)}
+
+/* CHART */
+.chart-wrap{position:relative;width:100%;height:320px}
+.legend{display:flex;gap:18px;font-size:11px;color:var(--txt2);margin-bottom:12px;flex-wrap:wrap}
+.legend-item{display:flex;align-items:center;gap:6px}
+.legend-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+.milestones-row{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--border)}
+.ms{padding:13px 14px;border-right:1px solid var(--border);text-align:center}
+.ms:last-child{border-right:none}
+.ms-yr{font-size:10px;color:var(--txt3);margin-bottom:3px;text-transform:uppercase;letter-spacing:.04em}
+.ms-val{font-size:13px;font-weight:500;color:var(--txt);font-family:var(--mono)}
+.ms-gain{font-size:10px;color:var(--grn-tx);margin-top:2px}
+
+/* WHY SECTION */
+.why-section{background:var(--surface);padding:48px 28px;border-top:1px solid var(--border)}
+.section-eyebrow{font-size:11px;color:var(--blue);font-weight:500;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px}
+.section-h{font-size:20px;font-weight:400;color:var(--txt);margin-bottom:6px;line-height:1.3}
+.section-sub{font-size:13px;color:var(--txt2);line-height:1.7;max-width:560px;margin-bottom:28px}
+.compare-grid{display:grid;grid-template-columns:55fr 45fr;gap:0;border-radius:var(--radius);overflow:hidden;border:1px solid var(--border);margin-bottom:28px}
+.cc{display:flex;flex-direction:column}
+.cc-hdr{padding:11px 14px;font-size:12px;font-weight:500;display:flex;align-items:center;gap:7px}
+.cc-hdr.bad{background:var(--red-lt);color:var(--red-tx);border-bottom:1px solid var(--red-bd)}
+.cc-hdr.good{background:var(--grn-lt);color:var(--grn-tx);border-bottom:1px solid var(--grn-bd)}
+.cc-icon{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0}
+.cc-icon.bad{background:var(--red-bd);color:var(--red-tx)}
+.cc-icon.good{background:var(--grn-bd);color:var(--grn-tx)}
+.cc-body{padding:14px;flex:1;background:var(--surface)}
+.cc-bars{display:flex;align-items:flex-end;gap:3px;height:80px;margin-bottom:10px}
+.cc-caption{font-size:11px;color:var(--txt2);line-height:1.55}
+.cc-caption strong{color:var(--txt)}
+.shared-axis{display:flex;align-items:center;gap:8px;margin-bottom:8px;height:30px}
+.axis-track{position:relative;flex:1;height:3px;background:var(--border);border-radius:2px}
+.milestone-pin{position:absolute;left:55%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;top:-12px}
+.milestone-tag{font-size:10px;font-weight:500;color:var(--txt2);background:var(--surface);border:1px solid var(--border2);border-radius:4px;padding:2px 7px;white-space:nowrap;margin-bottom:2px}
+.milestone-line{width:1px;height:42px;background:var(--txt3);opacity:.3}
+.axis-age{font-size:11px;color:var(--txt3);white-space:nowrap}
+.insights-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:28px}
+.insight{background:var(--bg);border-radius:8px;padding:16px}
+.insight-num{font-size:22px;font-weight:500;color:var(--blue);margin-bottom:4px;font-family:var(--mono)}
+.insight-num.teal{color:var(--teal)}
+.insight-label{font-size:12px;font-weight:500;color:var(--txt);margin-bottom:3px}
+.insight-sub{font-size:11px;color:var(--txt2);line-height:1.5}
+.divider{height:1px;background:var(--border);margin:28px 0}
+.diff-list{display:flex;flex-direction:column;gap:10px}
+.diff-item{display:flex;gap:11px;align-items:flex-start}
+.diff-check{width:20px;height:20px;border-radius:50%;background:var(--grn-lt);border:1px solid var(--grn-bd);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
+.diff-check svg{width:9px;height:9px}
+.diff-text{font-size:13px;color:var(--txt2);line-height:1.55}
+.diff-text strong{color:var(--txt);font-weight:500}
+
+/* FOOTER */
+.footer{background:var(--navy);padding:18px 28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.footer span{font-size:11px;color:rgba(255,255,255,.3)}
+
+/* PRINT */
+@media print{
+  .topbar,.hero-cta,.why-section,.footer,.tl-editor,.btn-add-seg,.btn-add-phase,.phase-del,.fill-bar,.hint,.preset-row{display:none!important}
+  .hero{padding:20px 20px 0}
+  .kpi-strip{border-top:1px solid #ddd}
+  .page{padding:12px}
+  .card{break-inside:avoid;border:1px solid #ddd}
+  .chart-wrap{height:260px}
+  body{background:#fff}
+  .phase-card-body{display:block!important}
+}
+
+@media(max-width:760px){
+  .grid-sidebar{grid-template-columns:1fr}
+  .kpi-strip{grid-template-columns:1fr 1fr}
+  .insights-row{grid-template-columns:1fr}
+  .compare-grid{grid-template-columns:1fr}
+  .milestones-row{grid-template-columns:1fr 1fr}
+  .page{padding:14px}
+  .hero{padding:28px 16px 0}
+  .why-section{padding:28px 16px}
+  .topbar{padding:0 14px}
+  .topbar-actions .tb-btn span{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- MODAL – nápověda k uložení -->
+<div class="modal-overlay" id="help-modal">
+  <div class="modal">
+    <button class="modal-close" id="modal-close">×</button>
+    <h3>Jak uložit a obnovit nastavení</h3>
+    <p class="modal-sub">Vaše nastavení lze uložit do souboru a kdykoli znovu načíst — na jakémkoli zařízení nebo prohlížeči.</p>
+    <div class="modal-step">
+      <div class="modal-num">1</div>
+      <div class="modal-text">Klikněte na tlačítko <strong>Uložit nastavení</strong> v horní liště. Prohlížeč stáhne malý soubor s názvem <strong>kalkulacka-nastaveni.json</strong> — je to jen textový soubor s vašimi čísly.</div>
+    </div>
+    <div class="modal-step">
+      <div class="modal-num">2</div>
+      <div class="modal-text">Soubor si uložte kamkoli — na počítač, do Google Drive nebo ho pošlete e-mailem sobě. Neobsahuje žádné osobní údaje.</div>
+    </div>
+    <div class="modal-step">
+      <div class="modal-num">3</div>
+      <div class="modal-text">Při příští návštěvě klikněte na <strong>Načíst nastavení</strong>, vyberte uložený soubor a kalkulačka se okamžitě vyplní přesně tak, jak jste ji nechali.</div>
+    </div>
+    <div class="modal-tip">
+      <strong>Tip:</strong> Můžete mít více souborů pro různé scénáře — například <em>optimisticky.json</em> a <em>konzervativne.json</em> — a přepínat mezi nimi jedním kliknutím.
+    </div>
+    <div class="modal-actions">
+      <button class="btn primary" id="modal-ok">Rozumím</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOPBAR -->
+<nav class="topbar">
+  <a class="logo" href="#">
+    <div class="logo-mark">
+      <svg viewBox="0 0 15 15" fill="none"><polyline points="1,12 4.5,7 7.5,9 11,3.5 14,5.5" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <div>
+      <div class="logo-name">Investiční kalkulačka</div>
+      <div class="logo-sub">Simulace portfolia na 40 let</div>
+    </div>
+  </a>
+  <div class="topbar-actions">
+    <button class="tb-btn" id="btn-save">
+      <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 2h8l2 2v8a1 1 0 01-1 1H3a1 1 0 01-1-1V2z"/><path d="M5 2v3h4V2M4 8h6"/></svg>
+      <span>Uložit nastavení</span>
+    </button>
+    <label class="tb-btn" style="cursor:pointer">
+      <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 2v7M4 6l3 3 3-3M2 11h10"/></svg>
+      <span>Načíst nastavení</span>
+      <input type="file" id="btn-load" accept=".json" style="display:none">
+    </label>
+    <button class="help-btn" id="btn-help" title="Jak uložit a obnovit nastavení?">?</button>
+    <button class="tb-btn print" onclick="window.print()">
+      <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="10" height="7" rx="1"/><path d="M4 5V3h6v2M4 9h2M4 11h6"/></svg>
+      <span>Tisknout / PDF</span>
+    </button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-eyebrow">Jiný pohled na investování</div>
+  <div class="hero-title">Vaše portfolio nepřestane vydělávat,<br><strong>když přestanete pracovat</strong></div>
+  <div class="hero-body">Většina kalkulaček skončí v den odchodu do důchodu. Tato počítá dál — protože portfolio vydělává i když vy nepracujete.</div>
+  <a class="hero-cta" href="#proc">Proč je to jinak?</a>
+  <div class="kpi-strip">
+    <div class="kpi"><div class="kpi-label">Portfolio dnes</div><div class="kpi-val blue" id="kpi-now">0 Kč</div></div>
+    <div class="kpi"><div class="kpi-label">Celkem vloženo</div><div class="kpi-val" id="kpi-invested">0 Kč</div></div>
+    <div class="kpi"><div class="kpi-label">Celkové výnosy</div><div class="kpi-val teal" id="kpi-returns">0 Kč</div></div>
+    <div class="kpi"><div class="kpi-label">Hodnota po 40 letech</div><div class="kpi-val teal" id="kpi-final">0 Kč</div></div>
+  </div>
+</section>
+
+<!-- KALKULAČKA -->
+<main class="page">
+
+  <div class="grid-sidebar" style="margin-bottom:24px">
+    <div>
+      <!-- Základní parametry -->
+      <div class="card">
+        <div class="card-hdr"><div class="card-dot" style="background:var(--blue)"></div><div class="card-title">Základní parametry</div></div>
+        <div class="card-body">
+          <div class="inp-group">
+            <label class="inp-label">Počáteční investice</label>
+            <div class="inp-wrap"><input type="number" id="startAmount" value="0" min="0" step="10000"><span class="inp-unit">Kč</span></div>
+          </div>
+          <div class="inp-group">
+            <label class="inp-label">Rok zahájení</label>
+            <div class="inp-wrap"><input type="number" id="startYear" value="2025" min="2000" max="2100"></div>
+          </div>
+          <div class="inp-group">
+            <label class="inp-label">Investiční horizont</label>
+            <div class="inp-wrap"><input type="number" id="horizon" value="40" min="1" max="40"><span class="inp-unit">let</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Fáze zhodnocení -->
+      <div class="card">
+        <div class="card-hdr"><div class="card-dot" style="background:var(--teal)"></div><div class="card-title">Fáze zhodnocení portfolia</div></div>
+        <div class="card-body">
+          <p class="hint" style="margin-bottom:14px">Každá fáze má vlastní strategii a délku. Klikněte na fázi pro rozbalení a úpravu.</p>
+          <div class="phases-wrap" id="phases-wrap"></div>
+          <button class="btn-add-phase" id="btn-add-phase">+ přidat další fázi</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Graf -->
+    <div>
+      <div class="card">
+        <div class="card-hdr"><div class="card-dot" style="background:var(--blue)"></div><div class="card-title">Vývoj portfolia</div></div>
+        <div class="card-body">
+          <div class="legend">
+            <div class="legend-item"><div class="legend-dot" style="background:#5DADE2"></div><span>Vložená částka</span></div>
+            <div class="legend-item"><div class="legend-dot" style="background:#4ECDA0"></div><span>Výnosy z investice</span></div>
+          </div>
+          <div class="chart-wrap"><canvas id="main-chart"></canvas></div>
+        </div>
+        <div class="milestones-row" id="main-milestones"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pravidelné vklady -->
+  <div class="card">
+    <div class="card-hdr"><div class="card-dot" style="background:#f59e0b"></div><div class="card-title">Pravidelné vklady</div></div>
+    <div class="card-body">
+      <p class="hint" style="margin-bottom:12px">Klikni na segment pro editaci · Táhni okraje pro změnu délky · Záporná hodnota = pravidelný výběr</p>
+      <div class="tl-axis" id="dep-axis"></div>
+      <div class="tl-track" id="dep-track"></div>
+      <button class="btn-add-seg" id="dep-add">+ přidat období</button>
+      <div class="tl-editor" id="dep-editor">
+        <div class="tl-ef"><label>Od roku</label><input type="number" id="de-from" min="0" max="40"></div>
+        <div class="tl-ef"><label>Do roku</label><input type="number" id="de-to" min="0" max="40"></div>
+        <div class="tl-ef" style="flex:2"><label>Měsíční částka (Kč)</label><input type="number" id="de-val" step="500"></div>
+        <button class="btn primary" id="de-apply">Použít</button>
+        <button class="btn danger" id="de-del">Smazat</button>
+        <button class="btn" id="de-cancel">Zrušit</button>
+      </div>
+      <div class="hint">Hodnota 0 Kč = žádný vklad. Záporná = pravidelný měsíční výběr (např. v důchodu).</div>
+    </div>
+  </div>
+
+  <!-- Jednorázové vklady a výběry -->
+  <div class="card">
+    <div class="card-hdr"><div class="card-dot" style="background:#a78bfa"></div><div class="card-title">Jednorázové vklady a výběry</div></div>
+    <div class="card-body">
+      <div class="fill-bar">
+        <span>Rychlé vyplnění:</span>
+        <span>od roku</span><input type="number" id="fill-from" value="0" min="0" max="40">
+        <span>do roku</span><input type="number" id="fill-to" value="0" min="0" max="40">
+        <input type="number" id="fill-val" placeholder="částka" style="width:120px">
+        <span>Kč</span>
+        <button class="btn primary" id="fill-btn">Vyplnit</button>
+        <span style="color:var(--txt3)">nebo edituj rok po roku níže</span>
+      </div>
+      <div style="overflow-x:auto;max-height:420px;overflow-y:auto">
+        <table class="tx-table">
+          <thead><tr>
+            <th style="width:60px;text-align:center">Rok</th>
+            <th style="width:80px">Kalend.</th>
+            <th class="r">Částka (Kč)</th>
+            <th>Popis</th>
+          </tr></thead>
+          <tbody id="tx-body"></tbody>
+        </table>
+      </div>
+      <div class="hint" style="margin-top:8px">Kladná = vklad / investice · Záporná = výběr · Nula = žádná transakce</div>
+    </div>
+  </div>
+
+  <!-- Simulace rok po roku -->
+  <div class="card">
+    <div class="card-hdr"><div class="card-dot" style="background:var(--navy)"></div><div class="card-title">Simulace rok po roku</div></div>
+    <div class="sim-wrap">
+      <table class="sim-table">
+        <thead><tr>
+          <th style="text-align:center">Rok</th>
+          <th>Kalend.</th>
+          <th>Zhodnocení</th>
+          <th>Měs. vklad</th>
+          <th>Jednoráz.</th>
+          <th>Výnos</th>
+          <th>Kum. vloženo</th>
+          <th>Portfolio</th>
+        </tr></thead>
+        <tbody id="sim-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+</main>
+
+<!-- PROČ JE TO JINAK -->
+<section class="why-section" id="proc">
+  <div style="max-width:1100px;margin:0 auto">
+    <div class="section-eyebrow">Proč je to jinak</div>
+    <div class="section-h">Dvě kalkulačky, dva různé světy</div>
+    <div class="section-sub">Tradiční kalkulačky modelují portfolio jen do odchodu do důchodu. Tato počítá dál — protože portfolio vydělává i když vy nepracujete.</div>
+    <div class="shared-axis">
+      <span class="axis-age">25 let</span>
+      <div class="axis-track">
+        <div class="milestone-pin">
+          <div class="milestone-tag">65 let — odchod do důchodu</div>
+          <div class="milestone-line"></div>
+        </div>
+      </div>
+      <span class="axis-age">85 let</span>
+    </div>
+    <div class="compare-grid">
+      <div class="cc" style="border-right:1px solid var(--border)">
+        <div class="cc-hdr bad"><div class="cc-icon bad">✕</div>Tradiční kalkulačka — končí v 65 letech</div>
+        <div class="cc-body">
+          <div class="cc-bars" id="bad-bars"></div>
+          <div class="cc-caption"><strong>Portfolio se v 65 přestane počítat.</strong> Předpokládá se výběr a postupná spotřeba. Co se děje s vaším majetkem dalších 20 let, kalkulačka neřeší.</div>
+        </div>
+      </div>
+      <div class="cc">
+        <div class="cc-hdr good"><div class="cc-icon good">✓</div>Tato kalkulačka — pokračuje dál</div>
+        <div class="cc-body">
+          <div class="cc-bars" id="good-bars"></div>
+          <div class="cc-caption"><strong>Portfolio v 65 nekončí — jen změní režim.</strong> Nižší výnosy, žádné vklady, pravidelné výběry — a přesto roste nebo se udržuje.</div>
+        </div>
+      </div>
+    </div>
+    <div class="insights-row">
+      <div class="insight">
+        <div class="insight-num">3 %</div>
+        <div class="insight-label">stačí po odchodu do důchodu</div>
+        <div class="insight-sub">I konzervativní zhodnocení generuje z celoživotního portfolia výnos, který pokryje značnou část spotřeby.</div>
+      </div>
+      <div class="insight">
+        <div class="insight-num teal">40 let</div>
+        <div class="insight-label">celý životní horizont v jednom grafu</div>
+        <div class="insight-sub">Produktivní léta, přechod na konzervu, důchod — vše v jediné simulaci bez nutnosti přepočítávat.</div>
+      </div>
+      <div class="insight">
+        <div class="insight-num">rok po roku</div>
+        <div class="insight-label">přesné zadání vkladů i výběrů</div>
+        <div class="insight-sub">Každý rok lze nastavit jinak — různé vklady, jednorázové investice, výběry na dovolenou nebo rekonstrukci.</div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="section-h" style="font-size:15px;margin-bottom:14px">Co tato kalkulačka umí, co ostatní neumí</div>
+    <div class="diff-list">
+      <div class="diff-item">
+        <div class="diff-check"><svg viewBox="0 0 9 9"><polyline points="1,4.5 3.5,7 8,2" stroke="var(--grn-tx)" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg></div>
+        <div class="diff-text"><strong>Simulace po odchodu do důchodu</strong> — portfolio se nemaže, ale dál roste za sníženého zhodnocení a pokrývá výběry na spotřebu</div>
+      </div>
+      <div class="diff-item">
+        <div class="diff-check"><svg viewBox="0 0 9 9"><polyline points="1,4.5 3.5,7 8,2" stroke="var(--grn-tx)" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg></div>
+        <div class="diff-text"><strong>Proměnlivé měsíční vklady</strong> — různé částky pro různá životní období; nula v důchodu je plnohodnotná hodnota</div>
+      </div>
+      <div class="diff-item">
+        <div class="diff-check"><svg viewBox="0 0 9 9"><polyline points="1,4.5 3.5,7 8,2" stroke="var(--grn-tx)" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg></div>
+        <div class="diff-text"><strong>Postupná změna strategie</strong> — přechod z dynamického portfolia na konzervativní se promítá do výpočtu plynule</div>
+      </div>
+      <div class="diff-item">
+        <div class="diff-check"><svg viewBox="0 0 9 9"><polyline points="1,4.5 3.5,7 8,2" stroke="var(--grn-tx)" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg></div>
+        <div class="diff-text"><strong>Jednorázové transakce rok po roku</strong> — mimořádný příjem, prodej nemovitosti, velký výběr — to vše ovlivní přesný výpočet</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <span>Výpočty jsou orientační. Nezohledňují inflaci, daně ani poplatky správce fondu.</span>
+  <span>Nástroj je zdarma a bez registrace</span>
+</footer>
+
+<script>
+const MAX_YR=40;
+const fmt=n=>new Intl.NumberFormat('cs-CZ',{style:'currency',currency:'CZK',maximumFractionDigits:0}).format(Math.round(n||0));
+const fmtPct=n=>((n||0)*100).toFixed(1)+' %';
+const num=(v,f=0)=>{const p=parseFloat(v);return isNaN(p)?f:p;};
+
+const PRESETS=[
+  {label:'Dynamická',val:10,sub:'10 %'},
+  {label:'Vyvážená',val:6,sub:'6 %'},
+  {label:'Konzervativní',val:3,sub:'3 %'},
+];
+const DEP_PAL=[
+  {bg:'#B5D4F4',tx:'#0C447C',bd:'#378ADD'},
+  {bg:'#9FE1CB',tx:'#085041',bd:'#1D9E75'},
+  {bg:'#FAC775',tx:'#412402',bd:'#BA7517'},
+  {bg:'#F4C0D1',tx:'#4B1528',bd:'#D4537E'},
+  {bg:'#CECBF6',tx:'#26215C',bd:'#7F77DD'},
+  {bg:'#C0DD97',tx:'#173404',bd:'#639922'},
+];
+
+let phases=[
+  {years:10,rate:10,preset:'Dynamická',custom:false},
+  {years:10,rate:6, preset:'Vyvážená', custom:false},
+  {years:10,rate:6, preset:'Vyvážená', custom:false},
+  {years:10,rate:3, preset:'Konzervativní',custom:false},
+];
+let depSegs=[];
+let txData=Array.from({length:41},(_,i)=>({yr:i,val:0,desc:''}));
+let selDep=null, drag=null, chartInst=null;
+
+// SIMULATE
+function getRateForYear(yr){
+  let cum=0;
+  for(const p of phases){
+    if(yr>=cum&&yr<cum+p.years) return p.rate/100;
+    cum+=p.years;
+  }
+  return phases[phases.length-1].rate/100;
+}
+function getMonthly(yr){
+  if(yr===0) return 0;
+  for(const s of depSegs){if(yr>=s.from&&yr<=s.to) return s.val;}
+  return 0;
+}
+function getTx(yr){return txData.filter(t=>t.yr===yr).reduce((s,t)=>s+num(t.val),0);}
+
+function simulate(){
+  const start=num(document.getElementById('startAmount').value,0);
+  const startYr=num(document.getElementById('startYear').value,2025);
+  const hor=Math.min(num(document.getElementById('horizon').value,40),40);
+  const rows=[];
+  let portfolio=start,cumInv=start;
+  for(let yr=0;yr<=hor;yr++){
+    const rate=getRateForYear(yr);
+    const monthly=getMonthly(yr);
+    const annDep=monthly*12;
+    const tx=getTx(yr);
+    let gain=0;
+    if(yr===0){portfolio=start+tx;cumInv=start+tx;}
+    else{gain=(portfolio+(annDep+tx)/2)*rate;portfolio+=annDep+tx+gain;cumInv+=annDep+tx;}
+    rows.push({yr,calYr:startYr+yr,rate,monthly,annDep,tx,gain,cumInv,cumRet:portfolio-cumInv,portfolio});
+  }
+  return rows;
+}
+
+// PHASE CARDS
+function renderPhases(){
+  const wrap=document.getElementById('phases-wrap');
+  wrap.innerHTML='';
+  phases.forEach((ph,i)=>{
+    const div=document.createElement('div');
+    div.className='phase-card';
+    const btns=PRESETS.map(p=>`<button class="preset${ph.preset===p.label&&!ph.custom?' sel':''}" data-phase="${i}" data-preset="${p.label}" data-val="${p.val}">${p.label} <span style="opacity:.55;font-size:11px">${p.sub}</span></button>`).join('');
+    div.innerHTML=`
+      <div class="phase-card-hdr" data-idx="${i}">
+        <div class="phase-num">${i+1}</div>
+        <div class="phase-label">Fáze ${i+1}</div>
+        <div class="phase-summary">${ph.years} let · ${ph.rate} % p.a.</div>
+        ${phases.length>1?`<button class="phase-del" data-del="${i}">×</button>`:''}
+      </div>
+      <div class="phase-card-body${i===0?' open':''}" id="phase-body-${i}">
+        <div class="phase-row">
+          <div class="phase-field"><label>Délka fáze (let)</label><input type="number" class="ph-years" data-i="${i}" value="${ph.years}" min="1" max="40"></div>
+        </div>
+        <div class="phase-row">
+          <div class="phase-field" style="width:100%">
+            <label>Strategie</label>
+            <div class="preset-row">${btns}<button class="preset${ph.custom?' custom-sel':''}" data-phase="${i}" data-preset="custom">Vlastní %</button></div>
+          </div>
+        </div>
+        <div class="phase-row" id="cr-${i}" style="display:${ph.custom?'flex':'none'}">
+          <div class="phase-field"><label>Vlastní výnos (% p.a.)</label><input type="number" class="ph-rate" data-i="${i}" value="${ph.rate}" step="0.5" min="0" max="50"></div>
+        </div>
+      </div>`;
+    wrap.appendChild(div);
+  });
+
+  wrap.querySelectorAll('.phase-card-hdr').forEach(hdr=>{
+    hdr.addEventListener('click',e=>{
+      if(e.target.closest('.phase-del')) return;
+      document.getElementById('phase-body-'+hdr.dataset.idx).classList.toggle('open');
+    });
+  });
+  wrap.querySelectorAll('.phase-del').forEach(btn=>{
+    btn.addEventListener('click',e=>{e.stopPropagation();phases.splice(+btn.dataset.del,1);renderPhases();recalc();});
+  });
+  wrap.querySelectorAll('.preset').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const i=+btn.dataset.phase;
+      if(btn.dataset.preset==='custom'){
+        phases[i].custom=true;phases[i].preset='';
+      } else {
+        phases[i].custom=false;phases[i].preset=btn.dataset.preset;phases[i].rate=+btn.dataset.val;
+      }
+      renderPhases();recalc();
+    });
+  });
+  wrap.querySelectorAll('.ph-years').forEach(inp=>{
+    inp.addEventListener('input',()=>{phases[+inp.dataset.i].years=Math.max(1,num(inp.value,1));recalc();});
+  });
+  wrap.querySelectorAll('.ph-rate').forEach(inp=>{
+    inp.addEventListener('input',()=>{phases[+inp.dataset.i].rate=num(inp.value,0);recalc();});
+  });
+}
+
+document.getElementById('btn-add-phase').addEventListener('click',()=>{
+  phases.push({years:10,rate:3,preset:'Konzervativní',custom:false});
+  renderPhases();recalc();
+});
+
+// TIMELINE
+function renderTL(){
+  const track=document.getElementById('dep-track');
+  const axis=document.getElementById('dep-axis');
+  axis.innerHTML='';
+  [0,5,10,15,20,25,30,35,40].forEach(y=>{const s=document.createElement('span');s.textContent=y;axis.appendChild(s);});
+  track.innerHTML='';
+  depSegs.forEach((seg,i)=>{
+    const left=(seg.from/MAX_YR)*100,width=((seg.to-seg.from+1)/MAX_YR)*100;
+    const p=DEP_PAL[i%DEP_PAL.length];
+    const el=document.createElement('div');
+    el.className='tl-seg'+(selDep===i?' sel':'');
+    el.style.cssText=`left:${left}%;width:${width}%;background:${p.bg};color:${p.tx};border:1px solid ${p.bd};`;
+    const lbl=seg.val===0?'0 Kč/m':new Intl.NumberFormat('cs-CZ',{maximumFractionDigits:0}).format(seg.val)+' Kč/m';
+    el.innerHTML=`<span style="pointer-events:none;padding:0 6px;overflow:hidden;text-overflow:ellipsis">${lbl}</span>`;
+    el.addEventListener('click',e=>{e.stopPropagation();selectSeg(i);});
+    ['l','r'].forEach(s=>{
+      const h=document.createElement('div');h.className=`tl-handle ${s}`;
+      h.addEventListener('mousedown',e=>{e.stopPropagation();startDrag(e,i,s);});
+      el.appendChild(h);
+    });
+    track.appendChild(el);
+  });
+}
+function selectSeg(i){
+  selDep=i;
+  document.getElementById('dep-editor').classList.add('open');
+  document.getElementById('de-from').value=depSegs[i].from;
+  document.getElementById('de-to').value=depSegs[i].to;
+  document.getElementById('de-val').value=depSegs[i].val;
+  renderTL();
+}
+function startDrag(e,idx,side){
+  e.preventDefault();
+  drag={idx,side,rect:document.getElementById('dep-track').getBoundingClientRect()};
+  document.addEventListener('mousemove',onDrag);
+  document.addEventListener('mouseup',stopDrag);
+}
+function onDrag(e){
+  if(!drag) return;
+  const yr=Math.round(Math.max(0,Math.min(1,(e.clientX-drag.rect.left)/drag.rect.width))*MAX_YR);
+  const seg=depSegs[drag.idx];
+  depSegs[drag.idx]=drag.side==='l'?{...seg,from:Math.min(yr,seg.to)}:{...seg,to:Math.max(yr,seg.from)};
+  if(selDep===drag.idx){document.getElementById('de-from').value=depSegs[drag.idx].from;document.getElementById('de-to').value=depSegs[drag.idx].to;}
+  renderTL();recalc();
+}
+function stopDrag(){drag=null;document.removeEventListener('mousemove',onDrag);document.removeEventListener('mouseup',stopDrag);}
+
+document.getElementById('dep-track').addEventListener('click',e=>{
+  const yr=Math.round((e.clientX-e.currentTarget.getBoundingClientRect().left)/e.currentTarget.getBoundingClientRect().width*MAX_YR);
+  if(depSegs.findIndex(s=>yr>=s.from&&yr<=s.to)<0){depSegs.push({from:yr,to:Math.min(yr+4,MAX_YR),val:0});selectSeg(depSegs.length-1);}
+});
+document.getElementById('dep-add').addEventListener('click',()=>{depSegs.push({from:0,to:5,val:0});selectSeg(depSegs.length-1);});
+document.getElementById('de-apply').addEventListener('click',()=>{
+  if(selDep===null) return;
+  depSegs[selDep]={...depSegs[selDep],from:parseInt(document.getElementById('de-from').value)||0,to:parseInt(document.getElementById('de-to').value)||0,val:parseFloat(document.getElementById('de-val').value)||0};
+  renderTL();recalc();
+});
+document.getElementById('de-del').addEventListener('click',()=>{
+  if(selDep===null) return;
+  depSegs.splice(selDep,1);selDep=null;
+  document.getElementById('dep-editor').classList.remove('open');
+  renderTL();recalc();
+});
+document.getElementById('de-cancel').addEventListener('click',()=>{
+  selDep=null;document.getElementById('dep-editor').classList.remove('open');renderTL();
+});
+
+// TX TABLE
+function renderTxTable(){
+  const startYr=num(document.getElementById('startYear').value,2025);
+  const tb=document.getElementById('tx-body');
+  tb.innerHTML='';
+  txData.forEach((row,i)=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td style="text-align:center;color:var(--txt3)">${row.yr}</td><td style="color:var(--txt3)">${startYr+row.yr}</td><td class="r"><input type="number" value="${row.val}" step="1000" data-i="${i}" class="txi" style="text-align:right"></td><td><input type="text" value="${row.desc}" placeholder="popis…" data-i="${i}" class="dsc"></td>`;
+    tb.appendChild(tr);
+  });
+  tb.querySelectorAll('.txi').forEach(inp=>inp.addEventListener('input',e=>{txData[+e.target.dataset.i].val=num(e.target.value);recalc();}));
+  tb.querySelectorAll('.dsc').forEach(inp=>inp.addEventListener('input',e=>{txData[+e.target.dataset.i].desc=e.target.value;}));
+}
+document.getElementById('fill-btn').addEventListener('click',()=>{
+  const from=parseInt(document.getElementById('fill-from').value)||0,to=parseInt(document.getElementById('fill-to').value)||0,val=parseFloat(document.getElementById('fill-val').value)||0;
+  for(let y=from;y<=Math.min(to,MAX_YR);y++) txData[y].val=val;
+  renderTxTable();recalc();
+});
+
+// KPIs + MILESTONES + CHART + SIM
+function renderKPIs(rows){
+  const last=rows[rows.length-1]||{};
+  document.getElementById('kpi-now').textContent=fmt(rows[0]?.portfolio||0);
+  document.getElementById('kpi-invested').textContent=fmt(last.cumInv||0);
+  document.getElementById('kpi-returns').textContent='+'+fmt(Math.max(0,last.cumRet||0));
+  document.getElementById('kpi-final').textContent=fmt(last.portfolio||0);
+}
+function renderMilestones(rows){
+  const el=document.getElementById('main-milestones');el.innerHTML='';
+  [10,20,30,40].forEach(yr=>{
+    const r=rows.find(r=>r.yr===yr);if(!r) return;
+    const d=document.createElement('div');d.className='ms';
+    d.innerHTML=`<div class="ms-yr">Rok ${yr}</div><div class="ms-val">${fmt(r.portfolio)}</div><div class="ms-gain">+${fmt(Math.max(0,r.cumRet))} výnosy</div>`;
+    el.appendChild(d);
+  });
+}
+function renderChart(rows){
+  const canvas=document.getElementById('main-chart');if(!canvas) return;
+  if(chartInst){chartInst.destroy();}
+  chartInst=new Chart(canvas,{
+    type:'bar',
+    data:{labels:rows.map(r=>r.yr),datasets:[
+      {label:'Vložená částka',data:rows.map(r=>Math.round(r.cumInv)),backgroundColor:'#5DADE2',stack:'s'},
+      {label:'Výnosy',data:rows.map(r=>Math.round(Math.max(0,r.cumRet))),backgroundColor:'#4ECDA0',stack:'s'},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      scales:{
+        x:{stacked:true,grid:{display:false},ticks:{font:{size:10},maxTicksLimit:11,color:'#9aa3b0'}},
+        y:{stacked:true,grid:{color:'#f0f2f4'},ticks:{font:{size:10},color:'#9aa3b0',callback:v=>{const m=Math.round(v/1000)/1000;return m>=1?m.toFixed(1)+' M':Math.round(v/1000)+'k';}}},
+      },
+      plugins:{legend:{display:false},tooltip:{callbacks:{
+        title:([i])=>`Rok ${i.label}`,
+        label:i=>`${i.dataset.label}: ${fmt(i.raw)}`,
+        footer:items=>`Celkem: ${fmt(items.reduce((s,i)=>s+(i.raw||0),0))}`
+      }}}
+    }
+  });
+}
+function renderSimTable(rows){
+  const tb=document.getElementById('sim-body');tb.innerHTML='';
+  const ms=new Set([0,5,10,15,20,25,30,35,40]);
+  rows.forEach(r=>{
+    const tr=document.createElement('tr');
+    if(ms.has(r.yr)) tr.className='milestone';
+    tr.innerHTML=`<td>${r.yr}</td><td style="text-align:right">${r.calYr}</td><td style="text-align:right">${fmtPct(r.rate)}</td><td style="text-align:right">${r.monthly!==0?fmt(r.monthly):'—'}</td><td style="text-align:right" class="${r.tx>0?'pos':r.tx<0?'neg':''}">${r.tx!==0?fmt(r.tx):'—'}</td><td style="text-align:right" class="${r.gain>0?'pos':r.gain<0?'neg':''}">${r.yr>0?fmt(r.gain):'—'}</td><td style="text-align:right">${fmt(r.cumInv)}</td><td style="text-align:right;font-weight:500">${fmt(r.portfolio)}</td>`;
+    tb.appendChild(tr);
+  });
+}
+
+// RECALC
+function recalc(){
+  const rows=simulate();
+  renderKPIs(rows);renderMilestones(rows);renderChart(rows);renderSimTable(rows);
+  saveState();
+}
+
+// SAVE / LOAD
+function getState(){
+  return{startAmount:document.getElementById('startAmount').value,startYear:document.getElementById('startYear').value,horizon:document.getElementById('horizon').value,phases,depSegs,txData};
+}
+function applyState(s){
+  document.getElementById('startAmount').value=s.startAmount||0;
+  document.getElementById('startYear').value=s.startYear||2025;
+  document.getElementById('horizon').value=s.horizon||40;
+  if(s.phases&&s.phases.length) phases=s.phases;
+  if(s.depSegs) depSegs=s.depSegs;
+  if(s.txData) txData=s.txData;
+  renderPhases();renderTL();renderTxTable();recalc();
+}
+function saveState(){try{localStorage.setItem('inv-calc',JSON.stringify(getState()));}catch(e){}}
+
+document.getElementById('btn-save').addEventListener('click',()=>{
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(getState(),null,2)],{type:'application/json'}));
+  a.download='kalkulacka-nastaveni.json';a.click();
+});
+document.getElementById('btn-load').addEventListener('change',e=>{
+  const f=e.target.files[0];if(!f) return;
+  const r=new FileReader();
+  r.onload=ev=>{try{applyState(JSON.parse(ev.target.result));}catch{alert('Soubor není platný.');}};
+  r.readAsText(f);e.target.value='';
+});
+
+// MODAL
+const modal=document.getElementById('help-modal');
+document.getElementById('btn-help').addEventListener('click',()=>modal.classList.add('open'));
+document.getElementById('modal-close').addEventListener('click',()=>modal.classList.remove('open'));
+document.getElementById('modal-ok').addEventListener('click',()=>modal.classList.remove('open'));
+modal.addEventListener('click',e=>{if(e.target===modal)modal.classList.remove('open');});
+
+// COMPARE BARS
+function drawBars(id,data,c1,c2){
+  const el=document.getElementById(id);if(!el) return;
+  const max=Math.max(...data.map(d=>d[0]+d[1]));
+  el.style.cssText='display:flex;align-items:flex-end;gap:3px;width:100%;height:80px';
+  data.forEach(([inv,ret])=>{
+    const w=document.createElement('div');
+    w.style.cssText='flex:1;display:flex;flex-direction:column;align-items:stretch;justify-content:flex-end;height:100%';
+    const hi=Math.round((inv/max)*100),hr=Math.round((ret/max)*100);
+    w.innerHTML=`<div style="height:${hr}%;background:${c2};border-radius:2px 2px 0 0;min-height:${ret>0?2:0}px"></div><div style="height:${hi}%;background:${c1};border-radius:${hr>0?'0':'2px 2px'} 0 0;min-height:2px"></div>`;
+    el.appendChild(w);
+  });
+}
+
+// INPUT LISTENERS
+['startAmount','startYear','horizon'].forEach(id=>{
+  document.getElementById(id).addEventListener('input',()=>{renderTxTable();recalc();});
+});
+
+// INIT
+drawBars('bad-bars',[[15,0],[18,1],[22,3],[27,6],[32,10],[37,14],[42,19],[47,24],[50,28],[51,29],[51,29]],'#5DADE2','rgba(93,173,226,.3)');
+drawBars('good-bars',[[50,29],[47,32],[44,35],[41,38],[39,41],[38,44],[37,47],[37,50],[37,54]],'#5DADE2','#4ECDA0');
+
+try{
+  const saved=localStorage.getItem('inv-calc');
+  if(saved){applyState(JSON.parse(saved));}
+  else{renderPhases();renderTL();renderTxTable();recalc();}
+}catch(e){renderPhases();renderTL();renderTxTable();recalc();}
+</script>
+</body>
+</html>
