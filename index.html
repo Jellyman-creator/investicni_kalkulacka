@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Investiční kalkulačka — Simulace portfolia na 40 let</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root {
+  --navy:   #1a2332;
+  --navy2:  #243447;
+  --blue:   #4A9EE0;
+  --teal:   #4ECDA0;
+  --red-lt: #fff5f5;
+  --red-bd: #fde8e8;
+  --red-tx: #993C1D;
+  --grn-lt: #f0fdf8;
+  --grn-bd: #d1f5e8;
+  --grn-tx: #0F6E56;
+  --bg:     #f7f8fa;
+  --surface:#ffffff;
+  --border: #e8eaed;
+  --border2:#d0d3d8;
+  --txt:    #1a2332;
+  --txt2:   #5a6475;
+  --txt3:   #9aa3b0;
+  --radius: 10px;
+  --font:   'DM Sans', sans-serif;
+  --mono:   'DM Mono', monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:14px;line-height:1.6}
+
+/* ── TOPBAR ── */
+.topbar{background:var(--navy);height:54px;display:flex;align-items:center;padding:0 28px;justify-content:space-between;position:sticky;top:0;z-index:100}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.logo-mark{width:28px;height:28px;background:var(--blue);border-radius:7px;display:flex;align-items:center;justify-content:center}
+.logo-mark svg{width:15px;height:15px}
+.logo-name{font-size:14px;font-weight:500;color:#fff}
+.logo-sub{font-size:10px;color:rgba(255,255,255,.38);margin-top:1px}
+.topbar-nav{display:flex;gap:6px}
+.topbar-nav a{font-size:12px;color:rgba(255,255,255,.45);text-decoration:none;padding:5px 10px;border-radius:6px;transition:all .15s}
+.topbar-nav a:hover{color:#fff;background:rgba(255,255,255,.08)}
+.topbar-nav a.active{color:#fff}
+
+/* ── HERO ── */
+.hero{background:var(--navy);padding:52px 28px 0;overflow:hidden;position:relative}
+.hero::before{content:'';position:absolute;right:-80px;top:-80px;width:360px;height:360px;border-radius:50%;background:rgba(74,158,224,.06);pointer-events:none}
+.hero-eyebrow{font-size:11px;color:var(--blue);font-weight:500;letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px}
+.hero-title{font-size:28px;font-weight:300;color:#fff;line-height:1.25;margin-bottom:14px;max-width:540px}
+.hero-title strong{font-weight:500;color:var(--teal)}
+.hero-body{font-size:13px;color:rgba(255,255,255,.5);line-height:1.75;max-width:480px;margin-bottom:28px}
+.hero-cta{display:inline-block;background:var(--blue);color:#fff;font-size:13px;font-weight:500;padding:11px 24px;border-radius:8px;cursor:pointer;text-decoration:none;transition:opacity .15s}
+.hero-cta:hover{opacity:.88}
+
+.kpi-strip{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid rgba(255,255,255,.07);margin-top:36px}
+.kpi{padding:18px 20px;border-right:1px solid rgba(255,255,255,.07)}
+.kpi:last-child{border-right:none}
+.kpi-label{font-size:10px;color:rgba(255,255,255,.38);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px}
+.kpi-val{font-size:19px;font-weight:500;color:#fff;font-family:var(--mono)}
+.kpi-val.blue{color:var(--blue)}
+.kpi-val.teal{color:var(--teal)}
+
+/* ── NAV TABS ── */
+.nav-tabs{background:var(--surface);border-bottom:1px solid var(--border);display:flex;padding:0 24px;gap:2px;overflow-x:auto;position:sticky;top:54px;z-index:99}
+.nt{padding:13px 16px;font-size:13px;color:var(--txt2);border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;transition:all .15s;background:none;border-top:none;border-left:none;border-right:none;font-family:var(--font)}
+.nt:hover{color:var(--txt)}
+.nt.active{color:var(--navy);border-bottom-color:var(--navy);font-weight:500}
+
+/* ── LAYOUT ── */
+.page{padding:24px;max-width:1100px;margin:0 auto}
+.tab-pane{display:none}
+.tab-pane.active{display:block}
+
+.grid-sidebar{display:grid;grid-template-columns:320px 1fr;gap:20px;align-items:start}
+
+/* ── CARDS ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:16px}
+.card:last-child{margin-bottom:0}
+.card-hdr{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+.card-dot{width:8px;height:8px;border-radius:50%}
+.card-title{font-size:11px;font-weight:500;color:var(--txt2);text-transform:uppercase;letter-spacing:.05em}
+.card-body{padding:16px}
+
+/* ── INPUTS ── */
+.inp-group{margin-bottom:12px}
+.inp-group:last-child{margin-bottom:0}
+.inp-label{font-size:11px;color:var(--txt3);margin-bottom:4px;font-weight:500;display:block}
+.inp-wrap{position:relative}
+.inp-wrap input{width:100%;padding:8px 40px 8px 12px;font-size:13px;font-family:var(--font);border:1px solid var(--border);border-radius:7px;background:var(--bg);color:var(--txt);outline:none;transition:border .15s}
+.inp-wrap input:focus{border-color:var(--blue);background:#fff}
+.inp-unit{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--txt3);pointer-events:none}
+
+/* ── TIMELINE ── */
+.tl-outer{margin-bottom:8px}
+.tl-axis{display:flex;justify-content:space-between;font-size:10px;color:var(--txt3);margin-bottom:5px}
+.tl-track{position:relative;height:38px;border-radius:7px;background:var(--bg);border:1px solid var(--border);overflow:hidden;cursor:crosshair;user-select:none}
+.tl-seg{position:absolute;top:2px;bottom:2px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;cursor:pointer;overflow:hidden;white-space:nowrap;transition:opacity .1s}
+.tl-seg:hover{opacity:.85}
+.tl-seg.sel{outline:2px solid var(--txt);outline-offset:1px}
+.tl-handle{position:absolute;top:0;bottom:0;width:9px;cursor:ew-resize;z-index:2;display:flex;align-items:center;justify-content:center}
+.tl-handle::after{content:'';width:2px;height:14px;background:rgba(0,0,0,.2);border-radius:2px}
+.tl-handle.l{left:0}
+.tl-handle.r{right:0}
+.tl-editor{padding:12px;background:var(--bg);border-radius:7px;margin-top:10px;display:none}
+.tl-editor.open{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end}
+.tl-ef{display:flex;flex-direction:column;gap:3px;flex:1;min-width:80px}
+.tl-ef label{font-size:10px;color:var(--txt3);font-weight:500}
+.tl-ef input{padding:6px 8px;font-size:12px;font-family:var(--font);border:1px solid var(--border);border-radius:6px;background:#fff;color:var(--txt);outline:none;width:100%}
+.tl-ef input:focus{border-color:var(--blue)}
+.btn{padding:6px 13px;font-size:12px;font-family:var(--font);border:1px solid var(--border);border-radius:6px;background:none;color:var(--txt);cursor:pointer;transition:all .15s;align-self:flex-end}
+.btn:hover{background:var(--bg)}
+.btn.primary{background:var(--navy);color:#fff;border-color:transparent}
+.btn.primary:hover{opacity:.85}
+.btn.danger{color:var(--red-tx);border-color:var(--red-bd)}
+.btn.danger:hover{background:var(--red-lt)}
+.btn-add-seg{font-size:11px;color:var(--blue);background:none;border:1px dashed #b5d4f4;border-radius:6px;padding:4px 10px;cursor:pointer;margin-top:6px;font-family:var(--font)}
+.btn-add-seg:hover{background:#f0f7fd}
+.hint{font-size:11px;color:var(--txt3);line-height:1.5;margin-top:6px}
+
+/* ── SCENARIOS ── */
+.scenario-row{display:flex;gap:8px}
+.scenario{border:1px solid var(--border);border-radius:8px;padding:10px 12px;cursor:pointer;flex:1;transition:all .15s}
+.scenario:hover{border-color:var(--border2)}
+.scenario.sel{border-color:var(--blue);background:#f0f7fd}
+.sc-label{font-size:10px;color:var(--txt3);margin-bottom:2px}
+.sc-name{font-size:12px;font-weight:500;color:var(--txt)}
+.sc-sub{font-size:10px;color:var(--txt3);margin-top:1px}
+
+/* ── TRANSACTIONS ── */
+.fill-bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:10px 12px;background:var(--bg);border-radius:7px;margin-bottom:10px;font-size:12px;color:var(--txt2)}
+.fill-bar input{padding:5px 8px;font-size:12px;font-family:var(--font);border:1px solid var(--border);border-radius:6px;background:#fff;color:var(--txt);width:80px;outline:none}
+.fill-bar input:focus{border-color:var(--blue)}
+.fill-bar .btn{align-self:auto}
+.tx-table{width:100%;border-collapse:collapse;font-size:12px}
+.tx-table th{padding:7px 8px;text-align:left;font-weight:500;font-size:10px;color:var(--txt3);border-bottom:1px solid var(--border);text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
+.tx-table th.r,.tx-table td.r{text-align:right}
+.tx-table td{padding:4px 6px;border-bottom:1px solid #f4f5f7;vertical-align:middle}
+.tx-table tr:last-child td{border-bottom:none}
+.tx-table tr:hover td{background:#fafbfc}
+.tx-table input[type=number],.tx-table input[type=text]{padding:4px 7px;font-size:12px;font-family:var(--font);border:1px solid transparent;border-radius:5px;background:transparent;color:var(--txt);width:100%;outline:none;transition:all .12s}
+.tx-table input:hover{border-color:var(--border)}
+.tx-table input:focus{border-color:var(--blue);background:#fff}
+
+/* ── SIMULATION TABLE ── */
+.sim-wrap{overflow-x:auto;max-height:480px;overflow-y:auto}
+.sim-table{width:100%;border-collapse:collapse;font-size:12px;min-width:600px}
+.sim-table th{position:sticky;top:0;background:var(--bg);padding:8px 10px;text-align:right;font-weight:500;font-size:10px;color:var(--txt3);border-bottom:1px solid var(--border);white-space:nowrap;text-transform:uppercase;letter-spacing:.04em;z-index:1}
+.sim-table th:first-child{text-align:center}
+.sim-table td{padding:5px 10px;text-align:right;border-bottom:1px solid #f4f5f7;font-variant-numeric:tabular-nums;font-family:var(--mono);font-size:11px}
+.sim-table td:first-child{text-align:center;font-family:var(--font);color:var(--txt3)}
+.sim-table tr.milestone td{background:#fafbfc;font-weight:500}
+.sim-table tr:hover td{background:#fafbfc}
+.pos{color:#0F6E56}
+.neg{color:var(--red-tx)}
+
+/* ── CHART ── */
+.chart-wrap{position:relative;width:100%;height:320px}
+.legend{display:flex;gap:18px;font-size:11px;color:var(--txt2);margin-bottom:12px;flex-wrap:wrap}
+.legend-item{display:flex;align-items:center;gap:6px}
+.legend-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+.milestones-row{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-top:1px solid var(--border)}
+.ms{padding:13px 14px;border-right:1px solid var(--border);text-align:center}
+.ms:last-child{border-right:none}
+.ms-yr{font-size:10px;color:var(--txt3);margin-bottom:3px;text-transform:uppercase;letter-spacing:.04em}
+.ms-val{font-size:13px;font-weight:500;color:var(--txt);font-family:var(--mono)}
+.ms-gain{font-size:10px;color:var(--grn-tx);margin-top:2px}
+
+/* ── WHY SECTION ── */
+.why-section{background:var(--surface);padding:40px 28px;border-top:1px solid var(--border)}
+.section-eyebrow{font-size:11px;color:var(--blue);font-weight:500;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px}
+.section-title{font-size:20px;font-weight:400;color:var(--txt);margin-bottom:6px;line-height:1.3}
+.section-sub{font-size:13px;color:var(--txt2);line-height:1.7;max-width:560px;margin-bottom:28px}
+
+.compare-grid{display:grid;grid-template-columns:55fr 45fr;gap:0;border-radius:var(--radius);overflow:hidden;border:1px solid var(--border);margin-bottom:28px}
+.cc{display:flex;flex-direction:column}
+.cc-hdr{padding:11px 14px;font-size:12px;font-weight:500;display:flex;align-items:center;gap:7px}
+.cc-hdr.bad{background:var(--red-lt);color:var(--red-tx);border-bottom:1px solid var(--red-bd)}
+.cc-hdr.good{background:var(--grn-lt);color:var(--grn-tx);border-bottom:1px solid var(--grn-bd)}
+.cc-icon{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0}
+.cc-icon.bad{background:var(--red-bd);color:var(--red-tx)}
+.cc-icon.good{background:var(--grn-bd);color:var(--grn-tx)}
+.cc-body{padding:14px;flex:1;background:var(--surface)}
+.cc-bars{display:flex;align-items:flex-end;gap:3px;height:80px;margin-bottom:10px}
+.cc-caption{font-size:11px;color:var(--txt2);line-height:1.55}
+.cc-caption strong{color:var(--txt)}
+
+.shared-axis{display:flex;align-items:center;gap:8px;margin-bottom:8px;height:30px}
+.axis-track{position:relative;flex:1;height:3px;background:var(--border);border-radius:2px}
+.milestone-pin{position:absolute;left:55%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;top:-12px}
+.milestone-tag{font-size:10px;font-weight:500;color:var(--txt2);background:var(--surface);border:1px solid var(--border2);border-radius:4px;padding:2px 7px;white-space:nowrap;margin-bottom:2px}
+.milestone-line{width:1px;height:42px;background:var(--txt3);opacity:.3}
+.axis-age{font-size:11px;color:var(--txt3);white-space:nowrap}
+
+.diff-list{display:flex;flex-direction:column;gap:10px;margin-top:4px}
+.diff-item{display:flex;gap:11px;align-items:flex-start}
+.diff-check{width:20px;height:20px;border-radius:50%;background:var(--grn-lt);border:1px solid var(--grn-bd);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
+.diff-check svg{width:9px;height:9px}
+.diff-text{font-size:13px;color:var(--txt2);line-height:1.55}
+.diff-text strong{color:var(--txt)}
+
+.insights-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:28px}
+.insight{background:var(--bg);border-radius:8px;padding:16px}
+.insight-num{font-size:22px;font-weight:500;color:var(--blue);margin-bottom:4px;font-family:var(--mono)}
+.insight-num.teal{color:var(--teal)}
+.insight-label{font-size:12px;font-weight:500;color:var(--txt);margin-bottom:3px}
+.insight-sub{font-size:11px;color:var(--txt2);line-height:1.5}
+
+.divider{height:1px;background:var(--border);margin:28px 0}
+
+/* ── FOOTER ── */
+.footer{background:var(--navy);padding:18px 28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.footer span{font-size:11px;color:rgba(255,255,255,.3)}
+
+/* ── RESPONSIVE ── */
+@media(max-width:700px){
+  .grid-sidebar{grid-template-columns:1fr}
+  .kpi-strip{grid-template-columns:1fr 1fr}
+  .insights-row{grid-template-columns:1fr}
+  .compare-grid{grid-template-columns:1fr}
+  .milestones-row{grid-template-columns:1fr 1fr}
+  .page{padding:14px}
+  .hero{padding:32px 16px 0}
+  .why-section{padding:28px 16px}
+}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<nav class="topbar">
+  <a class="logo" href="#kalkulacka">
+    <div class="logo-mark">
+      <svg viewBox="0 0 15 15" fill="none"><polyline points="1,12 4.5,7 7.5,9 11,3.5 14,5.5" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <div>
+      <div class="logo-name">Investiční kalkulačka</div>
+      <div class="logo-sub">Simulace portfolia na 40 let</div>
+    </div>
+  </a>
+  <nav class="topbar-nav">
+    <a href="#proc" id="nav-proc">Proč jinak?</a>
+    <a href="#kalkulacka" id="nav-kalk" class="active">Kalkulačka</a>
+  </nav>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="kalkulacka">
+  <div class="hero-eyebrow">Jiný pohled na investování</div>
+  <div class="hero-title">Vaše portfolio nepřestane vydělávat,<br><strong>když přestanete pracovat</strong></div>
+  <div class="hero-body">Většina kalkulaček skončí v den odchodu do důchodu. Tato počítá dál — protože portfolio vydělává i když vy nepracujete.</div>
+  <a class="hero-cta" href="#proc">Proč je to jinak?</a>
+
+  <div class="kpi-strip">
+    <div class="kpi"><div class="kpi-label">Portfolio dnes</div><div class="kpi-val blue" id="kpi-now">—</div></div>
+    <div class="kpi"><div class="kpi-label">Celkem vloženo</div><div class="kpi-val" id="kpi-invested">—</div></div>
+    <div class="kpi"><div class="kpi-label">Celkové výnosy</div><div class="kpi-val teal" id="kpi-returns">—</div></div>
+    <div class="kpi"><div class="kpi-label">Hodnota po 40 letech</div><div class="kpi-val teal" id="kpi-final">—</div></div>
+  </div>
+</section>
+
+<!-- NAV TABS -->
+<div class="nav-tabs" id="calc-tabs">
+  <button class="nt active" data-tab="nastaveni">Nastavení</button>
+  <button class="nt" data-tab="vklady">Vklady &amp; výběry</button>
+  <button class="nt" data-tab="transakce">Jednorázové transakce</button>
+  <button class="nt" data-tab="vysledky">Graf &amp; výsledky</button>
+  <button class="nt" data-tab="simulace">Simulace</button>
+</div>
+
+<!-- KALKULAČKA -->
+<main class="page">
+
+  <!-- TAB: NASTAVENÍ -->
+  <div class="tab-pane active" id="tab-nastaveni">
+    <div class="grid-sidebar">
+      <div>
+        <div class="card">
+          <div class="card-hdr"><div class="card-dot" style="background:var(--blue)"></div><div class="card-title">Základní parametry</div></div>
+          <div class="card-body">
+            <div class="inp-group">
+              <label class="inp-label">Počáteční investice</label>
+              <div class="inp-wrap"><input type="number" id="startAmount" value="2045000" step="10000"><span class="inp-unit">Kč</span></div>
+            </div>
+            <div class="inp-group">
+              <label class="inp-label">Rok zahájení</label>
+              <div class="inp-wrap"><input type="number" id="startYear" value="2026" min="2000" max="2100"></div>
+            </div>
+            <div class="inp-group">
+              <label class="inp-label">Investiční horizont</label>
+              <div class="inp-wrap"><input type="number" id="horizon" value="40" min="1" max="40"><span class="inp-unit">let</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-hdr"><div class="card-dot" style="background:var(--teal)"></div><div class="card-title">Fáze zhodnocení</div></div>
+          <div class="card-body">
+            <div class="tl-outer">
+              <div class="tl-axis" id="rate-axis"></div>
+              <div class="tl-track" id="rate-track"></div>
+            </div>
+            <button class="btn-add-seg" id="rate-add">+ přidat fázi</button>
+            <div class="tl-editor" id="rate-editor">
+              <div class="tl-ef"><label>Od roku</label><input type="number" id="re-from" min="0" max="40"></div>
+              <div class="tl-ef"><label>Do roku</label><input type="number" id="re-to" min="0" max="40"></div>
+              <div class="tl-ef" style="flex:2"><label>Zhodnocení (% p.a.)</label><input type="number" id="re-val" step="0.5"></div>
+              <button class="btn primary" id="re-apply">Použít</button>
+              <button class="btn danger" id="re-del">Smazat</button>
+              <button class="btn" id="re-cancel">Zrušit</button>
+            </div>
+            <div class="hint">Zadejte roční výnos v procentech (např. 8 = 8 % p.a.). Táhni okraje pro změnu délky.</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-hdr"><div class="card-dot" style="background:#a78bfa)"></div><div class="card-title">Scénář výpočtu</div></div>
+          <div class="card-body">
+            <div class="scenario-row" id="scenario-row">
+              <div class="scenario sel" data-s="optimistic"><div class="sc-label">Aktivní</div><div class="sc-name">Optimistický</div><div class="sc-sub">+1 % výnosy</div></div>
+              <div class="scenario" data-s="base"><div class="sc-label">Základní</div><div class="sc-name">Realistický</div><div class="sc-sub">Zadané hodnoty</div></div>
+              <div class="scenario" data-s="conservative"><div class="sc-label">Opatrný</div><div class="sc-name">Konzervativní</div><div class="sc-sub">−1 % výnosy</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="card">
+          <div class="card-hdr"><div class="card-dot" style="background:#f59e0b"></div><div class="card-title">Přehled portfolia</div></div>
+          <div class="card-body" style="padding:0">
+            <div class="milestones-row" id="overview-milestones"></div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:16px">
+          <div class="card-hdr"><div class="card-dot" style="background:var(--blue)"></div><div class="card-title">Vývoj portfolia</div></div>
+          <div class="card-body">
+            <div class="legend">
+              <div class="legend-item"><div class="legend-dot" style="background:#5DADE2"></div><span>Vložená částka</span></div>
+              <div class="legend-item"><div class="legend-dot" style="background:#4ECDA0"></div><span>Výnosy z investice</span></div>
+            </div>
+            <div class="chart-wrap"><canvas id="overview-chart"></canvas></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: VKLADY -->
+  <div class="tab-pane" id="tab-vklady">
+    <div class="card">
+      <div class="card-hdr"><div class="card-dot" style="background:var(--blue)"></div><div class="card-title">Pravidelné měsíční vklady</div></div>
+      <div class="card-body">
+        <p style="font-size:12px;color:var(--txt2);margin-bottom:12px">Klikni na segment pro editaci · Táhni okraje pro změnu délky · Klikni na prázdnou plochu pro přidání</p>
+        <div class="tl-outer">
+          <div class="tl-axis" id="dep-axis"></div>
+          <div class="tl-track" id="dep-track"></div>
+        </div>
+        <button class="btn-add-seg" id="dep-add">+ přidat období</button>
+        <div class="tl-editor" id="dep-editor">
+          <div class="tl-ef"><label>Od roku</label><input type="number" id="de-from" min="0" max="40"></div>
+          <div class="tl-ef"><label>Do roku</label><input type="number" id="de-to" min="0" max="40"></div>
+          <div class="tl-ef" style="flex:2"><label>Měsíční vklad (Kč) — záporné = pravidelný výběr</label><input type="number" id="de-val" step="500"></div>
+          <button class="btn primary" id="de-apply">Použít</button>
+          <button class="btn danger" id="de-del">Smazat</button>
+          <button class="btn" id="de-cancel">Zrušit</button>
+        </div>
+        <div class="hint">Hodnota 0 Kč = žádný vklad (důchodová fáze). Záporná = pravidelný měsíční výběr.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: TRANSAKCE -->
+  <div class="tab-pane" id="tab-transakce">
+    <div class="card">
+      <div class="card-hdr"><div class="card-dot" style="background:#f59e0b"></div><div class="card-title">Jednorázové transakce</div></div>
+      <div class="card-body">
+        <div class="fill-bar">
+          <span>Rychlé vyplnění:</span>
+          <span>od roku</span><input type="number" id="fill-from" value="0" min="0" max="40">
+          <span>do roku</span><input type="number" id="fill-to" value="5" min="0" max="40">
+          <input type="number" id="fill-val" placeholder="částka" style="width:120px">
+          <span>Kč</span>
+          <button class="btn primary" id="fill-btn">Vyplnit</button>
+          <span style="color:var(--txt3)">nebo edituj rok po roku níže</span>
+        </div>
+        <div style="overflow-x:auto;max-height:420px;overflow-y:auto">
+          <table class="tx-table">
+            <thead><tr>
+              <th style="width:60px;text-align:center">Rok</th>
+              <th style="width:80px">Kalend.</th>
+              <th class="r">Částka (Kč)</th>
+              <th>Popis</th>
+            </tr></thead>
+            <tbody id="tx-body"></tbody>
+          </table>
+        </div>
+        <div class="hint" style="margin-top:8px">Kladná = investice · Záporná = výběr · Nula = žádná transakce</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: VÝSLEDKY -->
+  <div class="tab-pane" id="tab-vysledky">
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-hdr"><div class="card-dot" style="background:var(--blue)"></div><div class="card-title">Vývoj portfolia — vloženo vs. výnosy</div></div>
+      <div class="card-body">
+        <div class="legend">
+          <div class="legend-item"><div class="legend-dot" style="background:#5DADE2"></div><span>Vložená částka</span></div>
+          <div class="legend-item"><div class="legend-dot" style="background:#4ECDA0"></div><span>Výnosy z investice</span></div>
+        </div>
+        <div class="chart-wrap" style="height:360px"><canvas id="main-chart"></canvas></div>
+      </div>
+      <div class="milestones-row" id="main-milestones"></div>
+    </div>
+  </div>
+
+  <!-- TAB: SIMULACE -->
+  <div class="tab-pane" id="tab-simulace">
+    <div class="card">
+      <div class="card-hdr"><div class="card-dot" style="background:var(--navy)"></div><div class="card-title">Rok po roku</div></div>
+      <div class="sim-wrap">
+        <table class="sim-table">
+          <thead><tr>
+            <th style="text-align:center">Rok</th>
+            <th>Kalend.</th>
+            <th>Zhodnocení</th>
+            <th>Měs. vklad</th>
+            <th>Jednoráz.</th>
+            <th>Výnos</th>
+            <th>Kum. vloženo</th>
+            <th>Portfolio</th>
+          </tr></thead>
+          <tbody id="sim-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- WHY SECTION -->
+<section class="why-section" id="proc">
+  <div style="max-width:1100px;margin:0 auto">
+    <div class="section-eyebrow">Proč je to jinak</div>
+    <div class="section-title">Dvě kalkulačky, dva různé světy</div>
+    <div class="section-sub">Tradiční kalkulačky modelují portfolio jen do odchodu do důchodu. Tato počítá dál — protože portfolio vydělává i když vy nepracujete.</div>
+
+    <div class="shared-axis">
+      <span class="axis-age">25 let</span>
+      <div class="axis-track">
+        <div class="milestone-pin">
+          <div class="milestone-tag">65 let — odchod do důchodu</div>
+          <div class="milestone-line"></div>
+        </div>
+      </div>
+      <span class="axis-age">85 let</span>
+    </div>
+
+    <div class="compare-grid">
+      <div class="cc" style="border-right:1px solid var(--border)">
+        <div class="cc-hdr bad">
+          <div class="cc-icon bad">✕</div>
+          Tradiční kalkulačka — končí v 65 letech
+        </div>
+        <div class="cc-body">
+          <div class="cc-bars" id="bad-bars"></div>
+          <div class="cc-caption"><strong>Portfolio se v 65 přestane počítat.</strong> Předpokládá se výběr a postupná spotřeba. Co se děje s vaším majetkem dalších 20 let, kalkulačka neřeší.</div>
+        </div>
+      </div>
+      <div class="cc">
+        <div class="cc-hdr good">
+          <div class="cc-icon good">✓</div>
+          Tato kalkulačka — pokračuje dál
+        </div>
+        <div class="cc-body">
+          <div class="cc-bars" id="good-bars"></div>
+          <div class="cc-caption"><strong>Portfolio v 65 nekončí — jen změní režim.</strong> Nižší výnosy, žádné vklady, pravidelné výběry — a přesto roste nebo se udržuje.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="insights-row">
+      <div class="insight">
+        <div class="insight-num">3 %</div>
+        <div class="insight-label">stačí po odchodu do důchodu</div>
+        <div class="insight-sub">I konzervativní zhodnocení generuje z celoživotního portfolia výnos, který pokryje značnou část spotřeby.</div>
+      </div>
+      <div class="insight">
+        <div class="insight-num teal">40 let</div>
+        <div class="insight-label">celý životní horizont v jednom grafu</div>
+        <div class="insight-sub">Produktivní léta, přechod na konzervu, důchod — vše v jediné simulaci bez nutnosti přepočítávat.</div>
+      </div>
+      <div class="insight">
+        <div class="insight-num">rok po roku</div>
+        <div class="insight-label">přesné zadání vkladů i výběrů</div>
+        <div class="insight-sub">Každý rok lze nastavit jinak — různé vklady, jednorázové investice, výběry na dovolenou nebo rekonstrukci.</div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="section-title" style="font-size:15px;margin-bottom:14px">Co tato kalkulačka umí, co ostatní neumí</div>
+    <div class="diff-list">
+      <div class="diff-item">
+        <div class="diff-check"><svg viewBox="0 0 9 9"><polyline points="1,4.5 3.5,7 8,2" stroke="var(--grn-tx)" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg></div>
+        <div class="diff-text"><strong>Simulace po odchodu do důchodu</strong> — portfolio se nemaže, ale dál roste za sníženého zhodnocení a pokrývá výběry na spotřebu</div>
+      </div>
+      <div class="diff-item">
+        <div class="diff-check"><svg viewBox="0 0 9 9"><polyline points="1,4.5 3.5,7 8,2" stroke="var(--grn-tx)" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg></div>
+        <div class="diff-text"><strong>Proměnlivé měsíční vklady</strong> — různé částky pro různá životní období; nula v důchodu je plnohodnotná hodnota</div>
+      </div>
+      <div class="diff-item">
+        <div class="diff-check"><svg viewBox="0 0 9 9"><polyline points="1,4.5 3.5,7 8,2" stroke="var(--grn-tx)" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg></div>
+        <div class="diff-text"><strong>Postupná změna strategie</strong> — přechod z dynamického portfolia na konzervativní se promítá do výpočtu plynule</div>
+      </div>
+      <div class="diff-item">
+        <div class="diff-check"><svg viewBox="0 0 9 9"><polyline points="1,4.5 3.5,7 8,2" stroke="var(--grn-tx)" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg></div>
+        <div class="diff-text"><strong>Jednorázové transakce rok po roku</strong> — mimořádný příjem, prodej nemovitosti, velký výběr — to vše ovlivní přesný výpočet</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <span>Výpočty jsou orientační. Nezohledňují inflaci, daně ani poplatky správce fondu.</span>
+  <span>Nástroj je zdarma a bez registrace</span>
+</footer>
+
+<script>
+const MAX_YR = 40;
+const fmt = n => new Intl.NumberFormat('cs-CZ',{style:'currency',currency:'CZK',maximumFractionDigits:0}).format(Math.round(n||0));
+const fmtM = n => { const m=Math.round(n/1000)/1000; return m.toFixed(1)+' M'; };
+const fmtPct = n => ((n||0)*100).toFixed(1)+'%';
+const num = (v,f=0) => { const p=parseFloat(v); return isNaN(p)?f:p; };
+
+// ── STATE ──────────────────────────────────────────────────────
+const DEP_PAL = [
+  {bg:'#B5D4F4',tx:'#0C447C',bd:'#378ADD'},
+  {bg:'#9FE1CB',tx:'#085041',bd:'#1D9E75'},
+  {bg:'#FAC775',tx:'#412402',bd:'#BA7517'},
+  {bg:'#F4C0D1',tx:'#4B1528',bd:'#D4537E'},
+  {bg:'#CECBF6',tx:'#26215C',bd:'#7F77DD'},
+  {bg:'#C0DD97',tx:'#173404',bd:'#639922'},
+];
+const RATE_PAL = [
+  {bg:'#E6F1FB',tx:'#0C447C',bd:'#85B7EB'},
+  {bg:'#EAF3DE',tx:'#27500A',bd:'#97C459'},
+  {bg:'#FAEEDA',tx:'#412402',bd:'#EF9F27'},
+  {bg:'#FCEBEB',tx:'#501313',bd:'#F09595'},
+  {bg:'#EEEDFE',tx:'#26215C',bd:'#AFA9EC'},
+];
+
+let depSegs = [
+  {from:0,to:15,val:4000},
+  {from:16,to:40,val:0},
+];
+let rateSegs = [
+  {from:0,to:9,val:8},
+  {from:10,to:19,val:8},
+  {from:20,to:29,val:4},
+  {from:30,to:35,val:4},
+  {from:36,to:40,val:3.5},
+];
+let txData = Array.from({length:41},(_,i)=>({
+  yr:i,
+  val: i<=15?25000 : i>=21&&i<=25?-360000 : i>=26&&i<=36?-420000 : i>=37?-480000 : 0,
+  desc: i===0?'Mimořádný příjem' : i===1?'Roční bonus' : i===10?'Reinvestice' : ''
+}));
+let scenario = 'optimistic';
+let selDep = null, selRate = null;
+let drag = null;
+
+// ── SIMULATE ──────────────────────────────────────────────────
+function getRate(yr){
+  let rate=0, adj = scenario==='optimistic'?0.01 : scenario==='conservative'?-0.01:0;
+  const sorted=[...rateSegs].sort((a,b)=>a.from-b.from);
+  for(const s of sorted){ if(yr>=s.from&&yr<=s.to){ rate=s.val/100+adj; break; } }
+  return Math.max(0,rate);
+}
+function getMonthly(yr){
+  if(yr===0) return 0;
+  let dep=0;
+  const sorted=[...depSegs].sort((a,b)=>a.from-b.from);
+  for(const s of sorted){ if(yr>=s.from&&yr<=s.to){ dep=s.val; break; } }
+  return dep;
+}
+function getTx(yr){ return txData.filter(t=>t.yr===yr).reduce((s,t)=>s+num(t.val),0); }
+
+function simulate(){
+  const start=num(document.getElementById('startAmount').value,2045000);
+  const startYr=num(document.getElementById('startYear').value,2026);
+  const hor=Math.min(num(document.getElementById('horizon').value,40),40);
+  const rows=[];
+  let portfolio=start, cumInv=start;
+  for(let yr=0;yr<=hor;yr++){
+    const rate=getRate(yr);
+    const monthly=getMonthly(yr);
+    const annDep=monthly*12;
+    const tx=getTx(yr);
+    let gain=0;
+    if(yr===0){ portfolio=start+tx; cumInv=start+tx; }
+    else { gain=(portfolio+(annDep+tx)/2)*rate; portfolio+=annDep+tx+gain; cumInv+=annDep+tx; }
+    rows.push({yr,calYr:startYr+yr,rate,monthly,annDep,tx,gain,cumInv,cumRet:portfolio-cumInv,portfolio});
+  }
+  return rows;
+}
+
+// ── RENDER KPIs ───────────────────────────────────────────────
+function renderKPIs(rows){
+  const last=rows[rows.length-1]||{};
+  document.getElementById('kpi-now').textContent  = fmt(rows[0]?.portfolio);
+  document.getElementById('kpi-invested').textContent = fmt(last.cumInv);
+  document.getElementById('kpi-returns').textContent  = '+'+fmt(last.cumRet);
+  document.getElementById('kpi-final').textContent    = fmt(last.portfolio);
+}
+
+// ── RENDER MILESTONES ────────────────────────────────────────
+function renderMilestones(rows, elId){
+  const el=document.getElementById(elId);
+  if(!el) return;
+  el.innerHTML='';
+  [10,20,30,40].forEach(yr=>{
+    const r=rows.find(r=>r.yr===yr);
+    if(!r) return;
+    const d=document.createElement('div');
+    d.className='ms';
+    d.innerHTML=`<div class="ms-yr">Rok ${yr}</div><div class="ms-val">${fmt(r.portfolio)}</div><div class="ms-gain">+${fmt(r.cumRet)} výnosy</div>`;
+    el.appendChild(d);
+  });
+}
+
+// ── CHARTS ────────────────────────────────────────────────────
+let overviewChartInst=null, mainChartInst=null;
+function renderChart(canvasId, rows, inst){
+  const canvas=document.getElementById(canvasId);
+  if(!canvas) return null;
+  if(inst){inst.destroy();}
+  const labels=rows.map(r=>r.yr);
+  const invested=rows.map(r=>Math.round(r.cumInv));
+  const returns=rows.map(r=>Math.round(Math.max(0,r.cumRet)));
+  return new Chart(canvas,{
+    type:'bar',
+    data:{labels,datasets:[
+      {label:'Vložená částka',data:invested,backgroundColor:'#5DADE2',stack:'s'},
+      {label:'Výnosy',data:returns,backgroundColor:'#4ECDA0',stack:'s'},
+    ]},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      scales:{
+        x:{stacked:true,grid:{display:false},ticks:{font:{size:10},maxTicksLimit:11,color:'#9aa3b0'}},
+        y:{stacked:true,grid:{color:'#f0f2f4'},ticks:{font:{size:10},color:'#9aa3b0',callback:v=>fmtM(v)}},
+      },
+      plugins:{legend:{display:false},tooltip:{callbacks:{
+        title:([i])=>`Rok ${i.label}`,
+        label:i=>`${i.dataset.label}: ${fmt(i.raw)}`,
+        footer:items=>`Celkem: ${fmt(items.reduce((s,i)=>s+(i.raw||0),0))}`
+      }}}
+    }
+  });
+}
+
+// ── SIM TABLE ─────────────────────────────────────────────────
+function renderSimTable(rows){
+  const tb=document.getElementById('sim-body');
+  if(!tb) return;
+  tb.innerHTML='';
+  const milestones=new Set([0,5,10,15,20,25,30,35,40]);
+  rows.forEach(r=>{
+    const tr=document.createElement('tr');
+    if(milestones.has(r.yr)) tr.className='milestone';
+    tr.innerHTML=`
+      <td>${r.yr}</td>
+      <td style="text-align:right">${r.calYr}</td>
+      <td style="text-align:right">${fmtPct(r.rate)}</td>
+      <td style="text-align:right">${r.monthly!==0?fmt(r.monthly):'—'}</td>
+      <td style="text-align:right" class="${r.tx>0?'pos':r.tx<0?'neg':''}">${r.tx!==0?fmt(r.tx):'—'}</td>
+      <td style="text-align:right" class="${r.gain>0?'pos':r.gain<0?'neg':''}">${r.yr>0?fmt(r.gain):'—'}</td>
+      <td style="text-align:right">${fmt(r.cumInv)}</td>
+      <td style="text-align:right;font-weight:500">${fmt(r.portfolio)}</td>`;
+    tb.appendChild(tr);
+  });
+}
+
+// ── TX TABLE ──────────────────────────────────────────────────
+function renderTxTable(){
+  const startYr=num(document.getElementById('startYear').value,2026);
+  const tb=document.getElementById('tx-body');
+  if(!tb) return;
+  tb.innerHTML='';
+  txData.forEach((row,i)=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td style="text-align:center;color:var(--txt3)">${row.yr}</td>
+      <td style="color:var(--txt3)">${startYr+row.yr}</td>
+      <td class="r"><input type="number" value="${row.val}" step="1000" data-i="${i}" class="txi" style="text-align:right"></td>
+      <td><input type="text" value="${row.desc}" placeholder="popis…" data-i="${i}" class="dsc"></td>`;
+    tb.appendChild(tr);
+  });
+  tb.querySelectorAll('.txi').forEach(inp=>inp.addEventListener('input',e=>{txData[+e.target.dataset.i].val=num(e.target.value);recalc();}));
+  tb.querySelectorAll('.dsc').forEach(inp=>inp.addEventListener('input',e=>{txData[+e.target.dataset.i].desc=e.target.value;}));
+}
+
+// ── TIMELINE ─────────────────────────────────────────────────
+function makeTL(trackId, axisId, segs, pal, selVar, editorId, recalcFn){
+  const track=document.getElementById(trackId);
+  const axis=document.getElementById(axisId);
+  if(!track||!axis) return;
+  axis.innerHTML='';
+  [0,5,10,15,20,25,30,35,40].forEach(y=>{ const s=document.createElement('span'); s.textContent=y; axis.appendChild(s); });
+  track.innerHTML='';
+  segs.forEach((seg,i)=>{
+    const left=(seg.from/MAX_YR)*100;
+    const width=((seg.to-seg.from+1)/MAX_YR)*100;
+    const p=pal[i%pal.length];
+    const el=document.createElement('div');
+    el.className='tl-seg'+(window[selVar]===i?' sel':'');
+    el.style.cssText=`left:${left}%;width:${width}%;background:${p.bg};color:${p.tx};border:1px solid ${p.bd};`;
+    const label = seg.val===0?'0':new Intl.NumberFormat('cs-CZ',{maximumFractionDigits:0}).format(seg.val)+(trackId==='dep-track'?' Kč/m':' %');
+    el.innerHTML=`<span style="pointer-events:none;padding:0 6px;overflow:hidden;text-overflow:ellipsis">${label}</span>`;
+    el.addEventListener('click',e=>{e.stopPropagation();selectSeg(segs,i,selVar,editorId,trackId,axisId,pal,recalcFn);});
+    ['l','r'].forEach(side=>{
+      const h=document.createElement('div');
+      h.className=`tl-handle ${side}`;
+      h.addEventListener('mousedown',e=>{e.stopPropagation();startDrag(e,segs,i,side,trackId,axisId,pal,selVar,editorId,recalcFn);});
+      el.appendChild(h);
+    });
+    track.appendChild(el);
+  });
+}
+
+function selectSeg(segs,i,selVar,editorId,trackId,axisId,pal,recalcFn){
+  window[selVar]=i;
+  const ed=document.getElementById(editorId);
+  ed.classList.add('open');
+  const prefix=editorId==='dep-editor'?'de':'re';
+  document.getElementById(prefix+'-from').value=segs[i].from;
+  document.getElementById(prefix+'-to').value=segs[i].to;
+  document.getElementById(prefix+'-val').value=segs[i].val;
+  makeTL(trackId,axisId,segs,pal,selVar,editorId,recalcFn);
+}
+
+function startDrag(e,segs,idx,side,trackId,axisId,pal,selVar,editorId,recalcFn){
+  e.preventDefault();
+  const rect=document.getElementById(trackId).getBoundingClientRect();
+  drag={segs,idx,side,rect,trackId,axisId,pal,selVar,editorId,recalcFn};
+  document.addEventListener('mousemove',onDrag);
+  document.addEventListener('mouseup',stopDrag);
+}
+function onDrag(e){
+  if(!drag) return;
+  const {segs,idx,side,rect,trackId,axisId,pal,selVar,editorId,recalcFn}=drag;
+  const yr=Math.round(Math.max(0,Math.min(1,(e.clientX-rect.left)/rect.width))*MAX_YR);
+  const seg=segs[idx];
+  if(side==='l') segs[idx]={...seg,from:Math.min(yr,seg.to)};
+  else           segs[idx]={...seg,to:Math.max(yr,seg.from)};
+  if(window[selVar]===idx){
+    const prefix=editorId==='dep-editor'?'de':'re';
+    document.getElementById(prefix+'-from').value=segs[idx].from;
+    document.getElementById(prefix+'-to').value=segs[idx].to;
+  }
+  makeTL(trackId,axisId,segs,pal,selVar,editorId,recalcFn);
+  recalcFn();
+}
+function stopDrag(){ drag=null; document.removeEventListener('mousemove',onDrag); document.removeEventListener('mouseup',stopDrag); }
+
+function bindTL(trackId,axisId,segs,pal,selVar,editorId,addBtnId,applyId,delId,cancelId,recalcFn){
+  document.getElementById(trackId).addEventListener('click',e=>{
+    const yr=Math.round((e.clientX-e.currentTarget.getBoundingClientRect().left)/e.currentTarget.getBoundingClientRect().width*MAX_YR);
+    if(segs.findIndex(s=>yr>=s.from&&yr<=s.to)<0){
+      segs.push({from:yr,to:Math.min(yr+4,MAX_YR),val:0});
+      selectSeg(segs,segs.length-1,selVar,editorId,trackId,axisId,pal,recalcFn);
+    }
+  });
+  document.getElementById(addBtnId).addEventListener('click',()=>{
+    segs.push({from:0,to:5,val:0});
+    selectSeg(segs,segs.length-1,selVar,editorId,trackId,axisId,pal,recalcFn);
+  });
+  const prefix=editorId==='dep-editor'?'de':'re';
+  document.getElementById(applyId).addEventListener('click',()=>{
+    if(window[selVar]===null) return;
+    segs[window[selVar]]={...segs[window[selVar]],
+      from:parseInt(document.getElementById(prefix+'-from').value)||0,
+      to:parseInt(document.getElementById(prefix+'-to').value)||0,
+      val:parseFloat(document.getElementById(prefix+'-val').value)||0};
+    makeTL(trackId,axisId,segs,pal,selVar,editorId,recalcFn);
+    recalcFn();
+  });
+  document.getElementById(delId).addEventListener('click',()=>{
+    if(window[selVar]===null) return;
+    segs.splice(window[selVar],1);
+    window[selVar]=null;
+    document.getElementById(editorId).classList.remove('open');
+    makeTL(trackId,axisId,segs,pal,selVar,editorId,recalcFn);
+    recalcFn();
+  });
+  document.getElementById(cancelId).addEventListener('click',()=>{
+    window[selVar]=null;
+    document.getElementById(editorId).classList.remove('open');
+    makeTL(trackId,axisId,segs,pal,selVar,editorId,recalcFn);
+  });
+}
+
+// ── RECALC ────────────────────────────────────────────────────
+function recalc(){
+  const rows=simulate();
+  renderKPIs(rows);
+  renderMilestones(rows,'overview-milestones');
+  renderMilestones(rows,'main-milestones');
+  overviewChartInst=renderChart('overview-chart',rows,overviewChartInst);
+  mainChartInst=renderChart('main-chart',rows,mainChartInst);
+  renderSimTable(rows);
+  makeTL('dep-track','dep-axis',depSegs,DEP_PAL,'selDep','dep-editor',recalc);
+  makeTL('rate-track','rate-axis',rateSegs,RATE_PAL,'selRate','rate-editor',recalc);
+}
+
+// ── COMPARE BARS ─────────────────────────────────────────────
+function drawBars(id,data,c1,c2){
+  const el=document.getElementById(id);
+  if(!el) return;
+  const max=Math.max(...data.map(d=>d[0]+d[1]));
+  el.style.cssText='display:flex;align-items:flex-end;gap:3px;width:100%;height:80px';
+  data.forEach(([inv,ret])=>{
+    const w=document.createElement('div');
+    w.style.cssText='flex:1;display:flex;flex-direction:column;align-items:stretch;justify-content:flex-end;height:100%';
+    const hi=Math.round((inv/max)*100), hr=Math.round((ret/max)*100);
+    w.innerHTML=`<div style="height:${hr}%;background:${c2};border-radius:2px 2px 0 0;min-height:${ret>0?2:0}px"></div>`+
+                `<div style="height:${hi}%;background:${c1};border-radius:${hr>0?'0':'2px 2px'} 0 0;min-height:2px"></div>`;
+    el.appendChild(w);
+  });
+}
+
+// ── TABS ──────────────────────────────────────────────────────
+document.querySelectorAll('.nt').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.nt').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-'+btn.dataset.tab).classList.add('active');
+    if(btn.dataset.tab==='vysledky'||btn.dataset.tab==='nastaveni'){
+      setTimeout(()=>{overviewChartInst=renderChart('overview-chart',simulate(),overviewChartInst);
+                       mainChartInst=renderChart('main-chart',simulate(),mainChartInst);},50);
+    }
+  });
+});
+
+// ── FILL BAR ─────────────────────────────────────────────────
+document.getElementById('fill-btn').addEventListener('click',()=>{
+  const from=parseInt(document.getElementById('fill-from').value)||0;
+  const to=parseInt(document.getElementById('fill-to').value)||0;
+  const val=parseFloat(document.getElementById('fill-val').value)||0;
+  for(let y=from;y<=Math.min(to,MAX_YR);y++) txData[y].val=val;
+  renderTxTable();
+  recalc();
+});
+
+// ── SCENARIOS ────────────────────────────────────────────────
+document.getElementById('scenario-row').addEventListener('click',e=>{
+  const sc=e.target.closest('.scenario');
+  if(!sc) return;
+  scenario=sc.dataset.s;
+  document.querySelectorAll('.scenario').forEach(s=>s.classList.remove('sel'));
+  sc.classList.add('sel');
+  recalc();
+});
+
+// ── INPUTS ───────────────────────────────────────────────────
+['startAmount','startYear','horizon'].forEach(id=>{
+  document.getElementById(id).addEventListener('input',()=>{renderTxTable();recalc();});
+});
+
+// ── INIT ─────────────────────────────────────────────────────
+bindTL('dep-track','dep-axis',depSegs,DEP_PAL,'selDep','dep-editor','dep-add','de-apply','de-del','de-cancel',recalc);
+bindTL('rate-track','rate-axis',rateSegs,RATE_PAL,'selRate','rate-editor','rate-add','re-apply','re-del','re-cancel',recalc);
+
+drawBars('bad-bars',
+  [[15,0],[18,1],[22,3],[27,6],[32,10],[37,14],[42,19],[47,24],[50,28],[51,29],[51,29]],
+  '#5DADE2','rgba(93,173,226,.3)');
+drawBars('good-bars',
+  [[50,29],[47,32],[44,35],[41,38],[39,41],[38,44],[37,47],[37,50],[37,54]],
+  '#5DADE2','#4ECDA0');
+
+renderTxTable();
+recalc();
+</script>
+</body>
+</html>
