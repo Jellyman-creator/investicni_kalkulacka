@@ -525,6 +525,7 @@ let phases=[]; // {from,to,rate,name,custom}
 let selIn=null,selOut=null,selPh=null,drag=null;
 let modeIn='repeat',modeOut='repeat';
 let chartInst=null,ruleId=0;
+let prevHorizon=40; // tracks last known horizon for proportional rescaling
 
 function getHorizon(){return Math.min(num(document.getElementById('horizon').value,40),MAX_YR);}
 function getStartYear(){return num(document.getElementById('startYear').value,2025);}
@@ -1044,6 +1045,7 @@ function applyState(s){
   document.getElementById('horizon').value=h;
   document.getElementById('horizon-slider').value=h;
   document.getElementById('horizon-val').textContent=h;
+  prevHorizon=h;
   if(s.depIn)depIn=s.depIn;
   if(s.depOut)depOut=s.depOut;
   if(s.txIn)txIn=s.txIn;
@@ -1083,11 +1085,43 @@ modal.addEventListener('click',e=>{if(e.target===modal)modal.classList.remove('o
 
 // HORIZON SLIDER
 document.getElementById('horizon-slider').addEventListener('input',e=>{
-  const v=e.target.value;
-  document.getElementById('horizon').value=v;
-  document.getElementById('horizon-val').textContent=v;
-  if(!phases.length)initDefaultPhases();
-  ensureFullCoverage();
+  const newHor=parseInt(e.target.value);
+  const oldHor=prevHorizon;
+  document.getElementById('horizon').value=newHor;
+  document.getElementById('horizon-val').textContent=newHor;
+
+  // Proportionally rescale all segments
+  function scaleSegs(arr){
+    arr.forEach(s=>{
+      s.from=Math.max(1,Math.round(s.from/oldHor*newHor));
+      s.to  =Math.max(s.from,Math.min(newHor,Math.round(s.to/oldHor*newHor)));
+    });
+    // remove segments that collapsed to zero width or fell outside
+    for(let i=arr.length-1;i>=0;i--){
+      if(arr[i].from>newHor)arr.splice(i,1);
+    }
+    sortArr(arr);
+    // fix overlaps after rounding
+    for(let i=1;i<arr.length;i++){
+      if(arr[i].from<=arr[i-1].to)arr[i].from=arr[i-1].to+1;
+      if(arr[i].from>arr[i].to)arr[i].to=arr[i].from;
+      if(arr[i].from>newHor)arr.splice(i--,1);
+    }
+  }
+
+  scaleSegs(depIn);
+  scaleSegs(depOut);
+  scaleSegs(phases);
+
+  // Phases must cover full horizon — rescale last to end, or init defaults
+  if(!phases.length){initDefaultPhases();}
+  else{
+    sortArr(phases);
+    phases[phases.length-1].to=newHor;
+    ensureFullCoverage();
+  }
+
+  prevHorizon=newHor;
   renderDepTL('in');renderDepTL('out');renderPhaseTL();
   renderTxTable('in');renderTxTable('out');recalc();
 });
@@ -1130,8 +1164,8 @@ function initDefaultPhases(){
 try{
   const saved=localStorage.getItem('inv-calc-v3');
   if(saved){applyState(JSON.parse(saved));}
-  else{initDefaultPhases();renderDepTL('in');renderDepTL('out');renderPhaseTL();renderRules('in');renderRules('out');renderTxTable('in');renderTxTable('out');recalc();}
-}catch(e){initDefaultPhases();renderDepTL('in');renderDepTL('out');renderPhaseTL();renderRules('in');renderRules('out');renderTxTable('in');renderTxTable('out');recalc();}
+  else{prevHorizon=getHorizon();initDefaultPhases();renderDepTL('in');renderDepTL('out');renderPhaseTL();renderRules('in');renderRules('out');renderTxTable('in');renderTxTable('out');recalc();}
+}catch(e){prevHorizon=getHorizon();initDefaultPhases();renderDepTL('in');renderDepTL('out');renderPhaseTL();renderRules('in');renderRules('out');renderTxTable('in');renderTxTable('out');recalc();}
 </script>
 </body>
 </html>
