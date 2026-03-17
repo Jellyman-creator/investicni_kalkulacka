@@ -1227,32 +1227,32 @@ function applyRules(){
 }
 function renderRules(kind){
   const list=document.getElementById('rules-'+kind);
+  if(!list){renderRulesUnified();return;} // fallback to unified
   const arr=kind==='in'?rulesIn:rulesOut;
   list.innerHTML='';
-  if(!arr.length){list.innerHTML='<div style="font-size:13px;color:var(--txt3);padding:4px 0">Zatím žádná pravidla.</div>';return;}
+  if(!arr.length){list.innerHTML='<div style="font-size:13px;color:var(--txt3);padding:4px 0">Zatím žádné položky.</div>';return;}
   arr.forEach((r,i)=>{
     const ev=r.every===1?'každý rok':`každých ${r.every} let`;
     const tag=document.createElement('div');tag.className='rule-tag'+(kind==='out'?' neg':'');
     tag.innerHTML=`<div class="rule-tag-text"><strong>${kind==='out'?'−':''}${new Intl.NumberFormat('cs-CZ',{maximumFractionDigits:0}).format(r.val)} Kč</strong> — ${ev}, roky ${r.from}–${r.to}${r.desc?' · '+r.desc:''}</div><button class="rule-del" data-i="${i}">×</button>`;
     list.appendChild(tag);
   });
-  list.querySelectorAll('.rule-del').forEach(b=>b.addEventListener('click',()=>{(kind==='in'?rulesIn:rulesOut).splice(+b.dataset.i,1);applyRules();renderRules(kind);renderTxTable(kind);recalc();}));
+  list.querySelectorAll('.rule-del').forEach(b=>b.addEventListener('click',()=>{(kind==='in'?rulesIn:rulesOut).splice(+b.dataset.i,1);applyRules();renderRulesUnified();renderTxTable(kind);recalc();}));
 }
 function addRule(kind){
-  const pfx=kind==='in'?'rbin':'rbout';
-  const val=Math.abs(parseFloat(document.getElementById(pfx+'-val').value)||0);
-  const from=parseInt(document.getElementById(pfx+'-from').value)||1;
-  const to=parseInt(document.getElementById(pfx+'-to').value)||from;
-  const every=parseInt(document.getElementById(pfx+'-every').value)||1;
-  const desc=document.getElementById(pfx+'-desc').value.trim();
+  // Always read from rbin-* fields (single merged form)
+  const val=Math.abs(parseFloat(document.getElementById('rbin-val').value)||0);
+  const from=parseInt(document.getElementById('rbin-from').value)||1;
+  const to=parseInt(document.getElementById('rbin-to').value)||from;
+  const every=parseInt(document.getElementById('rbin-every').value)||1;
+  const desc=document.getElementById('rbin-desc').value.trim();
   if(!val){alert('Zadejte částku.');return;}
   (kind==='in'?rulesIn:rulesOut).push({val,from:Math.max(1,from),to:Math.min(Math.max(from,to),MAX_YR),every,desc,id:++ruleId});
-  applyRules();renderRules(kind);renderTxTable(kind);recalc();
-  document.getElementById(pfx+'-val').value='';
-  document.getElementById(pfx+'-desc').value='';
+  applyRules();renderRulesUnified();renderTxTable('in');recalc();
+  document.getElementById('rbin-val').value='';
+  document.getElementById('rbin-desc').value='';
 }
-document.getElementById('rbin-add').addEventListener('click',()=>addRule('in'));
-// rbout-add merged into rbin-add via txKind
+document.getElementById('rbin-add').addEventListener('click',()=>addRule(txKind||'in'));
 
 // TOGGLE — only 'in' toggle exists now (one-off merged card)
 ['in'].forEach(kind=>{
@@ -1273,6 +1273,7 @@ document.getElementById('rbin-add').addEventListener('click',()=>addRule('in'));
 function renderTxTable(kind){
   const arr=kind==='in'?txIn:txOut;
   const tb=document.getElementById('tbody-'+kind);
+  if(!tb) return; // element may not exist if merged UI
   const hor=getHorizon();const sy=getStartYear();
   tb.innerHTML='';
   for(let i=1;i<=hor;i++){
