@@ -1718,6 +1718,7 @@ resetBtn.addEventListener('mouseout',()=>{resetBtn.style.background='var(--surfa
 document.getElementById('btn-reset').addEventListener('click',()=>{
   if(!confirm('Opravdu chcete vynulovat všechny hodnoty?'))return;
   document.getElementById('startAmount').value='';
+  document.getElementById('birthYear').value='';
   document.getElementById('startAmount').placeholder='např. 1 000 000';
   document.getElementById('startYear').value=new Date().getFullYear();
   const defHor=40;
