@@ -322,6 +322,10 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
           </div>
         </div>
       </div>
+      <button id="btn-reset" style="width:100%;margin-top:8px;padding:10px;font-size:13px;font-family:var(--font);font-weight:500;border:1px solid var(--border);border-radius:7px;background:none;color:var(--txt3);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:all .15s">
+        <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 7a6 6 0 1 0 1.5-3.9"/><path d="M1 2.5V7h4.5"/></svg>
+        Vynulovat hodnoty
+      </button>
     </div>
     <div>
       <div class="card">
@@ -1215,7 +1219,38 @@ function drawBars(id,data,c1,c2){
   });
 }
 
-// INIT
+// RESET
+document.getElementById('btn-reset').addEventListener('click',()=>{
+  if(!confirm('Opravdu chcete vynulovat všechny hodnoty?'))return;
+  document.getElementById('startAmount').value=0;
+  document.getElementById('startYear').value=new Date().getFullYear();
+  const defHor=40;
+  document.getElementById('horizon').value=defHor;
+  document.getElementById('horizon-slider').value=defHor;
+  document.getElementById('horizon-val').textContent=defHor;
+  prevHorizon=defHor;
+  depIn=[];depOut=[];
+  txIn =Array.from({length:MAX_YR+1},(_,i)=>({yr:i,val:0,desc:''}));
+  txOut=Array.from({length:MAX_YR+1},(_,i)=>({yr:i,val:0,desc:''}));
+  rulesIn=[];rulesOut=[];
+  modeIn='repeat';modeOut='repeat';
+  // reset toggles to Opakovaně
+  ['in','out'].forEach(kind=>{
+    document.getElementById('toggle-'+kind).querySelectorAll('.toggle-opt').forEach(b=>b.classList.toggle('sel',b.dataset.mode==='repeat'));
+    document.getElementById('tx'+kind+'-repeat').style.display='';
+    document.getElementById('tx'+kind+'-manual').style.display='none';
+  });
+  initDefaultPhases();
+  selIn=null;selOut=null;selPh=null;
+  document.getElementById('tl-editor-in').classList.remove('open');
+  document.getElementById('tl-editor-out').classList.remove('open');
+  document.getElementById('ph-editor').classList.remove('open');
+  renderDepTL('in');renderDepTL('out');renderPhaseTL();
+  renderRules('in');renderRules('out');renderTxTable('in');renderTxTable('out');recalc();
+  localStorage.removeItem('inv-calc-v4');
+});
+
+
 bindDepLive('in');
 bindDepLive('out');
 drawBars('bad-bars',[[15,0],[18,1],[22,3],[27,6],[32,10],[37,14],[42,19],[47,24],[50,28],[51,29],[51,29]],'#5DADE2','rgba(93,173,226,.3)');
