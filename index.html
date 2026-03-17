@@ -1490,7 +1490,7 @@ function applyState(s){
   });
   renderDepTL('in');renderDepTL('out');renderPhaseTL();renderRulesUnified();renderTxTable('in');renderTxTable('out');recalc();
 }
-function saveState(){try{localStorage.setItem('inv-calc-v4',JSON.stringify(getState()));}catch(e){}}
+function saveState(){try{localStorage.setItem('inv-calc-v5',JSON.stringify(getState()));}catch(e){}}
 
 document.getElementById('btn-save').addEventListener('click',()=>{
   const a=document.createElement('a');
@@ -1611,7 +1611,7 @@ document.getElementById('btn-reset').addEventListener('click',()=>{
   document.getElementById('ph-editor').classList.remove('open');
   renderDepTL('in');renderDepTL('out');renderPhaseTL();
   renderRulesUnified();renderTxTable('in');renderTxTable('out');recalc();
-  localStorage.removeItem('inv-calc-v4');
+  localStorage.removeItem('inv-calc-v5');
 });
 
 
@@ -1631,11 +1631,13 @@ function initDefaultPhases(){
   ];
 }
 
+// Always set startYear default before loading saved state
+document.getElementById('startYear').value = new Date().getFullYear();
+
 try{
-  const saved=localStorage.getItem('inv-calc-v4');
+  const saved=localStorage.getItem('inv-calc-v5');
   if(saved){applyState(JSON.parse(saved));}
   else{
-    document.getElementById('startYear').value=new Date().getFullYear();
     prevHorizon=getHorizon();initDefaultPhases();
     renderDepTL('in');renderDepTL('out');renderPhaseTL();
     renderRulesUnified();renderTxTable('in');renderTxTable('out');recalc();
