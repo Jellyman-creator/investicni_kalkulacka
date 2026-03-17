@@ -1619,7 +1619,7 @@ function applyState(s){
   });
   renderDepTL('in');renderDepTL('out');renderPhaseTL();renderRulesUnified();renderTxTable('in');renderTxTable('out');recalc();
 }
-function saveState(){try{localStorage.setItem('inv-calc-v7',JSON.stringify(getState()));}catch(e){}}
+function saveState(){try{localStorage.setItem('inv-calc-v8',JSON.stringify(getState()));}catch(e){}}
 
 document.getElementById('btn-save').addEventListener('click',()=>{
   const a=document.createElement('a');
@@ -1743,7 +1743,7 @@ document.getElementById('btn-reset').addEventListener('click',()=>{
   document.getElementById('target-result').style.display='none';
   renderDepTL('in');renderPhaseTL();
   renderRulesUnified();renderTxTable('in');recalc();
-  localStorage.removeItem('inv-calc-v7');
+  localStorage.removeItem('inv-calc-v8');
 });
 
 
@@ -1767,7 +1767,7 @@ function initDefaultPhases(){
 document.getElementById('startYear').value = new Date().getFullYear();
 
 try{
-  const saved=localStorage.getItem('inv-calc-v7');
+  const saved=localStorage.getItem('inv-calc-v8');
   if(saved){
     applyState(JSON.parse(saved));
     // Safety: if phases ended up empty, reinitialize
