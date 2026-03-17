@@ -1173,17 +1173,49 @@ function renderTargetIncome(rows){
   const retireRate=num(document.getElementById('target-rate').value,3)/100;
   const by=getBirthYear();
   const sy=getStartYear();
-  // find retirement year offset
-  let retireYr=null;
-  if(by){retireYr=Math.max(0,Math.min(getHorizon(),(by+retireAge)-sy));}
-  else{retireYr=Math.min(getHorizon(),67);} // fallback: year 67
-  // portfolio needed = annual income / rate (perpetuity formula)
+  const hor=getHorizon();
+
+  // Find the withdrawal-start year — i.e. when net monthly flow first turns negative
+  // (depOut kicks in or depIn stops). If birthYear set, also consider retirement age.
+  // Use whichever comes first that makes sense.
+  let withdrawalStartYr=null;
+
+  // Option A: retirement age from birthYear
+  if(by){
+    const ageYr=(by+retireAge)-sy;
+    if(ageYr>=1&&ageYr<=hor)withdrawalStartYr=ageYr;
+  }
+
+  // Option B: first year where net monthly cash flow goes negative
+  if(withdrawalStartYr===null){
+    for(let yr=1;yr<=hor;yr++){
+      if(getMonthlyNet(yr)<0){withdrawalStartYr=yr;break;}
+    }
+  }
+
+  // Option C: year of peak portfolio value (accumulation → drawdown transition)
+  if(withdrawalStartYr===null){
+    let peakVal=0,peakYr=0;
+    rows.forEach(r=>{if(r.portfolio>peakVal){peakVal=r.portfolio;peakYr=r.yr;}});
+    withdrawalStartYr=peakYr||hor;
+  }
+
+  // Clamp to horizon
+  withdrawalStartYr=Math.min(withdrawalStartYr,hor);
+
+  // Portfolio needed at withdrawal start (perpetuity: P = annual_income / rate)
   const annualIncome=income*12;
   const needed=retireRate>0?annualIncome/retireRate:0;
-  // projected portfolio at retirement from simulation
-  const retireRow=rows.find(r=>r.yr===retireYr)||rows[rows.length-1];
-  const projected=retireRow?retireRow.portfolio:0;
+
+  // Projected portfolio at withdrawal start from simulation
+  const refRow=rows.find(r=>r.yr===withdrawalStartYr)||rows[rows.length-1];
+  const projected=refRow?refRow.portfolio:0;
   const diff=projected-needed;
+
+  // Label for the reference year
+  const refYr=sy+withdrawalStartYr;
+  const ageLabel=by?` (věk ${by+withdrawalStartYr-sy} let)`:'';
+
   document.getElementById('target-result').style.display='';
   document.getElementById('tr-needed').textContent=fmt(needed);
   const projEl=document.getElementById('tr-projected');
@@ -1192,16 +1224,21 @@ function renderTargetIncome(rows){
   const diffEl=document.getElementById('tr-diff');
   diffEl.textContent=(diff>=0?'+':'')+fmt(diff);
   diffEl.style.color=diff>=0?'var(--grn-tx)':'var(--red-tx)';
+
+  // Update label to show reference year
+  document.querySelector('#target-result [style*="Odhadnuté"]').textContent=
+    `Portfolio v roce ${refYr}${ageLabel}`;
+
   const msg=document.getElementById('tr-message');
   if(diff>=0){
     const surplus=Math.round(projected*retireRate/12);
-    msg.innerHTML=`✓ <strong>Cíl je dosažitelný.</strong> Při aktuálním nastavení bude vaše portfolio v důchodu generovat přibližně <strong>${fmt(surplus)} měsíčně</strong> — to je o ${fmt(surplus-income)} více, než požadujete.`;
+    msg.innerHTML=`✓ <strong>Cíl je dosažitelný.</strong> V roce ${refYr}${ageLabel} bude portfolio generovat přibližně <strong>${fmt(surplus)} měsíčně</strong> — o ${fmt(surplus-income)} více, než požadujete.`;
     msg.style.color='var(--grn-tx)';
   } else {
     const shortfall=Math.abs(diff);
-    const yearsLeft=retireYr;
+    const yearsLeft=withdrawalStartYr;
     const extraMonthly=yearsLeft>0?Math.round(shortfall/(yearsLeft*12*1.5)):shortfall;
-    msg.innerHTML=`✗ <strong>Cíl zatím není dosažitelný.</strong> Chybí přibližně ${fmt(shortfall)}. Zvažte zvýšení měsíčních vkladů (orientačně o ${fmt(extraMonthly)}/měs.), delší investiční horizont nebo vyšší výnos.`;
+    msg.innerHTML=`✗ <strong>Cíl zatím není dosažitelný.</strong> Do roku ${refYr}${ageLabel} chybí přibližně <strong>${fmt(shortfall)}</strong>. Zvažte zvýšení měsíčních vkladů (orientačně +${fmt(extraMonthly)}/měs.), prodloužení akumulační fáze nebo vyšší výnos portfolia.`;
     msg.style.color='var(--red-tx)';
   }
 }
