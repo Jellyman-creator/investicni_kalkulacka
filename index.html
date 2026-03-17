@@ -378,17 +378,25 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
       <div id="tl-track-in" style="position:relative;height:80px;border-radius:7px;background:var(--bg);border:1px solid var(--border);overflow:hidden;user-select:none;touch-action:pan-y">
         <!-- Permanent row divider -->
         <div style="position:absolute;left:0;right:0;top:40px;height:1px;background:var(--border2);pointer-events:none;z-index:1"></div>
-        <div style="position:absolute;right:6px;top:12px;font-size:9px;font-weight:700;color:var(--grn-tx);opacity:.5;pointer-events:none;text-transform:uppercase;letter-spacing:.05em">vklady +</div>
-        <div style="position:absolute;right:6px;top:53px;font-size:9px;font-weight:700;color:var(--red-tx);opacity:.5;pointer-events:none;text-transform:uppercase;letter-spacing:.05em">výběry −</div>
+        <div style="position:absolute;left:6px;top:10px;font-size:9px;font-weight:700;color:var(--grn-tx);opacity:.5;pointer-events:none;text-transform:uppercase;letter-spacing:.05em">vklady +</div>
+        <div style="position:absolute;left:6px;top:53px;font-size:9px;font-weight:700;color:var(--red-tx);opacity:.5;pointer-events:none;text-transform:uppercase;letter-spacing:.05em">výběry −</div>
         <div class="tl-empty-msg" id="dep-empty-msg" style="pointer-events:none;flex-direction:column;gap:3px">
           <span style="font-size:12px;color:var(--txt3)">Kliknutím na tlačítka výše přidejte vklady nebo výběry</span>
         </div>
       </div>
       <!-- Editor panel — shown when a segment is selected -->
       <div id="tl-editor-in" class="tl-editor">
-        <div id="dep-editor-type-badge" style="font-size:12px;font-weight:700;padding:4px 10px;border-radius:5px;background:var(--grn-lt);color:var(--grn-tx);border:1px solid var(--grn-bd)">Vklad +</div>
-        <div class="tl-ef"><label>Od roku</label><input type="number" id="tei-from" min="1" max="70"></div>
-        <div class="tl-ef"><label>Do roku</label><input type="number" id="tei-to" min="1" max="70"></div>
+        <div id="dep-editor-type-badge" style="font-size:12px;font-weight:700;padding:4px 10px;border-radius:5px;background:var(--grn-lt);color:var(--grn-tx);border:1px solid var(--grn-bd);align-self:flex-end">Vklad +</div>
+        <div class="tl-ef">
+          <label>Od roku</label>
+          <input type="number" id="tei-from" min="1" max="70">
+          <div id="tei-from-hint" style="font-size:11px;color:var(--blue);margin-top:3px;font-weight:500"></div>
+        </div>
+        <div class="tl-ef">
+          <label>Do roku</label>
+          <input type="number" id="tei-to" min="1" max="70">
+          <div id="tei-to-hint" style="font-size:11px;color:var(--blue);margin-top:3px;font-weight:500"></div>
+        </div>
         <div class="tl-ef" style="flex:2"><label id="tei-val-label">Měsíční vklad (Kč)</label><input type="number" id="tei-val" step="500" min="0" placeholder="0"></div>
         <button class="btn danger" id="tei-del">Smazat</button>
         <button class="btn" id="tei-cancel">Zavřít</button>
@@ -908,6 +916,19 @@ function openDepEditor(kind,idx){
   syncDepEditorUnified(kind,idx);
   renderDepTL('in');
 }
+function updateDepEditorHints(){
+  const sy=getStartYear();
+  const by=getBirthYear();
+  ['from','to'].forEach(which=>{
+    const val=parseInt(document.getElementById('tei-'+which).value)||null;
+    const hint=document.getElementById('tei-'+which+'-hint');
+    if(!hint)return;
+    if(val){
+      const calYr=sy+val;
+      hint.textContent=by?'→ '+calYr+' ('+Math.max(0,calYr-by)+' let)':'→ rok '+calYr;
+    } else {hint.textContent='';}
+  });
+}
 function syncDepEditorUnified(kind,idx){
   const arr=kind==='in'?depIn:depOut;
   if(idx===null||!arr[idx])return;
@@ -915,9 +936,9 @@ function syncDepEditorUnified(kind,idx){
   document.getElementById('tei-from').value=s.from;
   document.getElementById('tei-to').value=s.to;
   document.getElementById('tei-val').value=s.val;
-  // Store current kind for live edits
   document.getElementById('tl-editor-in').dataset.kind=kind;
   document.getElementById('tl-editor-in').dataset.idx=idx;
+  updateDepEditorHints();
 }
 // Unified live editor for single tl-editor-in
 function bindDepLive(){
@@ -934,6 +955,7 @@ function bindDepLive(){
       const v=Math.abs(parseFloat(document.getElementById('tei-val').value)||0);
       arr[idx]={...arr[idx],from:f,to:t,val:v};
       noOverlap(arr,idx,'r');noOverlap(arr,idx,'l');
+      updateDepEditorHints();
       renderDepTL('in');recalc();
     });
   });
@@ -1620,6 +1642,7 @@ document.getElementById('horizon-slider').addEventListener('input',e=>{
 }));
 document.getElementById('birthYear').addEventListener('input',()=>{
   renderDepTL('in');renderDepTL('out');renderPhaseTL();
+  updateDepEditorHints();
   recalc();
 });
 document.getElementById('tr-retire-age-input').addEventListener('input',()=>recalc());
