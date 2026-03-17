@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Celoživotní investiční kalkulačka</title>
+<title>Investiční kalkulačka</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
@@ -20,7 +20,6 @@
 html{scroll-behavior:smooth}
 body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15px;line-height:1.6}
 
-/* TOPBAR */
 .topbar{background:var(--navy);height:56px;display:flex;align-items:center;padding:0 24px;justify-content:space-between;position:sticky;top:0;z-index:100}
 .logo{display:flex;align-items:center;gap:10px;text-decoration:none}
 .logo-mark{width:30px;height:30px;background:var(--blue);border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -36,7 +35,6 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
 .help-btn{width:26px;height:26px;border-radius:50%;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.09);color:rgba(255,255,255,.65);font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;font-family:var(--font);flex-shrink:0}
 .help-btn:hover{background:rgba(255,255,255,.2);color:#fff}
 
-/* MODAL */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;align-items:center;justify-content:center;padding:20px}
 .modal-overlay.open{display:flex}
 .modal{background:var(--surface);border-radius:14px;max-width:480px;width:100%;padding:28px;position:relative}
@@ -52,7 +50,6 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
 .modal-tip strong{font-weight:600}
 .modal-actions{display:flex;gap:8px;margin-top:22px;justify-content:flex-end}
 
-/* HERO */
 .hero{background:var(--navy);padding:48px 24px 0;overflow:hidden;position:relative}
 .hero::before{content:'';position:absolute;right:-80px;top:-80px;width:360px;height:360px;border-radius:50%;background:rgba(74,158,224,.06);pointer-events:none}
 .hero-eyebrow{font-size:12px;color:var(--blue);font-weight:600;letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px}
@@ -69,20 +66,17 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
 .kpi-val.blue{color:var(--blue)}
 .kpi-val.teal{color:var(--teal)}
 
-/* LAYOUT */
 .page{padding:24px;max-width:1100px;margin:0 auto}
 .top-grid{display:grid;grid-template-columns:340px 1fr;gap:24px;margin-bottom:20px;align-items:start}
 
-/* CARDS */
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:20px}
 .card:last-child{margin-bottom:0}
 .card-hdr{padding:13px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:9px;flex-wrap:wrap}
 .card-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
 .card-title{font-size:12px;font-weight:600;color:var(--txt2);text-transform:uppercase;letter-spacing:.05em}
-.card-sub{font-size:11px;color:var(--txt3);font-weight:400;text-transform:none;letter-spacing:0;margin-left:4px}
+.card-sub{font-size:11px;color:var(--txt3);font-weight:400;text-transform:none;letter-spacing:0;margin-left:2px}
 .card-body{padding:18px}
 
-/* INPUTS */
 .inp-group{margin-bottom:16px}
 .inp-group:last-child{margin-bottom:0}
 .inp-label{font-size:12px;color:var(--txt2);margin-bottom:6px;font-weight:600;display:block}
@@ -91,71 +85,51 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
 .inp-wrap input:focus{border-color:var(--blue);background:#fff}
 .inp-unit{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--txt3);pointer-events:none;font-weight:500}
 
-/* SLIDER */
 .slider-wrap{display:flex;align-items:center;gap:12px;margin-top:6px}
 .slider-wrap input[type=range]{flex:1;height:4px;accent-color:var(--blue);cursor:pointer;min-width:0}
 .slider-val{font-size:16px;font-weight:600;font-family:var(--mono);min-width:42px;text-align:right;white-space:nowrap}
 .slider-val span{font-size:12px;font-weight:400;color:var(--txt3)}
 
-/* PRESETS */
-.preset-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
-.preset{padding:6px 11px;font-size:13px;font-family:var(--font);font-weight:500;border:1px solid var(--border);border-radius:6px;background:none;color:var(--txt2);cursor:pointer;transition:all .15s;white-space:nowrap}
-.preset:hover{border-color:var(--border2);color:var(--txt)}
-.preset.sel{background:var(--navy);color:#fff;border-color:var(--navy)}
-.preset.custom-sel{background:var(--blue);color:#fff;border-color:var(--blue)}
-
-/* PHASE GRID */
-.phases-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.phase-card{border:1px solid var(--border);border-radius:8px;overflow:hidden}
-.phase-card-hdr{padding:10px 13px;background:var(--bg);display:flex;align-items:center;gap:9px;cursor:pointer;user-select:none}
-.phase-card-hdr:hover{background:#eceef2}
-.phase-num{width:22px;height:22px;border-radius:50%;background:var(--navy);color:#fff;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.phase-label{font-size:13px;font-weight:600;color:var(--txt);flex:1}
-.phase-summary{font-size:11px;color:var(--txt3);font-family:var(--mono)}
-.phase-del{width:22px;height:22px;border-radius:50%;border:1px solid var(--border);background:none;cursor:pointer;font-size:14px;color:var(--txt3);display:flex;align-items:center;justify-content:center;transition:all .15s;font-family:var(--font);line-height:1;flex-shrink:0}
-.phase-del:hover{border-color:var(--red-bd);color:var(--red-tx);background:var(--red-lt)}
-.phase-body{padding:13px;border-top:1px solid var(--border);display:none}
-.phase-body.open{display:block}
-.phase-row{display:flex;gap:8px;align-items:flex-end;margin-bottom:10px;flex-wrap:wrap}
-.phase-row:last-child{margin-bottom:0}
-.phase-field{display:flex;flex-direction:column;gap:4px}
-.phase-field label{font-size:10px;color:var(--txt3);font-weight:600;text-transform:uppercase;letter-spacing:.03em}
-.phase-field input{padding:7px 9px;font-size:13px;font-family:var(--mono);border:1px solid var(--border);border-radius:6px;background:#fff;color:var(--txt);outline:none;width:80px}
-.phase-field input:focus{border-color:var(--blue)}
-.btn-add-phase{font-size:13px;font-weight:500;color:var(--blue);background:none;border:1px dashed #b5d4f4;border-radius:7px;padding:10px;cursor:pointer;width:100%;margin-top:8px;font-family:var(--font);transition:all .15s;grid-column:1/-1}
-.btn-add-phase:hover{background:#f0f7fd}
-
-/* TIMELINE */
+/* TIMELINE — shared styles for deposit, withdrawal, and phase tracks */
 .tl-section{margin-bottom:18px}
 .tl-section:last-of-type{margin-bottom:0}
 .tl-section-label{font-size:12px;font-weight:600;color:var(--txt2);margin-bottom:6px;display:flex;align-items:center;gap:7px}
 .tl-badge{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
 .tl-badge.dep{background:var(--grn-lt);color:var(--grn-tx)}
 .tl-badge.with{background:var(--red-lt);color:var(--red-tx)}
+.tl-badge.phase{background:#e8f0fe;color:#1a3c8f}
 .tl-axis-wrap{position:relative;height:16px;margin-bottom:4px}
 .tl-axis{position:absolute;inset:0;font-size:10px;color:var(--txt3);font-weight:500}
 .tl-axis span{position:absolute;transform:translateX(-50%)}
-.tl-track{position:relative;height:42px;border-radius:7px;background:var(--bg);border:1px solid var(--border);cursor:crosshair;user-select:none;touch-action:pan-y}
-.tl-empty-msg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--txt3);pointer-events:none}
-.tl-seg{position:absolute;top:2px;bottom:2px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;cursor:pointer;overflow:hidden;white-space:nowrap;touch-action:none}
+.tl-track{position:relative;height:46px;border-radius:7px;background:var(--bg);border:1px solid var(--border);cursor:crosshair;user-select:none;touch-action:pan-y}
+.tl-track.phase-track{height:52px}
+.tl-empty-msg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--txt3);pointer-events:none;gap:6px}
+.tl-seg{position:absolute;top:2px;bottom:2px;border-radius:5px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:12px;font-weight:600;cursor:pointer;overflow:hidden;white-space:nowrap;touch-action:none;gap:1px}
 .tl-seg:hover{opacity:.88}
 .tl-seg.sel{outline:2px solid #333;outline-offset:2px}
-.tl-seg-val{pointer-events:none;padding:0 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tl-seg-label{pointer-events:none;padding:0 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;font-weight:600;line-height:1.2}
+.tl-seg-sub{pointer-events:none;font-size:10px;font-weight:500;opacity:.75;line-height:1}
 .tl-seg-input{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:calc(100% - 18px);max-width:130px;text-align:center;font-size:12px;font-family:var(--mono);font-weight:600;background:rgba(255,255,255,.95);border:1px solid rgba(0,0,0,.18);border-radius:4px;padding:3px 5px;outline:none;display:none;z-index:3;touch-action:none}
 .tl-seg-input.visible{display:block}
 .tl-handle{position:absolute;top:0;bottom:0;width:12px;cursor:ew-resize;z-index:2;display:flex;align-items:center;justify-content:center;touch-action:none}
 .tl-handle::after{content:'';width:3px;height:16px;background:rgba(0,0,0,.22);border-radius:2px}
 .tl-handle.l{left:0}.tl-handle.r{right:0}
-.tl-editor{padding:13px;background:var(--bg);border-radius:8px;margin-top:8px;display:none;flex-wrap:wrap;gap:9px;align-items:flex-end;border:1px solid var(--border)}
+
+/* PHASE EDITOR */
+.tl-editor{padding:14px;background:var(--bg);border-radius:8px;margin-top:8px;display:none;flex-wrap:wrap;gap:10px;align-items:flex-start;border:1px solid var(--border)}
 .tl-editor.open{display:flex}
 .tl-ef{display:flex;flex-direction:column;gap:4px;flex:1;min-width:76px}
 .tl-ef label{font-size:11px;color:var(--txt3);font-weight:600;text-transform:uppercase;letter-spacing:.03em}
-.tl-ef input{padding:8px 10px;font-size:13px;font-family:var(--mono);border:1px solid var(--border);border-radius:6px;background:#fff;color:var(--txt);outline:none;width:100%}
+.tl-ef input[type=number]{padding:8px 10px;font-size:13px;font-family:var(--mono);border:1px solid var(--border);border-radius:6px;background:#fff;color:var(--txt);outline:none;width:100%}
 .tl-ef input:focus{border-color:var(--blue)}
+.phase-presets{display:flex;gap:6px;flex-wrap:wrap}
+.phase-preset-btn{padding:7px 12px;font-size:13px;font-family:var(--font);font-weight:500;border:1px solid var(--border);border-radius:6px;background:none;color:var(--txt2);cursor:pointer;transition:all .15s;white-space:nowrap}
+.phase-preset-btn:hover{border-color:var(--border2);color:var(--txt)}
+.phase-preset-btn.sel{background:var(--navy);color:#fff;border-color:var(--navy)}
+.phase-preset-btn.custom-sel{background:var(--blue);color:#fff;border-color:var(--blue)}
 .hint{font-size:12px;color:var(--txt3);line-height:1.55;margin-top:7px}
 
-/* BUTTONS */
-.btn{padding:8px 14px;font-size:13px;font-family:var(--font);font-weight:500;border:1px solid var(--border);border-radius:6px;background:none;color:var(--txt);cursor:pointer;transition:all .15s;align-self:flex-end;white-space:nowrap}
+.btn{padding:8px 14px;font-size:13px;font-family:var(--font);font-weight:500;border:1px solid var(--border);border-radius:6px;background:none;color:var(--txt);cursor:pointer;transition:all .15s;white-space:nowrap}
 .btn:hover{background:var(--bg)}
 .btn.primary{background:var(--navy);color:#fff;border-color:transparent}
 .btn.primary:hover{opacity:.85}
@@ -164,12 +138,10 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
 .btn-add-seg{font-size:12px;font-weight:500;color:var(--blue);background:none;border:1px dashed #b5d4f4;border-radius:6px;padding:5px 12px;cursor:pointer;margin-top:6px;font-family:var(--font)}
 .btn-add-seg:hover{background:#f0f7fd}
 
-/* TOGGLE */
 .toggle-bar{display:flex;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:3px;margin-bottom:14px;width:fit-content}
 .toggle-opt{padding:7px 16px;font-size:13px;font-weight:500;font-family:var(--font);border:none;background:none;color:var(--txt3);cursor:pointer;border-radius:6px;transition:all .15s;white-space:nowrap}
 .toggle-opt.sel{background:var(--surface);color:var(--txt);box-shadow:0 1px 3px rgba(0,0,0,.1)}
 
-/* RULE BUILDER */
 .rule-builder{padding:14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;margin-bottom:12px}
 .rb-row{display:flex;gap:9px;flex-wrap:wrap;align-items:flex-end}
 .rb-field{display:flex;flex-direction:column;gap:4px}
@@ -186,7 +158,6 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
 .rule-del{width:22px;height:22px;border-radius:50%;border:1px solid var(--border);background:none;cursor:pointer;font-size:14px;color:var(--txt3);display:flex;align-items:center;justify-content:center;transition:all .15s;font-family:var(--font)}
 .rule-del:hover{border-color:var(--red-bd);color:var(--red-tx);background:var(--red-lt)}
 
-/* TX TABLE */
 .tx-scroll{overflow-y:auto}
 .tx-table{width:100%;border-collapse:collapse;font-size:13px}
 .tx-table th{padding:8px 8px;text-align:left;font-weight:600;font-size:11px;color:var(--txt3);border-bottom:1px solid var(--border);text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
@@ -195,11 +166,9 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
 .tx-table tr:last-child td{border-bottom:none}
 .tx-table tr:hover td{background:#f9fafb}
 .tx-table input[type=number],.tx-table input[type=text]{padding:5px 8px;font-size:13px;font-family:var(--mono);border:1px solid transparent;border-radius:5px;background:transparent;color:var(--txt);width:100%;outline:none;transition:all .12s}
-.tx-table input.neg{color:var(--red-tx);font-weight:600}
 .tx-table input:hover{border-color:var(--border)}
 .tx-table input:focus{border-color:var(--blue);background:#fff}
 
-/* SIM TABLE */
 .sim-wrap{overflow-x:auto;overflow-y:auto}
 .sim-table{width:100%;border-collapse:collapse;font-size:13px;min-width:580px}
 .sim-table th{position:sticky;top:0;background:var(--bg);padding:9px 10px;text-align:right;font-weight:600;font-size:11px;color:var(--txt3);border-bottom:1px solid var(--border);white-space:nowrap;text-transform:uppercase;letter-spacing:.04em;z-index:1}
@@ -211,7 +180,6 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
 .pos{color:var(--grn-tx);font-weight:600}
 .neg{color:var(--red-tx);font-weight:600}
 
-/* CHART */
 .chart-wrap{position:relative;width:100%;height:300px}
 .legend{display:flex;gap:16px;font-size:13px;color:var(--txt2);margin-bottom:12px;flex-wrap:wrap}
 .legend-item{display:flex;align-items:center;gap:7px}
@@ -223,7 +191,6 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
 .ms-val{font-size:13px;font-weight:600;color:var(--txt);font-family:var(--mono);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ms-gain{font-size:11px;color:var(--grn-tx);margin-top:1px;font-weight:600}
 
-/* WHY SECTION */
 .why-section{background:var(--surface);padding:48px 24px;border-top:1px solid var(--border)}
 .section-eyebrow{font-size:12px;color:var(--blue);font-weight:600;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px}
 .section-h{font-size:22px;font-weight:400;color:var(--txt);margin-bottom:7px;line-height:1.3}
@@ -261,22 +228,18 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
 .footer{background:var(--navy);padding:20px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
 .footer span{font-size:12px;color:rgba(255,255,255,.35)}
 
-/* PRINT */
 @media print{
-  .topbar,.hero-cta,.why-section,.footer,.tl-editor,.btn-add-seg,.btn-add-phase,.phase-del,.hint,.preset-row,.toggle-bar,.rule-builder{display:none!important}
+  .topbar,.hero-cta,.why-section,.footer,.tl-editor,.btn-add-seg,.hint,.toggle-bar,.rule-builder{display:none!important}
   .hero{padding:16px 16px 0}
   .page{padding:10px}
   .card{break-inside:avoid;border:1px solid #ddd;margin-bottom:12px}
   .chart-wrap{height:220px}
   body{background:#fff;font-size:13px}
-  .phase-body{display:block!important}
   .sim-wrap{max-height:none!important;overflow:visible!important}
   .tx-scroll{max-height:none!important;overflow:visible!important}
-  .phases-grid,.top-grid{grid-template-columns:1fr 1fr}
+  .top-grid{grid-template-columns:1fr 1fr}
   .kpi-strip{grid-template-columns:repeat(4,1fr)}
 }
-
-/* RESPONSIVE */
 @media(max-width:720px){
   .kpi-strip{grid-template-columns:1fr 1fr}
   .kpi{padding:12px 12px}
@@ -291,14 +254,11 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
   .why-section{padding:24px 14px}
   .topbar{padding:0 12px}
   .topbar-actions .tb-btn span{display:none}
-  .phases-grid{grid-template-columns:1fr!important}
   .rb-row{flex-direction:column;align-items:stretch}
   .rb-field input,.rb-field select,.rb-field input.wide{width:100%}
+  .phase-presets{flex-direction:column}
 }
-@media(max-width:400px){
-  .logo-sub{display:none}
-  .kpi-val{font-size:13px}
-}
+@media(max-width:400px){.logo-sub{display:none}.kpi-val{font-size:13px}}
 </style>
 </head>
 <body>
@@ -321,7 +281,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
 <nav class="topbar">
   <a class="logo" href="#">
     <div class="logo-mark"><svg viewBox="0 0 15 15" fill="none"><polyline points="1,12 4.5,7 7.5,9 11,3.5 14,5.5" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-    <div><div class="logo-name">Celoživotní investiční kalkulačka</div><div class="logo-sub">Simulace portfolia</div></div>
+    <div><div class="logo-name">Investiční kalkulačka</div><div class="logo-sub">Simulace portfolia</div></div>
   </a>
   <div class="topbar-actions">
     <button class="tb-btn" id="btn-save"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 2h8l2 2v8a1 1 0 01-1 1H3a1 1 0 01-1-1V2z"/><path d="M5 2v3h4V2M4 8h6"/></svg><span>Uložit nastavení</span></button>
@@ -345,7 +305,6 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
   </div>
 </section>
 
-<!-- KALKULAČKA -->
 <main class="page">
 
   <!-- Parametry + Graf -->
@@ -380,8 +339,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
   <div class="card">
     <div class="card-hdr"><div class="card-dot" style="background:#f59e0b"></div><div class="card-title">Pravidelné vklady</div></div>
     <div class="card-body">
-      <p class="hint" style="margin-bottom:14px">Klikni na segment pro přímou editaci hodnoty · Táhni okraje pro změnu délky (bez překrývání) · Záporné hodnoty jsou červené automaticky</p>
-      <!-- Vklady -->
+      <p class="hint" style="margin-bottom:14px">Klikni na segment pro editaci · Táhni okraje pro změnu délky · Překrývání vkladů a výběrů je povoleno</p>
       <div class="tl-section">
         <div class="tl-section-label"><span class="tl-badge dep">Vklady</span> měsíční investice do portfolia</div>
         <div class="tl-axis-wrap"><div class="tl-axis" id="tl-axis-in"></div></div>
@@ -395,7 +353,6 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
           <button class="btn" id="tei-cancel">Zavřít</button>
         </div>
       </div>
-      <!-- Výběry -->
       <div class="tl-section">
         <div class="tl-section-label"><span class="tl-badge with">Výběry</span> měsíční čerpání (např. renta v důchodu)</div>
         <div class="tl-axis-wrap"><div class="tl-axis" id="tl-axis-out"></div></div>
@@ -409,7 +366,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
           <button class="btn" id="teo-cancel">Zavřít</button>
         </div>
       </div>
-      <div class="hint">Vklady a výběry se v každém roce sečtou. Překrývání je povoleno — výběr se odečte od vkladu.</div>
+      <div class="hint">Vklady a výběry se sečtou. Záporný výsledek = čisté čerpání z portfolia.</div>
     </div>
   </div>
 
@@ -428,7 +385,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
             <div class="rb-field"><label>Od roku</label><input type="number" id="rbin-from" value="1" min="1" max="70" style="width:76px"></div>
             <div class="rb-field"><label>Do roku</label><input type="number" id="rbin-to" value="10" min="1" max="70" style="width:76px"></div>
             <div class="rb-field"><label>Každých N let</label><select id="rbin-every"><option value="1">každý rok</option><option value="2">každé 2 roky</option><option value="3">každé 3 roky</option><option value="5" selected>každých 5 let</option><option value="10">každých 10 let</option></select></div>
-            <div class="rb-field" style="flex:1;min-width:200px"><label>Popis</label><input type="text" id="rbin-desc" class="wide" placeholder="např. prodej nemovitosti, dědictví atp."></div>
+            <div class="rb-field" style="flex:1;min-width:180px"><label>Popis</label><input type="text" id="rbin-desc" class="wide" placeholder="např. prodej nemovitosti, dědictví atp."></div>
             <button class="btn primary" id="rbin-add" style="align-self:flex-end">Přidat</button>
           </div>
         </div>
@@ -456,7 +413,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
             <div class="rb-field"><label>Od roku</label><input type="number" id="rbout-from" value="1" min="1" max="70" style="width:76px"></div>
             <div class="rb-field"><label>Do roku</label><input type="number" id="rbout-to" value="10" min="1" max="70" style="width:76px"></div>
             <div class="rb-field"><label>Každých N let</label><select id="rbout-every"><option value="1">každý rok</option><option value="2">každé 2 roky</option><option value="3">každé 3 roky</option><option value="5" selected>každých 5 let</option><option value="10">každých 10 let</option></select></div>
-            <div class="rb-field" style="flex:1;min-width:200px"><label>Popis</label><input type="text" id="rbout-desc" class="wide" placeholder="např. koupě auta, rekonstrukce bytu atp."></div>
+            <div class="rb-field" style="flex:1;min-width:180px"><label>Popis</label><input type="text" id="rbout-desc" class="wide" placeholder="např. koupě auta, rekonstrukce bytu atp."></div>
             <button class="btn primary" id="rbout-add" style="align-self:flex-end">Přidat</button>
           </div>
         </div>
@@ -469,6 +426,36 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
     </div>
   </div>
 
+  <!-- FÁZE ZHODNOCENÍ — timeline -->
+  <div class="card">
+    <div class="card-hdr"><div class="card-dot" style="background:var(--teal)"></div><div class="card-title">Fáze zhodnocení portfolia</div></div>
+    <div class="card-body">
+      <p class="hint" style="margin-bottom:14px">Klikni na segment pro nastavení strategie · Táhni okraje pro změnu délky · Celý horizont je automaticky pokryt — poslední fáze se natáhne do konce</p>
+      <div class="tl-axis-wrap"><div class="tl-axis" id="ph-axis"></div></div>
+      <div class="tl-track phase-track" id="ph-track"><div class="tl-empty-msg">Klikni pro přidání první fáze</div></div>
+      <button class="btn-add-seg" id="ph-add">+ přidat fázi</button>
+      <div class="tl-editor" id="ph-editor">
+        <div class="tl-ef"><label>Od roku</label><input type="number" id="phe-from" min="1" max="70"></div>
+        <div class="tl-ef"><label>Do roku</label><input type="number" id="phe-to" min="1" max="70"></div>
+        <div style="display:flex;flex-direction:column;gap:6px;flex:3;min-width:220px">
+          <label style="font-size:11px;color:var(--txt3);font-weight:600;text-transform:uppercase;letter-spacing:.03em">Strategie</label>
+          <div class="phase-presets" id="phase-presets">
+            <button class="phase-preset-btn" data-pval="10" data-pname="Dynamická">Dynamická <span style="opacity:.6;font-size:11px">10 %</span></button>
+            <button class="phase-preset-btn" data-pval="6" data-pname="Vyvážená">Vyvážená <span style="opacity:.6;font-size:11px">6 %</span></button>
+            <button class="phase-preset-btn" data-pval="3" data-pname="Konzervativní">Konzervativní <span style="opacity:.6;font-size:11px">3 %</span></button>
+            <button class="phase-preset-btn" data-pval="custom" data-pname="Vlastní">Vlastní %</button>
+          </div>
+          <div id="phe-custom-wrap" style="display:none;margin-top:4px">
+            <div class="tl-ef"><label>Vlastní výnos (% p.a.)</label><input type="number" id="phe-rate" step="0.5" min="0" max="50" style="width:100px"></div>
+          </div>
+        </div>
+        <button class="btn danger" id="phe-del">Smazat</button>
+        <button class="btn" id="phe-cancel">Zavřít</button>
+      </div>
+      <div class="hint">Mezery mezi fázemi jsou automaticky doplněny výnosem poslední nastavené fáze. Barva segmentu se mění podle výnosu.</div>
+    </div>
+  </div>
+
   <!-- Simulace -->
   <div class="card">
     <div class="card-hdr"><div class="card-dot" style="background:var(--navy)"></div><div class="card-title">Simulace rok po roku</div></div>
@@ -477,16 +464,6 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
         <thead><tr><th style="text-align:center">Rok</th><th style="text-align:right">Rok</th><th>Výnos %</th><th>Měs. vklad</th><th>Jednoráz.</th><th>Výnos Kč</th><th>Kum. vloženo</th><th>Portfolio</th></tr></thead>
         <tbody id="sim-body"></tbody>
       </table>
-    </div>
-  </div>
-
-  <!-- Fáze zhodnocení -->
-  <div class="card">
-    <div class="card-hdr"><div class="card-dot" style="background:var(--teal)"></div><div class="card-title">Fáze zhodnocení portfolia</div></div>
-    <div class="card-body">
-      <p class="hint" style="margin-bottom:14px">Každá fáze má vlastní strategii a délku. Klikněte na fázi pro rozbalení.</p>
-      <div class="phases-grid" id="phases-wrap"></div>
-      <button class="btn-add-phase" id="btn-add-phase">+ přidat další fázi</button>
     </div>
   </div>
 
@@ -504,52 +481,78 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
       <div class="cc"><div class="cc-hdr good"><div class="cc-icon good">✓</div>Tato kalkulačka — pokračuje dál</div><div class="cc-body"><div class="cc-bars" id="good-bars"></div><div class="cc-caption"><strong>Portfolio v 65 nekončí — jen změní režim.</strong> Nižší výnosy, pravidelné výběry — a přesto roste.</div></div></div>
     </div>
     <div class="insights-row">
-      <div class="insight"><div class="insight-num">3 %</div><div class="insight-label">stačí po odchodu do důchodu</div><div class="insight-sub">I konzervativní zhodnocení z celoživotního portfolia pokryje značnou část spotřeby.</div></div>
+      <div class="insight"><div class="insight-num">3 %</div><div class="insight-label">stačí po odchodu do důchodu</div><div class="insight-sub">I konzervativní zhodnocení pokryje značnou část spotřeby z celoživotního portfolia.</div></div>
       <div class="insight"><div class="insight-num teal">70 let</div><div class="insight-label">celý životní horizont v jednom grafu</div><div class="insight-sub">Produktivní léta, přechod na konzervu, důchod — vše v jediné simulaci.</div></div>
       <div class="insight"><div class="insight-num">rok po roku</div><div class="insight-label">přesné zadání vkladů i výběrů</div><div class="insight-sub">Každý rok jinak — vklady, investice, výběry na dovolenou nebo rekonstrukci.</div></div>
     </div>
     <div class="divider"></div>
     <div class="section-h" style="font-size:16px;margin-bottom:14px">Co tato kalkulačka umí, co ostatní neumí</div>
     <div class="diff-list">
-      <div class="diff-item"><div class="diff-check"><svg viewBox="0 0 9 9"><polyline points="1,4.5 3.5,7 8,2" stroke="var(--grn-tx)" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg></div><div class="diff-text"><strong>Simulace po odchodu do důchodu</strong> — portfolio dál roste a pokrývá výběry na spotřebu</div></div>
+      <div class="diff-item"><div class="diff-check"><svg viewBox="0 0 9 9"><polyline points="1,4.5 3.5,7 8,2" stroke="var(--grn-tx)" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg></div><div class="diff-text"><strong>Simulace po odchodu do důchodu</strong> — portfolio dál roste a pokrývá výběry</div></div>
       <div class="diff-item"><div class="diff-check"><svg viewBox="0 0 9 9"><polyline points="1,4.5 3.5,7 8,2" stroke="var(--grn-tx)" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg></div><div class="diff-text"><strong>Proměnlivé měsíční vklady i výběry</strong> — různé částky pro různá životní období</div></div>
-      <div class="diff-item"><div class="diff-check"><svg viewBox="0 0 9 9"><polyline points="1,4.5 3.5,7 8,2" stroke="var(--grn-tx)" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg></div><div class="diff-text"><strong>Postupná změna strategie</strong> — plynulý přechod z dynamického portfolia na konzervativní</div></div>
+      <div class="diff-item"><div class="diff-check"><svg viewBox="0 0 9 9"><polyline points="1,4.5 3.5,7 8,2" stroke="var(--grn-tx)" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg></div><div class="diff-text"><strong>Postupná změna strategie</strong> — plynulý přechod z dynamického na konzervativní</div></div>
       <div class="diff-item"><div class="diff-check"><svg viewBox="0 0 9 9"><polyline points="1,4.5 3.5,7 8,2" stroke="var(--grn-tx)" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg></div><div class="diff-text"><strong>Jednorázové transakce rok po roku</strong> — prodej nemovitosti, výběr každých 5 let — vše v přesném výpočtu</div></div>
     </div>
   </div>
 </section>
 <footer class="footer"><span>Výpočty jsou orientační. Nezohledňují inflaci, daně ani poplatky správce fondu.</span><span>Nástroj je zdarma a bez registrace</span></footer>
 
-
 <script>
 const MAX_YR=70;
 const fmt=n=>new Intl.NumberFormat('cs-CZ',{style:'currency',currency:'CZK',maximumFractionDigits:0}).format(Math.round(n||0));
 const fmtPct=n=>((n||0)*100).toFixed(1)+' %';
 const num=(v,f=0)=>{const p=parseFloat(v);return isNaN(p)?f:p;};
-const PRESETS=[{label:'Dynamická',val:10,sub:'10 %'},{label:'Vyvážená',val:6,sub:'6 %'},{label:'Konzervativní',val:3,sub:'3 %'}];
+
+// Palette for deposit/withdrawal TL
 const PAL_IN=[{bg:'#B5D4F4',tx:'#0C447C',bd:'#378ADD'},{bg:'#9FE1CB',tx:'#085041',bd:'#1D9E75'},{bg:'#C0DD97',tx:'#173404',bd:'#639922'},{bg:'#CECBF6',tx:'#26215C',bd:'#7F77DD'}];
 const PAL_OUT=[{bg:'#FECACA',tx:'#7f1d1d',bd:'#F87171'},{bg:'#FED7AA',tx:'#7c2d12',bd:'#FB923C'},{bg:'#FECDD3',tx:'#881337',bd:'#FB7185'},{bg:'#FDE68A',tx:'#78350f',bd:'#FBBF24'}];
 
+// Phase palette: warm→cool by rate (high rate = warm)
+function phaseColor(rate){
+  if(rate>=9)return{bg:'#FDE68A',tx:'#78350f',bd:'#FBBF24'};
+  if(rate>=7)return{bg:'#FED7AA',tx:'#7c2d12',bd:'#FB923C'};
+  if(rate>=5)return{bg:'#B5D4F4',tx:'#0C447C',bd:'#378ADD'};
+  if(rate>=3)return{bg:'#9FE1CB',tx:'#085041',bd:'#1D9E75'};
+  return{bg:'#e0e7ef',tx:'#374151',bd:'#b0bac8'};
+}
+
 // STATE
-let phases=[{years:10,rate:10,preset:'Dynamická',custom:false},{years:10,rate:6,preset:'Vyvážená',custom:false},{years:10,rate:6,preset:'Vyvážená',custom:false},{years:10,rate:3,preset:'Konzervativní',custom:false}];
-let depIn=[];   // {from,to,val} vklady (positive = monthly deposit)
-let depOut=[];  // {from,to,val} výběry (stored positive, subtracted in sim)
+let depIn=[], depOut=[];
 let txIn =Array.from({length:MAX_YR+1},(_,i)=>({yr:i,val:0,desc:''}));
 let txOut=Array.from({length:MAX_YR+1},(_,i)=>({yr:i,val:0,desc:''}));
 let rulesIn=[],rulesOut=[];
-let selIn=null,selOut=null,drag=null;
+let phases=[]; // {from,to,rate,name,custom}  — covers entire horizon automatically
+let selIn=null,selOut=null,selPh=null,drag=null;
 let modeIn='repeat',modeOut='repeat';
 let chartInst=null,ruleId=0;
 
 function getHorizon(){return Math.min(num(document.getElementById('horizon').value,40),MAX_YR);}
 function getStartYear(){return num(document.getElementById('startYear').value,2025);}
 
-// SIMULATE
+// PHASE: get rate for year — fills gaps with last phase rate
 function getRateForYear(yr){
-  let cum=0;
-  for(const p of phases){if(yr>=cum&&yr<cum+p.years)return p.rate/100;cum+=p.years;}
-  return phases[phases.length-1].rate/100;
+  const hor=getHorizon();
+  // build effective coverage
+  const sorted=[...phases].sort((a,b)=>a.from-b.from);
+  if(!sorted.length)return 0.06; // default 6% if no phases set
+  // extend last phase to horizon
+  const last=sorted[sorted.length-1];
+  if(yr>last.to&&yr<=hor)return last.rate/100;
+  for(const p of sorted){if(yr>=p.from&&yr<=p.to)return p.rate/100;}
+  // before first phase → use first phase rate
+  if(sorted.length&&yr<sorted[0].from)return sorted[0].rate/100;
+  return sorted[sorted.length-1].rate/100;
 }
+
+// AUTO-COVER: after any change snap last phase's .to to horizon
+function snapPhasesToHorizon(){
+  const hor=getHorizon();
+  if(!phases.length)return;
+  const sorted=phases.sort((a,b)=>a.from-b.from);
+  sorted[sorted.length-1].to=hor;
+}
+
+// SIMULATE
 function getMonthlyNet(yr){
   if(yr===0)return 0;
   let net=0;
@@ -581,34 +584,10 @@ function simulate(){
   return rows;
 }
 
-// PHASE CARDS
-function renderPhases(){
-  const wrap=document.getElementById('phases-wrap');
-  wrap.innerHTML='';
-  phases.forEach((ph,i)=>{
-    const div=document.createElement('div');div.className='phase-card';
-    const btns=PRESETS.map(p=>`<button class="preset${ph.preset===p.label&&!ph.custom?' sel':''}" data-phase="${i}" data-pname="${p.label}" data-pval="${p.val}">${p.label} <span style="opacity:.5;font-size:11px">${p.sub}</span></button>`).join('');
-    div.innerHTML=`<div class="phase-card-hdr" data-idx="${i}"><div class="phase-num">${i+1}</div><div class="phase-label">Fáze ${i+1}</div><div class="phase-summary">${ph.years} let · ${ph.rate} % p.a.</div>${phases.length>1?`<button class="phase-del" data-del="${i}">×</button>`:''}</div><div class="phase-body${i===0?' open':''}" id="phb-${i}"><div class="phase-row"><div class="phase-field"><label>Délka (let)</label><input type="number" class="ph-yr" data-i="${i}" value="${ph.years}" min="1" max="70"></div></div><div class="phase-row"><div class="phase-field" style="width:100%"><label>Strategie</label><div class="preset-row">${btns}<button class="preset${ph.custom?' custom-sel':''}" data-phase="${i}" data-pname="custom">Vlastní %</button></div></div></div>${ph.custom?`<div class="phase-row"><div class="phase-field"><label>Výnos % p.a.</label><input type="number" class="ph-rt" data-i="${i}" value="${ph.rate}" step="0.5" min="0" max="50"></div></div>`:''}</div>`;
-    wrap.appendChild(div);
-  });
-  wrap.querySelectorAll('.phase-card-hdr').forEach(h=>h.addEventListener('click',e=>{if(e.target.closest('.phase-del'))return;document.getElementById('phb-'+h.dataset.idx).classList.toggle('open');}));
-  wrap.querySelectorAll('.phase-del').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();phases.splice(+b.dataset.del,1);renderPhases();recalc();}));
-  wrap.querySelectorAll('.preset').forEach(b=>b.addEventListener('click',()=>{
-    const i=+b.dataset.phase;
-    if(b.dataset.pname==='custom'){phases[i].custom=true;phases[i].preset='';}
-    else{phases[i].custom=false;phases[i].preset=b.dataset.pname;phases[i].rate=+b.dataset.pval;}
-    renderPhases();recalc();
-  }));
-  wrap.querySelectorAll('.ph-yr').forEach(inp=>inp.addEventListener('input',()=>{phases[+inp.dataset.i].years=Math.max(1,num(inp.value,1));recalc();}));
-  wrap.querySelectorAll('.ph-rt').forEach(inp=>inp.addEventListener('input',()=>{phases[+inp.dataset.i].rate=num(inp.value,0);recalc();}));
-}
-document.getElementById('btn-add-phase').addEventListener('click',()=>{phases.push({years:10,rate:3,preset:'Konzervativní',custom:false});renderPhases();recalc();});
-
-// TIMELINE ENGINE
-// No-overlap: sort segs; after changing seg[idx], push neighbours away
-function sortSegs(arr){arr.sort((a,b)=>a.from-b.from);}
+// SHARED TL HELPERS
+function sortArr(arr){arr.sort((a,b)=>a.from-b.from);}
 function noOverlap(arr,idx,side){
-  sortSegs(arr);
+  sortArr(arr);
   if(side==='r'){
     for(let i=idx+1;i<arr.length;i++){
       if(arr[i].from<=arr[i-1].to){const sh=arr[i-1].to-arr[i].from+1;arr[i].from+=sh;arr[i].to+=sh;}
@@ -619,33 +598,59 @@ function noOverlap(arr,idx,side){
   }
 }
 
-function renderAxis(axisEl,hor){
-  axisEl.innerHTML='';
-  const step=hor<=15?2:hor<=30?5:hor<=50?5:10;
+function renderAxis(axisElId,hor){
+  const el=document.getElementById(axisElId);
+  el.innerHTML='';
   const sy=getStartYear();
+  const step=hor<=15?2:hor<=30?5:hor<=50?5:10;
   for(let y=step;y<=hor;y+=step){
     const s=document.createElement('span');
     s.textContent=sy+y;
     s.style.left=((y/hor)*100)+'%';
-    axisEl.appendChild(s);
+    el.appendChild(s);
   }
 }
 
-function renderTL(kind){
+// Unified drag handler for all tracks
+function startTLDrag(e,kind,idx,side){
+  if(e.cancelable)e.preventDefault();
+  const trackId=kind==='ph'?'ph-track':'tl-track-'+kind;
+  const rect=document.getElementById(trackId).getBoundingClientRect();
+  drag={kind,idx,side,rect};
+  const move=ev=>{
+    const cx=ev.touches?ev.touches[0].clientX:ev.clientX;
+    const hor=getHorizon();
+    const yr=Math.max(1,Math.min(hor,Math.round((cx-drag.rect.left)/drag.rect.width*hor)+1));
+    const arr=drag.kind==='in'?depIn:drag.kind==='out'?depOut:phases;
+    if(drag.side==='l'){arr[drag.idx].from=Math.min(yr,arr[drag.idx].to);noOverlap(arr,drag.idx,'l');}
+    else{arr[drag.idx].to=Math.max(yr,arr[drag.idx].from);noOverlap(arr,drag.idx,'r');}
+    if(drag.kind==='ph'){snapPhasesToHorizon();syncPhEditor(drag.idx);renderPhaseTL();}
+    else{syncDepEditor(drag.kind,drag.idx);renderDepTL(drag.kind);}
+    recalc();
+  };
+  const up=()=>{
+    drag=null;
+    document.removeEventListener('mousemove',move);document.removeEventListener('mouseup',up);
+    document.removeEventListener('touchmove',move);document.removeEventListener('touchend',up);
+  };
+  document.addEventListener('mousemove',move);document.addEventListener('mouseup',up);
+  document.addEventListener('touchmove',move,{passive:false});document.addEventListener('touchend',up);
+}
+
+// DEP TL
+function renderDepTL(kind){
   const arr=kind==='in'?depIn:depOut;
   const pal=kind==='in'?PAL_IN:PAL_OUT;
   const trackEl=document.getElementById('tl-track-'+kind);
-  const axisEl=document.getElementById('tl-axis-'+kind);
   const sel=kind==='in'?selIn:selOut;
   const hor=getHorizon();
-  renderAxis(axisEl,hor);
-  // clear track but keep empty msg
+  renderAxis('tl-axis-'+kind,hor);
   const empty=trackEl.querySelector('.tl-empty-msg');
   trackEl.innerHTML='';
   if(empty)trackEl.appendChild(empty);
-  if(arr.length===0){if(empty)empty.style.display='flex';return;}
+  if(!arr.length){if(empty)empty.style.display='flex';return;}
   if(empty)empty.style.display='none';
-  sortSegs(arr);
+  sortArr(arr);
   arr.forEach((seg,i)=>{
     const left=((seg.from-1)/hor)*100;
     const width=((seg.to-seg.from+1)/hor)*100;
@@ -653,145 +658,213 @@ function renderTL(kind){
     const el=document.createElement('div');
     el.className='tl-seg'+(sel===i?' sel':'');
     el.style.cssText=`left:${left}%;width:${Math.max(width,0.5)}%;background:${p.bg};color:${p.tx};border:1px solid ${p.bd};`;
-    const lbl=document.createElement('span');lbl.className='tl-seg-val';
-    lbl.textContent=formatSegVal(seg.val,kind);
+    const lbl=document.createElement('span');lbl.className='tl-seg-label';
+    lbl.textContent=kind==='out'?'−'+fmtV(seg.val):fmtV(seg.val);
     const inp=document.createElement('input');inp.type='number';inp.className='tl-seg-input';inp.value=seg.val;inp.step=500;inp.min=0;
     inp.addEventListener('click',e=>e.stopPropagation());
-    inp.addEventListener('input',()=>{
-      arr[i].val=Math.abs(num(inp.value,0));
-      lbl.textContent=formatSegVal(arr[i].val,kind);
-      syncEditor(kind,i);recalc();
-    });
+    inp.addEventListener('input',()=>{arr[i].val=Math.abs(num(inp.value,0));lbl.textContent=kind==='out'?'−'+fmtV(arr[i].val):fmtV(arr[i].val);syncDepEditor(kind,i);recalc();});
     inp.addEventListener('blur',()=>{inp.classList.remove('visible');lbl.style.display='';});
     el.appendChild(lbl);el.appendChild(inp);
     el.addEventListener('click',e=>{
       if(e.target===inp)return;
       e.stopPropagation();
-      openEditor(kind,i);
+      openDepEditor(kind,i);
       lbl.style.display='none';inp.classList.add('visible');inp.focus();inp.select();
     });
-    // touch drag support
     ['l','r'].forEach(s=>{
       const h=document.createElement('div');h.className='tl-handle '+s;
-      const startDrag=e=>{e.stopPropagation();e.preventDefault();startTLDrag(e,kind,i,s);};
-      h.addEventListener('mousedown',startDrag);
-      h.addEventListener('touchstart',startDrag,{passive:false});
+      const sd=ev=>{ev.stopPropagation();startTLDrag(ev,kind,i,s);};
+      h.addEventListener('mousedown',sd);h.addEventListener('touchstart',sd,{passive:false});
       el.appendChild(h);
     });
     trackEl.appendChild(el);
   });
 }
-
-function formatSegVal(val,kind){
-  const v=Math.abs(val);
-  const s=v===0?'0 Kč/m':new Intl.NumberFormat('cs-CZ',{maximumFractionDigits:0}).format(v)+' Kč/m';
-  return kind==='out'?'−'+s:s;
+function fmtV(v){return v===0?'0 Kč/m':new Intl.NumberFormat('cs-CZ',{maximumFractionDigits:0}).format(v)+' Kč/m';}
+function openDepEditor(kind,idx){
+  if(kind==='in')selIn=idx;else selOut=idx;
+  document.getElementById('tl-editor-'+kind).classList.add('open');
+  syncDepEditor(kind,idx);
+  renderDepTL(kind);
 }
-
-function openEditor(kind,idx){
-  if(kind==='in'){selIn=idx;}else{selOut=idx;}
-  const ed=document.getElementById('tl-editor-'+kind);
-  ed.classList.add('open');
-  syncEditor(kind,idx);
-  renderTL(kind);
-}
-function syncEditor(kind,idx){
+function syncDepEditor(kind,idx){
   const arr=kind==='in'?depIn:depOut;
   if(idx===null||!arr[idx])return;
   const s=arr[idx];
-  if(kind==='in'){
-    document.getElementById('tei-from').value=s.from;
-    document.getElementById('tei-to').value=s.to;
-    document.getElementById('tei-val').value=s.val;
-  } else {
-    document.getElementById('teo-from').value=s.from;
-    document.getElementById('teo-to').value=s.to;
-    document.getElementById('teo-val').value=s.val;
-  }
+  if(kind==='in'){document.getElementById('tei-from').value=s.from;document.getElementById('tei-to').value=s.to;document.getElementById('tei-val').value=s.val;}
+  else{document.getElementById('teo-from').value=s.from;document.getElementById('teo-to').value=s.to;document.getElementById('teo-val').value=s.val;}
 }
-
-// Live editor sync
-function bindEditorLive(kind){
-  const fields=kind==='in'?['tei-from','tei-to','tei-val']:['teo-from','teo-to','teo-val'];
-  fields.forEach(id=>{
-    document.getElementById(id).addEventListener('input',()=>{
-      const arr=kind==='in'?depIn:depOut;
-      const sel=kind==='in'?selIn:selOut;
-      if(sel===null||!arr[sel])return;
-      const f=parseInt(document.getElementById(fields[0]).value)||1;
-      const t=parseInt(document.getElementById(fields[1]).value)||1;
-      const v=Math.abs(parseFloat(document.getElementById(fields[2]).value)||0);
-      arr[sel]={...arr[sel],from:Math.max(1,f),to:Math.max(f,t),val:v};
-      noOverlap(arr,sel,'r');noOverlap(arr,sel,'l');
-      renderTL(kind);recalc();
-    });
-  });
+function bindDepLive(kind){
+  const ids=kind==='in'?['tei-from','tei-to','tei-val']:['teo-from','teo-to','teo-val'];
+  ids.forEach(id=>document.getElementById(id).addEventListener('input',()=>{
+    const arr=kind==='in'?depIn:depOut;
+    const sel=kind==='in'?selIn:selOut;
+    if(sel===null||!arr[sel])return;
+    const f=parseInt(document.getElementById(ids[0]).value)||1;
+    const t=parseInt(document.getElementById(ids[1]).value)||1;
+    const v=Math.abs(parseFloat(document.getElementById(ids[2]).value)||0);
+    arr[sel]={...arr[sel],from:Math.max(1,f),to:Math.max(f,t),val:v};
+    noOverlap(arr,sel,'r');noOverlap(arr,sel,'l');
+    renderDepTL(kind);recalc();
+  }));
 }
-
-// Drag
-function startTLDrag(e,kind,idx,side){
-  if(e.cancelable)e.preventDefault();
-  const trackEl=document.getElementById('tl-track-'+kind);
-  const rect=trackEl.getBoundingClientRect();
-  drag={kind,idx,side,rect};
-  const move=ev=>{
-    const cx=ev.touches?ev.touches[0].clientX:ev.clientX;
-    const hor=getHorizon();
-    const raw=(cx-drag.rect.left)/drag.rect.width;
-    const yr=Math.max(1,Math.min(hor,Math.round(raw*hor)+1));
-    const arr=drag.kind==='in'?depIn:depOut;
-    const sel=drag.kind==='in'?selIn:selOut;
-    if(drag.side==='l'){arr[drag.idx].from=Math.min(yr,arr[drag.idx].to);noOverlap(arr,drag.idx,'l');}
-    else{arr[drag.idx].to=Math.max(yr,arr[drag.idx].from);noOverlap(arr,drag.idx,'r');}
-    syncEditor(drag.kind,drag.idx);
-    renderTL(drag.kind);recalc();
-  };
-  const up=()=>{drag=null;document.removeEventListener('mousemove',move);document.removeEventListener('mouseup',up);document.removeEventListener('touchmove',move);document.removeEventListener('touchend',up);};
-  document.addEventListener('mousemove',move);document.addEventListener('mouseup',up);
-  document.addEventListener('touchmove',move,{passive:false});document.addEventListener('touchend',up);
-}
-
-function addSeg(kind){
+function addDepSeg(kind){
   const arr=kind==='in'?depIn:depOut;
   const hor=getHorizon();
-  sortSegs(arr);
+  sortArr(arr);
   let start=1;
   for(const s of arr){if(start>=s.from&&start<=s.to)start=s.to+1;}
   start=Math.min(start,hor);
   arr.push({from:start,to:Math.min(start+9,hor),val:0});
-  sortSegs(arr);
+  sortArr(arr);
   const ni=arr.findIndex(s=>s.from===start);
   noOverlap(arr,ni,'r');
-  openEditor(kind,ni);
-  renderTL(kind);
+  openDepEditor(kind,ni);
+  renderDepTL(kind);
 }
-
-// Track click
 ['in','out'].forEach(kind=>{
-  const trackEl=document.getElementById('tl-track-'+kind);
-  trackEl.addEventListener('click',e=>{
+  const tr=document.getElementById('tl-track-'+kind);
+  tr.addEventListener('click',e=>{
     const hor=getHorizon();
     const arr=kind==='in'?depIn:depOut;
-    const rect=trackEl.getBoundingClientRect();
-    const yr=Math.max(1,Math.min(hor,Math.round((e.clientX-rect.left)/rect.width*hor)+1));
-    sortSegs(arr);
+    const yr=Math.max(1,Math.min(hor,Math.round((e.clientX-tr.getBoundingClientRect().left)/tr.getBoundingClientRect().width*hor)+1));
+    sortArr(arr);
     if(arr.findIndex(s=>yr>=s.from&&yr<=s.to)<0){
       arr.push({from:yr,to:Math.min(yr+9,hor),val:0});
-      sortSegs(arr);
+      sortArr(arr);
       const ni=arr.findIndex(s=>s.from===yr);
       noOverlap(arr,ni,'r');
-      openEditor(kind,ni);
-      renderTL(kind);
+      openDepEditor(kind,ni);
+      renderDepTL(kind);
     }
   });
-  document.querySelectorAll('.btn-add-seg[data-kind="'+kind+'"]').forEach(b=>b.addEventListener('click',()=>addSeg(kind)));
+  document.querySelectorAll('.btn-add-seg[data-kind="'+kind+'"]').forEach(b=>b.addEventListener('click',()=>addDepSeg(kind)));
 });
+document.getElementById('tei-del').addEventListener('click',()=>{if(selIn===null)return;depIn.splice(selIn,1);selIn=null;document.getElementById('tl-editor-in').classList.remove('open');renderDepTL('in');recalc();});
+document.getElementById('tei-cancel').addEventListener('click',()=>{selIn=null;document.getElementById('tl-editor-in').classList.remove('open');renderDepTL('in');});
+document.getElementById('teo-del').addEventListener('click',()=>{if(selOut===null)return;depOut.splice(selOut,1);selOut=null;document.getElementById('tl-editor-out').classList.remove('open');renderDepTL('out');recalc();});
+document.getElementById('teo-cancel').addEventListener('click',()=>{selOut=null;document.getElementById('tl-editor-out').classList.remove('open');renderDepTL('out');});
 
-// Editor buttons
-document.getElementById('tei-del').addEventListener('click',()=>{if(selIn===null)return;depIn.splice(selIn,1);selIn=null;document.getElementById('tl-editor-in').classList.remove('open');renderTL('in');recalc();});
-document.getElementById('tei-cancel').addEventListener('click',()=>{selIn=null;document.getElementById('tl-editor-in').classList.remove('open');renderTL('in');});
-document.getElementById('teo-del').addEventListener('click',()=>{if(selOut===null)return;depOut.splice(selOut,1);selOut=null;document.getElementById('tl-editor-out').classList.remove('open');renderTL('out');recalc();});
-document.getElementById('teo-cancel').addEventListener('click',()=>{selOut=null;document.getElementById('tl-editor-out').classList.remove('open');renderTL('out');});
+// PHASE TL
+function renderPhaseTL(){
+  const hor=getHorizon();
+  renderAxis('ph-axis',hor);
+  const trackEl=document.getElementById('ph-track');
+  const empty=trackEl.querySelector('.tl-empty-msg');
+  trackEl.innerHTML='';
+  if(empty)trackEl.appendChild(empty);
+  if(!phases.length){if(empty)empty.style.display='flex';return;}
+  if(empty)empty.style.display='none';
+  snapPhasesToHorizon();
+  sortArr(phases);
+  phases.forEach((seg,i)=>{
+    const left=((seg.from-1)/hor)*100;
+    const width=((seg.to-seg.from+1)/hor)*100;
+    const c=phaseColor(seg.rate);
+    const el=document.createElement('div');
+    el.className='tl-seg'+(selPh===i?' sel':'');
+    el.style.cssText=`left:${left}%;width:${Math.max(width,0.5)}%;background:${c.bg};color:${c.tx};border:1px solid ${c.bd};`;
+    const lbl=document.createElement('span');lbl.className='tl-seg-label';lbl.textContent=seg.name||'Vlastní';
+    const sub=document.createElement('span');sub.className='tl-seg-sub';sub.textContent=seg.rate+' % p.a.';
+    el.appendChild(lbl);el.appendChild(sub);
+    el.addEventListener('click',e=>{e.stopPropagation();openPhEditor(i);});
+    ['l','r'].forEach(s=>{
+      const h=document.createElement('div');h.className='tl-handle '+s;
+      const sd=ev=>{ev.stopPropagation();startTLDrag(ev,'ph',i,s);};
+      h.addEventListener('mousedown',sd);h.addEventListener('touchstart',sd,{passive:false});
+      el.appendChild(h);
+    });
+    trackEl.appendChild(el);
+  });
+}
+function openPhEditor(idx){
+  selPh=idx;
+  document.getElementById('ph-editor').classList.add('open');
+  syncPhEditor(idx);
+  renderPhaseTL();
+}
+function syncPhEditor(idx){
+  if(idx===null||!phases[idx])return;
+  const p=phases[idx];
+  document.getElementById('phe-from').value=p.from;
+  document.getElementById('phe-to').value=p.to;
+  // highlight correct preset
+  document.querySelectorAll('.phase-preset-btn').forEach(b=>{
+    b.classList.remove('sel','custom-sel');
+    if(!p.custom&&b.dataset.pname===p.name)b.classList.add('sel');
+    if(p.custom&&b.dataset.pval==='custom')b.classList.add('custom-sel');
+  });
+  document.getElementById('phe-custom-wrap').style.display=p.custom?'block':'none';
+  document.getElementById('phe-rate').value=p.rate;
+}
+
+// Phase editor live fields
+['phe-from','phe-to'].forEach(id=>document.getElementById(id).addEventListener('input',()=>{
+  if(selPh===null||!phases[selPh])return;
+  const f=parseInt(document.getElementById('phe-from').value)||1;
+  const t=parseInt(document.getElementById('phe-to').value)||1;
+  phases[selPh].from=Math.max(1,f);phases[selPh].to=Math.max(f,t);
+  noOverlap(phases,selPh,'r');noOverlap(phases,selPh,'l');
+  snapPhasesToHorizon();renderPhaseTL();recalc();
+}));
+document.getElementById('phe-rate').addEventListener('input',()=>{
+  if(selPh===null||!phases[selPh])return;
+  phases[selPh].rate=num(document.getElementById('phe-rate').value,0);
+  renderPhaseTL();recalc();
+});
+document.querySelectorAll('.phase-preset-btn').forEach(b=>b.addEventListener('click',()=>{
+  if(selPh===null||!phases[selPh])return;
+  if(b.dataset.pval==='custom'){
+    phases[selPh].custom=true;
+    document.getElementById('phe-custom-wrap').style.display='block';
+  } else {
+    phases[selPh].custom=false;
+    phases[selPh].name=b.dataset.pname;
+    phases[selPh].rate=+b.dataset.pval;
+    document.getElementById('phe-custom-wrap').style.display='none';
+  }
+  syncPhEditor(selPh);renderPhaseTL();recalc();
+}));
+
+document.getElementById('ph-add').addEventListener('click',()=>{
+  const hor=getHorizon();
+  sortArr(phases);
+  let start=1;
+  for(const s of phases){if(start>=s.from&&start<=s.to)start=s.to+1;}
+  start=Math.min(start,hor);
+  const newPh={from:start,to:Math.min(start+9,hor),rate:6,name:'Vyvážená',custom:false};
+  phases.push(newPh);
+  sortArr(phases);
+  const ni=phases.findIndex(p=>p.from===start);
+  noOverlap(phases,ni,'r');
+  snapPhasesToHorizon();
+  openPhEditor(ni);
+  renderPhaseTL();recalc();
+});
+document.getElementById('ph-track').addEventListener('click',e=>{
+  const hor=getHorizon();
+  const yr=Math.max(1,Math.min(hor,Math.round((e.clientX-e.currentTarget.getBoundingClientRect().left)/e.currentTarget.getBoundingClientRect().width*hor)+1));
+  sortArr(phases);
+  if(phases.findIndex(p=>yr>=p.from&&yr<=p.to)<0){
+    const newPh={from:yr,to:Math.min(yr+9,hor),rate:6,name:'Vyvážená',custom:false};
+    phases.push(newPh);
+    sortArr(phases);
+    const ni=phases.findIndex(p=>p.from===yr);
+    noOverlap(phases,ni,'r');
+    snapPhasesToHorizon();
+    openPhEditor(ni);
+    renderPhaseTL();recalc();
+  }
+});
+document.getElementById('phe-del').addEventListener('click',()=>{
+  if(selPh===null)return;
+  phases.splice(selPh,1);selPh=null;
+  document.getElementById('ph-editor').classList.remove('open');
+  renderPhaseTL();recalc();
+});
+document.getElementById('phe-cancel').addEventListener('click',()=>{
+  selPh=null;document.getElementById('ph-editor').classList.remove('open');renderPhaseTL();
+});
 
 // TX RULES
 function applyRules(){
@@ -806,9 +879,9 @@ function renderRules(kind){
   list.innerHTML='';
   if(!arr.length){list.innerHTML='<div style="font-size:13px;color:var(--txt3);padding:4px 0">Zatím žádná pravidla.</div>';return;}
   arr.forEach((r,i)=>{
-    const every=r.every===1?'každý rok':`každých ${r.every} let`;
+    const ev=r.every===1?'každý rok':`každých ${r.every} let`;
     const tag=document.createElement('div');tag.className='rule-tag'+(kind==='out'?' neg':'');
-    tag.innerHTML=`<div class="rule-tag-text"><strong>${kind==='out'?'−':''}${new Intl.NumberFormat('cs-CZ',{maximumFractionDigits:0}).format(r.val)} Kč</strong> — ${every}, roky ${r.from}–${r.to}${r.desc?' · '+r.desc:''}</div><button class="rule-del" data-i="${i}">×</button>`;
+    tag.innerHTML=`<div class="rule-tag-text"><strong>${kind==='out'?'−':''}${new Intl.NumberFormat('cs-CZ',{maximumFractionDigits:0}).format(r.val)} Kč</strong> — ${ev}, roky ${r.from}–${r.to}${r.desc?' · '+r.desc:''}</div><button class="rule-del" data-i="${i}">×</button>`;
     list.appendChild(tag);
   });
   list.querySelectorAll('.rule-del').forEach(b=>b.addEventListener('click',()=>{(kind==='in'?rulesIn:rulesOut).splice(+b.dataset.i,1);applyRules();renderRules(kind);renderTxTable(kind);recalc();}));
@@ -849,16 +922,14 @@ document.getElementById('rbout-add').addEventListener('click',()=>addRule('out')
 // TX TABLE
 function renderTxTable(kind){
   const arr=kind==='in'?txIn:txOut;
-  const tbId=kind==='in'?'tbody-in':'tbody-out';
-  const tb=document.getElementById(tbId);
-  const hor=getHorizon();
-  const sy=getStartYear();
+  const tb=document.getElementById('tbody-'+kind);
+  const hor=getHorizon();const sy=getStartYear();
   tb.innerHTML='';
   for(let i=1;i<=hor;i++){
     const row=arr[i]||{yr:i,val:0,desc:''};
-    const neg=kind==='out'&&row.val>0||kind==='in'&&row.val<0;
+    const isNeg=kind==='out'&&row.val>0||kind==='in'&&row.val<0;
     const tr=document.createElement('tr');
-    tr.innerHTML=`<td style="text-align:center;color:var(--txt3)">${i}</td><td style="text-align:right;color:var(--txt3)">${sy+i}</td><td class="r"><input type="number" value="${row.val}" step="1000" data-i="${i}" data-k="${kind}" class="txi" style="text-align:right${neg?';color:var(--red-tx);font-weight:600':''}"></td><td><input type="text" value="${row.desc||''}" placeholder="popis…" data-i="${i}" data-k="${kind}" class="txd"></td>`;
+    tr.innerHTML=`<td style="text-align:center;color:var(--txt3)">${i}</td><td style="text-align:right;color:var(--txt3)">${sy+i}</td><td class="r"><input type="number" value="${row.val}" step="1000" data-i="${i}" data-k="${kind}" class="txi" style="text-align:right${isNeg?';color:var(--red-tx);font-weight:600':''}"></td><td><input type="text" value="${row.desc||''}" placeholder="popis…" data-i="${i}" data-k="${kind}" class="txd"></td>`;
     tb.appendChild(tr);
   }
   tb.querySelectorAll('.txi').forEach(inp=>inp.addEventListener('input',e=>{
@@ -870,10 +941,7 @@ function renderTxTable(kind){
     e.target.style.fontWeight=neg?'600':'';
     recalc();
   }));
-  tb.querySelectorAll('.txd').forEach(inp=>inp.addEventListener('input',e=>{
-    const k=e.target.dataset.k,ii=+e.target.dataset.i;
-    (k==='in'?txIn:txOut)[ii].desc=e.target.value;
-  }));
+  tb.querySelectorAll('.txd').forEach(inp=>inp.addEventListener('input',e=>{(e.target.dataset.k==='in'?txIn:txOut)[+e.target.dataset.i].desc=e.target.value;}));
 }
 
 // KPIs
@@ -884,8 +952,6 @@ function renderKPIs(rows){
   document.getElementById('kpi-returns').textContent='+'+fmt(Math.max(0,last.cumRet||0));
   document.getElementById('kpi-final').textContent=fmt(last.portfolio||0);
 }
-
-// MILESTONES
 function renderMilestones(rows){
   const el=document.getElementById('main-milestones');el.innerHTML='';
   const hor=getHorizon();
@@ -901,21 +967,21 @@ function renderMilestones(rows){
     el.appendChild(d);
   });
 }
-
-// CHART — X axis shows calendar years
 function renderChart(rows){
   const canvas=document.getElementById('main-chart');if(!canvas)return;
   if(chartInst){chartInst.destroy();}
-  const labels=rows.map(r=>r.calYr);
+  const sy=getStartYear();
+  const hor=getHorizon();
+  const step=hor<=20?5:hor<=40?5:10;
   chartInst=new Chart(canvas,{
     type:'bar',
-    data:{labels,datasets:[
+    data:{labels:rows.map(r=>r.calYr),datasets:[
       {label:'Vložená částka',data:rows.map(r=>Math.round(r.cumInv)),backgroundColor:'#5DADE2',stack:'s'},
       {label:'Výnosy',data:rows.map(r=>Math.round(Math.max(0,r.cumRet))),backgroundColor:'#4ECDA0',stack:'s'},
     ]},
     options:{responsive:true,maintainAspectRatio:false,
       scales:{
-        x:{stacked:true,grid:{display:false},ticks:{font:{size:11},maxTicksLimit:12,color:'#6b7280',callback:(v,i,ticks)=>{const yr=rows[i]?.calYr;const hor=getHorizon();const step=hor<=20?5:hor<=40?5:10;return yr&&(yr-getStartYear())%step===0?yr:null;}}},
+        x:{stacked:true,grid:{display:false},ticks:{font:{size:11},maxTicksLimit:15,color:'#6b7280',callback:(v,i)=>{const yr=rows[i]?.calYr;return yr&&(yr-sy)%step===0?yr:null;}}},
         y:{stacked:true,grid:{color:'#edf0f4'},ticks:{font:{size:11},color:'#6b7280',callback:v=>{const m=v/1000000;return m>=1?(m.toFixed(1)+' M'):Math.round(v/1000)+'k';}}},
       },
       plugins:{legend:{display:false},tooltip:{callbacks:{
@@ -926,14 +992,11 @@ function renderChart(rows){
     }
   });
 }
-
-// SIM TABLE
 function renderSimTable(rows){
   const tb=document.getElementById('sim-body');tb.innerHTML='';
   const hor=getHorizon();
   const step=hor<=20?2:5;
-  const ms=new Set();
-  for(let y=0;y<=hor;y+=step)ms.add(y);ms.add(hor);
+  const ms=new Set();for(let y=0;y<=hor;y+=step)ms.add(y);ms.add(hor);
   rows.forEach(r=>{
     const tr=document.createElement('tr');
     if(ms.has(r.yr))tr.className='milestone';
@@ -942,7 +1005,6 @@ function renderSimTable(rows){
   });
 }
 
-// RECALC
 function recalc(){
   const rows=simulate();
   renderKPIs(rows);renderMilestones(rows);renderChart(rows);renderSimTable(rows);
@@ -951,7 +1013,7 @@ function recalc(){
 
 // SAVE / LOAD
 function getState(){
-  return{startAmount:document.getElementById('startAmount').value,startYear:document.getElementById('startYear').value,horizon:document.getElementById('horizon').value,phases,depIn,depOut,txIn,txOut,rulesIn,rulesOut,modeIn,modeOut};
+  return{startAmount:document.getElementById('startAmount').value,startYear:document.getElementById('startYear').value,horizon:document.getElementById('horizon').value,depIn,depOut,txIn,txOut,rulesIn,rulesOut,phases,modeIn,modeOut};
 }
 function applyState(s){
   document.getElementById('startAmount').value=s.startAmount||0;
@@ -960,18 +1022,24 @@ function applyState(s){
   document.getElementById('horizon').value=h;
   document.getElementById('horizon-slider').value=h;
   document.getElementById('horizon-val').textContent=h;
-  if(s.phases&&s.phases.length)phases=s.phases;
   if(s.depIn)depIn=s.depIn;
   if(s.depOut)depOut=s.depOut;
   if(s.txIn)txIn=s.txIn;
   if(s.txOut)txOut=s.txOut;
   if(s.rulesIn)rulesIn=s.rulesIn;
   if(s.rulesOut)rulesOut=s.rulesOut;
-  if(s.modeIn&&s.modeIn==='manual'){document.getElementById('toggle-in').querySelectorAll('.toggle-opt').forEach(b=>{b.classList.toggle('sel',b.dataset.mode==='manual');});modeIn='manual';document.getElementById('txin-repeat').style.display='none';document.getElementById('txin-manual').style.display='';}
-  if(s.modeOut&&s.modeOut==='manual'){document.getElementById('toggle-out').querySelectorAll('.toggle-opt').forEach(b=>{b.classList.toggle('sel',b.dataset.mode==='manual');});modeOut='manual';document.getElementById('txout-repeat').style.display='none';document.getElementById('txout-manual').style.display='';}
-  renderPhases();renderTL('in');renderTL('out');renderRules('in');renderRules('out');renderTxTable('in');renderTxTable('out');recalc();
+  if(s.phases)phases=s.phases;
+  ['in','out'].forEach(kind=>{
+    const mode=kind==='in'?s.modeIn:s.modeOut;
+    if(mode==='manual'){
+      document.getElementById('toggle-'+kind).querySelectorAll('.toggle-opt').forEach(b=>b.classList.toggle('sel',b.dataset.mode==='manual'));
+      if(kind==='in'){modeIn='manual';document.getElementById('txin-repeat').style.display='none';document.getElementById('txin-manual').style.display='';}
+      else{modeOut='manual';document.getElementById('txout-repeat').style.display='none';document.getElementById('txout-manual').style.display='';}
+    }
+  });
+  renderDepTL('in');renderDepTL('out');renderPhaseTL();renderRules('in');renderRules('out');renderTxTable('in');renderTxTable('out');recalc();
 }
-function saveState(){try{localStorage.setItem('inv-calc-v2',JSON.stringify(getState()));}catch(e){}}
+function saveState(){try{localStorage.setItem('inv-calc-v3',JSON.stringify(getState()));}catch(e){}}
 
 document.getElementById('btn-save').addEventListener('click',()=>{
   const a=document.createElement('a');
@@ -980,8 +1048,7 @@ document.getElementById('btn-save').addEventListener('click',()=>{
 });
 document.getElementById('btn-load').addEventListener('change',e=>{
   const f=e.target.files[0];if(!f)return;
-  const r=new FileReader();
-  r.onload=ev=>{try{applyState(JSON.parse(ev.target.result));}catch{alert('Soubor není platný.');}};
+  const r=new FileReader();r.onload=ev=>{try{applyState(JSON.parse(ev.target.result));}catch{alert('Soubor není platný.');}};
   r.readAsText(f);e.target.value='';
 });
 
@@ -997,13 +1064,16 @@ document.getElementById('horizon-slider').addEventListener('input',e=>{
   const v=e.target.value;
   document.getElementById('horizon').value=v;
   document.getElementById('horizon-val').textContent=v;
-  renderTL('in');renderTL('out');renderTxTable('in');renderTxTable('out');recalc();
+  snapPhasesToHorizon();
+  renderDepTL('in');renderDepTL('out');renderPhaseTL();
+  renderTxTable('in');renderTxTable('out');recalc();
 });
 
-// BASIC INPUTS
-['startAmount','startYear'].forEach(id=>document.getElementById(id).addEventListener('input',()=>{renderTxTable('in');renderTxTable('out');renderTL('in');renderTL('out');recalc();}));
+['startAmount','startYear'].forEach(id=>document.getElementById(id).addEventListener('input',()=>{
+  renderDepTL('in');renderDepTL('out');renderPhaseTL();
+  renderTxTable('in');renderTxTable('out');recalc();
+}));
 
-// COMPARE BARS
 function drawBars(id,data,c1,c2){
   const el=document.getElementById(id);if(!el)return;
   const max=Math.max(...data.map(d=>d[0]+d[1]));
@@ -1018,16 +1088,16 @@ function drawBars(id,data,c1,c2){
 }
 
 // INIT
-bindEditorLive('in');
-bindEditorLive('out');
+bindDepLive('in');
+bindDepLive('out');
 drawBars('bad-bars',[[15,0],[18,1],[22,3],[27,6],[32,10],[37,14],[42,19],[47,24],[50,28],[51,29],[51,29]],'#5DADE2','rgba(93,173,226,.3)');
 drawBars('good-bars',[[50,29],[47,32],[44,35],[41,38],[39,41],[38,44],[37,47],[37,50],[37,54]],'#5DADE2','#4ECDA0');
 
 try{
-  const saved=localStorage.getItem('inv-calc-v2');
+  const saved=localStorage.getItem('inv-calc-v3');
   if(saved){applyState(JSON.parse(saved));}
-  else{renderPhases();renderTL('in');renderTL('out');renderRules('in');renderRules('out');renderTxTable('in');renderTxTable('out');recalc();}
-}catch(e){renderPhases();renderTL('in');renderTL('out');renderRules('in');renderRules('out');renderTxTable('in');renderTxTable('out');recalc();}
+  else{renderDepTL('in');renderDepTL('out');renderPhaseTL();renderRules('in');renderRules('out');renderTxTable('in');renderTxTable('out');recalc();}
+}catch(e){renderDepTL('in');renderDepTL('out');renderPhaseTL();renderRules('in');renderRules('out');renderTxTable('in');renderTxTable('out');recalc();}
 </script>
 </body>
 </html>
