@@ -484,6 +484,17 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
         </div>
       </div>
 
+      <!-- Retire age field — shown only when no regular withdrawals on timeline -->
+      <div id="tr-retire-age-wrap" style="display:none;margin-bottom:16px;padding:14px;background:#f0f0ff;border:1px solid #c4b5fd;border-radius:8px">
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <div style="flex:1;min-width:200px">
+            <label class="inp-label" style="color:#4c1d95">V kolika letech chcete jít do penze?</label>
+            <div class="inp-wrap"><input type="number" id="tr-retire-age-input" value="67" min="40" max="80" step="1"><span class="inp-unit">let</span></div>
+          </div>
+          <div style="font-size:12px;color:#6d28d9;line-height:1.55;flex:2;min-width:180px">Na časové ose nemáte nastavené žádné pravidelné výběry. Zadejte věk odchodu do penze — kalkulačka podle něj určí, od kdy a jak dlouho budete čerpat. Jakmile přidáte výběry na časové ose, toto pole se skryje a použije se jejich nastavení.</div>
+        </div>
+      </div>
+
       <!-- Result -->
       <div id="target-result" style="display:none">
         <div style="background:linear-gradient(135deg,#1a2332 0%,#243447 100%);border-radius:10px;padding:20px 24px;margin-bottom:14px;display:flex;align-items:center;gap:24px;flex-wrap:wrap">
@@ -1310,6 +1321,26 @@ function getWithdrawalStartYr(){
   return null;
 }
 
+function getRetireAgeRefYr(){
+  // Used when no depOut segments — derive year from retire age input
+  const by=getBirthYear();
+  const sy=getStartYear();
+  const hor=getHorizon();
+  const retireAge=parseInt(document.getElementById('tr-retire-age-input')?.value)||67;
+  if(by){
+    const yr=(by+retireAge)-sy;
+    return Math.max(1,Math.min(hor,yr));
+  }
+  // No birthYear — use retire age as years-from-start
+  return Math.max(1,Math.min(hor,retireAge));
+}
+
+function updateRetireAgeField(){
+  const hasWithdrawals=depOut.length>0;
+  const wrap=document.getElementById('tr-retire-age-wrap');
+  if(wrap) wrap.style.display=hasWithdrawals?'none':'';
+}
+
 function renderTargetIncome(rows){
   const retireRate=num(document.getElementById('target-rate').value,3)/100;
   const legacy=num(document.getElementById('target-legacy').value,0);
@@ -1321,9 +1352,12 @@ function renderTargetIncome(rows){
   let baseRefYr=getWithdrawalStartYr();
   const usedWithdrawal=baseRefYr!==null;
   if(baseRefYr===null){
-    let peakVal=0;baseRefYr=hor;
-    rows.forEach(r=>{if(r.portfolio>peakVal){peakVal=r.portfolio;baseRefYr=r.yr;}});
+    // No regular withdrawals — use retire age field
+    baseRefYr=getRetireAgeRefYr();
   }
+
+  // Show/hide the retire age input field
+  updateRetireAgeField();
 
   // Apply slider offset (only if birthYear is set)
   let refYr=Math.max(1,Math.min(hor, baseRefYr+trSliderOffset));
@@ -1386,7 +1420,7 @@ function renderTargetIncome(rows){
   if(usedWithdrawal){
     intro.innerHTML=`Výpočet vychází z hodnoty portfolia <strong>v momentě, kdy začínáte pravidelně čerpat</strong> (${refCalYr}${ageAtRef?', věk '+ageAtRef+' let':''}). Odtud si lze čerpat měsíční rentu tak, aby portfolio vydrželo až do konce investičního horizontu.`;
   } else {
-    intro.innerHTML=`Na časové ose nejsou nastaveny žádné výběry. Výpočet proto vychází z <strong>vrcholu portfolia</strong> (${refCalYr}). Přidejte pravidelné výběry pro přesnější výsledek.`;
+    intro.innerHTML=`Výpočet vychází z <strong>věku odchodu do penze</strong> zadaného níže (${refCalYr}${ageAtRef?', věk '+ageAtRef+' let':''}). Pro přesnější výsledek přidejte pravidelné výběry na časové ose.`;
   }
 
   document.getElementById('target-result').style.display='';
@@ -1588,6 +1622,7 @@ document.getElementById('birthYear').addEventListener('input',()=>{
   renderDepTL('in');renderDepTL('out');renderPhaseTL();
   recalc();
 });
+document.getElementById('tr-retire-age-input').addEventListener('input',()=>recalc());
 ['target-rate','target-legacy'].forEach(id=>{
   document.getElementById(id).addEventListener('input',()=>recalc());
 });
