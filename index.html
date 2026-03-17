@@ -314,7 +314,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
         <div class="card-hdr"><div class="card-dot" style="background:var(--blue)"></div><div class="card-title">Základní parametry</div></div>
         <div class="card-body">
           <div class="inp-group"><label class="inp-label">Počáteční investice</label><div class="inp-wrap"><input type="number" id="startAmount" value="0" min="0" step="10000"><span class="inp-unit">Kč</span></div></div>
-          <div class="inp-group"><label class="inp-label">Rok zahájení</label><div class="inp-wrap"><input type="number" id="startYear" value="2025" min="2000" max="2100"></div></div>
+          <div class="inp-group"><label class="inp-label">Rok zahájení</label><div class="inp-wrap"><input type="number" id="startYear" value="2026" min="2000" max="2100"></div></div>
           <div class="inp-group">
             <label class="inp-label">Investiční horizont</label>
             <div class="slider-wrap"><input type="range" id="horizon-slider" min="1" max="70" value="40"><div class="slider-val"><span id="horizon-val">40</span> <span>let</span></div></div>
@@ -841,31 +841,20 @@ document.querySelectorAll('.phase-preset-btn').forEach(b=>b.addEventListener('cl
 document.getElementById('ph-add').addEventListener('click',()=>{
   const hor=getHorizon();
   sortArr(phases);
-  // Find a gap or split the last phase to make room
-  let start=1;
-  for(const s of phases){if(start>=s.from&&start<=s.to)start=s.to+1;}
-  if(start>hor){
-    // No free space — split the last phase in half
-    const last=phases[phases.length-1];
-    const mid=Math.floor((last.from+last.to)/2);
-    if(mid<=last.from){alert('Nelze přidat další fázi — horizont je příliš krátký.');return;}
-    const newTo=last.to;
-    last.to=mid;
-    const newPh={from:mid+1,to:newTo,rate:3,name:'Konzervativní',custom:false};
-    phases.push(newPh);
-    sortArr(phases);
-    ensureFullCoverage();
-    openPhEditor(phases.length-1);
-  } else {
-    start=Math.min(start,hor);
-    const newPh={from:start,to:Math.min(start+9,hor),rate:6,name:'Vyvážená',custom:false};
-    phases.push(newPh);
-    sortArr(phases);
-    const ni=phases.findIndex(p=>p.from===start);
-    noOverlap(phases,ni,'r');
-    ensureFullCoverage();
-    openPhEditor(ni);
-  }
+  // Find the longest phase and split it in the middle
+  let bestIdx=0, bestLen=0;
+  phases.forEach((p,i)=>{const len=p.to-p.from;if(len>bestLen){bestLen=len;bestIdx=i;}});
+  if(bestLen<2){alert('Horizont je příliš krátký pro další fázi.');return;}
+  const target=phases[bestIdx];
+  const mid=Math.round((target.from+target.to)/2);
+  const newTo=target.to;
+  target.to=mid-1;
+  const newPh={from:mid,to:newTo,rate:3,name:'Konzervativní',custom:false};
+  phases.push(newPh);
+  sortArr(phases);
+  ensureFullCoverage();
+  const ni=phases.findIndex(p=>p.from===mid);
+  openPhEditor(ni>=0?ni:phases.length-1);
   renderPhaseTL();recalc();
 });
 document.getElementById('ph-track').addEventListener('click',e=>{
@@ -1050,7 +1039,7 @@ function getState(){
 }
 function applyState(s){
   document.getElementById('startAmount').value=s.startAmount||0;
-  document.getElementById('startYear').value=s.startYear||2025;
+  document.getElementById('startYear').value=s.startYear||2026;
   const h=parseInt(s.horizon)||40;
   document.getElementById('horizon').value=h;
   document.getElementById('horizon-slider').value=h;
@@ -1129,12 +1118,12 @@ drawBars('good-bars',[[50,29],[47,32],[44,35],[41,38],[39,41],[38,44],[37,47],[3
 
 function initDefaultPhases(){
   const hor=getHorizon();
-  const t1=Math.floor(hor/3);
-  const t2=Math.floor(hor*2/3);
+  const t1=Math.round(hor/3);
+  const t2=Math.round(hor*2/3);
   phases=[
-    {from:1,  to:t1,  rate:10,name:'Dynamická',   custom:false},
-    {from:t1+1,to:t2, rate:6, name:'Vyvážená',    custom:false},
-    {from:t2+1,to:hor,rate:3, name:'Konzervativní',custom:false},
+    {from:1,    to:t1,  rate:10, name:'Dynamická',    custom:false},
+    {from:t1+1, to:t2,  rate:6,  name:'Vyvážená',     custom:false},
+    {from:t2+1, to:hor, rate:3,  name:'Konzervativní', custom:false},
   ];
 }
 
