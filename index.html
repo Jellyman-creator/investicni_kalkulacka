@@ -489,7 +489,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
   <div class="card">
     <div class="card-hdr"><div class="card-dot" style="background:#a78bfa"></div><div class="card-title">Jaký měsíční příjem si mohu dovolit?</div></div>
     <div class="card-body">
-      <p style="font-size:13px;color:var(--txt2);margin-bottom:16px;line-height:1.6">Výpočet vychází z <strong>vrcholu vašeho portfolia</strong> — momentu kdy je největší. Od té chvíle si z něj lze čerpat měsíční rentu tak, aby portfolio vydrželo až do konce vašeho investičního horizontu.</p>
+      <p id="tr-intro" style="font-size:13px;color:var(--txt2);margin-bottom:16px;line-height:1.6">Výpočet vychází z hodnoty portfolia <strong>v momentě, kdy začínáte pravidelně čerpat</strong> — tedy od prvního výběru nastaveného na časové ose. Odtud si lze čerpat měsíční rentu tak, aby portfolio vydrželo až do konce investičního horizontu.</p>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px" id="target-grid">
         <div class="inp-group" style="margin-bottom:0">
           <label class="inp-label">Výnos portfolia při čerpání</label>
@@ -499,12 +499,26 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
         <div class="inp-group" style="margin-bottom:0">
           <label class="inp-label">Chci odkázat blízkým</label>
           <div class="inp-wrap"><input type="number" id="target-legacy" value="0" step="100000" min="0"><span class="inp-unit">Kč</span></div>
-          <div class="hint" style="margin-top:4px">Tato částka se odečte z vrcholu portfolia před výpočtem renty</div>
+          <div class="hint" style="margin-top:4px">Tato částka se odečte z portfolia před výpočtem renty</div>
         </div>
       </div>
-      <!-- Result — shown always once we have simulation data -->
+
+      <!-- Pension age slider — shown when birthYear is set -->
+      <div id="tr-slider-wrap" style="display:none;margin-bottom:16px;padding:14px;background:var(--bg);border-radius:8px;border:1px solid var(--border)">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <label style="font-size:12px;font-weight:600;color:var(--txt2)">Chci do penze dříve / později</label>
+          <span style="font-size:13px;font-weight:600;font-family:var(--mono);color:var(--blue)" id="tr-slider-label">—</span>
+        </div>
+        <div class="slider-wrap" style="margin-top:0">
+          <span style="font-size:11px;color:var(--txt3);white-space:nowrap" id="tr-slider-min">—</span>
+          <input type="range" id="tr-retire-slider" min="40" max="80" value="67" style="flex:1">
+          <span style="font-size:11px;color:var(--txt3);white-space:nowrap" id="tr-slider-max">—</span>
+        </div>
+        <div class="hint" style="margin-top:6px">Posunutím měníte rok zahájení čerpání — renta se přepočítá automaticky. Toto nastavení nemění vaše vklady ani výběry na časové ose.</div>
+      </div>
+
+      <!-- Result -->
       <div id="target-result" style="display:none">
-        <!-- Big number highlight -->
         <div style="background:linear-gradient(135deg,#1a2332 0%,#243447 100%);border-radius:10px;padding:20px 24px;margin-bottom:14px;display:flex;align-items:center;gap:24px;flex-wrap:wrap">
           <div style="flex:1;min-width:180px">
             <div style="font-size:11px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">Měsíční renta</div>
@@ -513,10 +527,10 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
           </div>
           <div style="display:flex;flex-direction:column;gap:10px;flex:2;min-width:220px">
             <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
-              <span style="font-size:12px;color:rgba(255,255,255,.5)">Vrchol portfolia</span>
+              <span style="font-size:12px;color:rgba(255,255,255,.5)" id="tr-peak-label">Portfolio při zahájení čerpání</span>
               <span style="font-size:14px;font-weight:600;font-family:var(--mono);color:#fff" id="tr-peak">—</span>
             </div>
-            <div style="display:flex;justify-content:space-between;align-items:center;gap:12px" id="tr-legacy-row" style="display:none">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:12px" id="tr-legacy-row">
               <span style="font-size:12px;color:rgba(255,255,255,.5)">Odkaz blízkým</span>
               <span style="font-size:14px;font-weight:600;font-family:var(--mono);color:rgba(255,255,255,.6)" id="tr-legacy-val">—</span>
             </div>
@@ -525,7 +539,11 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
               <span style="font-size:14px;font-weight:600;font-family:var(--mono);color:var(--blue)" id="tr-capital">—</span>
             </div>
             <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
-              <span style="font-size:12px;color:rgba(255,255,255,.5)" id="tr-period-label">Doba čerpání</span>
+              <span style="font-size:12px;color:rgba(255,255,255,.5)">Věk při zahájení čerpání</span>
+              <span style="font-size:14px;font-weight:600;font-family:var(--mono);color:rgba(255,255,255,.7)" id="tr-retire-age-val">—</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+              <span style="font-size:12px;color:rgba(255,255,255,.5)">Doba čerpání</span>
               <span style="font-size:14px;font-weight:600;font-family:var(--mono);color:rgba(255,255,255,.7)" id="tr-period">—</span>
             </div>
           </div>
@@ -1197,15 +1215,10 @@ document.getElementById('mode-real').addEventListener('click',()=>{
 document.getElementById('inflation-rate').addEventListener('input',()=>recalc());
 
 // MONTHLY DRAWDOWN CALCULATOR
-// Reference point: first year regular withdrawals begin (depOut segment start).
-// Falls back to peak portfolio year if no withdrawals are set.
+let trSliderOffset=0; // year offset from slider (negative = earlier, positive = later)
+
 function getWithdrawalStartYr(){
-  const hor=getHorizon();
-  // First year covered by any depOut segment
-  if(depOut.length>0){
-    sortArr(depOut);
-    return Math.min(depOut[0].from, hor);
-  }
+  if(depOut.length>0){sortArr(depOut);return depOut[0].from;}
   return null;
 }
 
@@ -1214,15 +1227,38 @@ function renderTargetIncome(rows){
   const legacy=num(document.getElementById('target-legacy').value,0);
   const sy=getStartYear();
   const hor=getHorizon();
+  const by=getBirthYear();
 
-  // Reference year: when regular withdrawals begin, or peak
-  let refYr=getWithdrawalStartYr();
-  if(refYr===null){
-    // fallback: peak portfolio year
-    let peakVal=0;refYr=hor;
-    rows.forEach(r=>{if(r.portfolio>peakVal){peakVal=r.portfolio;refYr=r.yr;}});
+  // Base withdrawal start year
+  let baseRefYr=getWithdrawalStartYr();
+  const usedWithdrawal=baseRefYr!==null;
+  if(baseRefYr===null){
+    let peakVal=0;baseRefYr=hor;
+    rows.forEach(r=>{if(r.portfolio>peakVal){peakVal=r.portfolio;baseRefYr=r.yr;}});
   }
-  refYr=Math.min(refYr,hor);
+
+  // Apply slider offset (only if birthYear is set)
+  let refYr=Math.max(1,Math.min(hor, baseRefYr+trSliderOffset));
+
+  // Update slider UI
+  const sliderWrap=document.getElementById('tr-slider-wrap');
+  if(by){
+    sliderWrap.style.display='';
+    const baseAge=by+baseRefYr-sy;
+    const slider=document.getElementById('tr-retire-slider');
+    const minAge=Math.max(40, baseAge-20);
+    const maxAge=Math.min(80, baseAge+20);
+    slider.min=minAge; slider.max=maxAge;
+    const currentAge=by+refYr-sy;
+    slider.value=currentAge;
+    document.getElementById('tr-slider-min').textContent=minAge+' let';
+    document.getElementById('tr-slider-max').textContent=maxAge+' let';
+    const diff=currentAge-baseAge;
+    document.getElementById('tr-slider-label').textContent=
+      currentAge+' let'+(diff===0?' (základní nastavení)':diff>0?' (+'+diff+' let)':' ('+diff+' let)');
+  } else {
+    sliderWrap.style.display='none';
+  }
 
   const refRow=rows.find(r=>r.yr===refYr)||rows[rows.length-1];
   const refPortfolio=refRow?refRow.portfolio:0;
@@ -1234,45 +1270,61 @@ function renderTargetIncome(rows){
     return;
   }
 
-  // Annuity: PMT = C * r_m / (1 - (1+r_m)^(-n))
   const n=yearsDrawdown*12;
   let monthlyPmt=0;
   if(retireRate>0){
     const rm=Math.pow(1+retireRate,1/12)-1;
     monthlyPmt=capital*rm/(1-Math.pow(1+rm,-n));
-  } else {
-    monthlyPmt=n>0?capital/n:0;
-  }
+  } else {monthlyPmt=n>0?capital/n:0;}
 
   const refCalYr=sy+refYr;
-  const by=getBirthYear();
   const ageAtRef=by?(by+refYr-sy):null;
   const ageAtEnd=by?(by+hor-sy):null;
+
+  // Update intro text dynamically
+  const intro=document.getElementById('tr-intro');
+  if(usedWithdrawal){
+    intro.innerHTML=`Výpočet vychází z hodnoty portfolia <strong>v momentě, kdy začínáte pravidelně čerpat</strong> (${refCalYr}${ageAtRef?', věk '+ageAtRef+' let':''}). Odtud si lze čerpat měsíční rentu tak, aby portfolio vydrželo až do konce investičního horizontu.`;
+  } else {
+    intro.innerHTML=`Na časové ose nejsou nastaveny žádné výběry. Výpočet proto vychází z <strong>vrcholu portfolia</strong> (${refCalYr}). Přidejte pravidelné výběry pro přesnější výsledek.`;
+  }
 
   document.getElementById('target-result').style.display='';
   document.getElementById('tr-monthly').textContent=fmt(monthlyPmt);
   document.getElementById('tr-monthly-sub').textContent=
     `měsíčně od ${refCalYr}${ageAtRef?' ('+ageAtRef+' let)':''} do ${sy+hor}${ageAtEnd?' ('+ageAtEnd+' let)':''}`;
   document.getElementById('tr-peak').textContent=fmt(refPortfolio);
+  document.getElementById('tr-peak-label').textContent=usedWithdrawal?'Portfolio při zahájení výběrů':'Vrchol portfolia';
   document.getElementById('tr-capital').textContent=fmt(capital);
-  document.getElementById('tr-period').textContent=yearsDrawdown+' let ('+n+' měsíců)';
+  document.getElementById('tr-period').textContent=yearsDrawdown+' let';
+  document.getElementById('tr-retire-age-val').textContent=
+    ageAtRef?(ageAtRef+' let, rok '+refCalYr):('rok '+refCalYr);
 
   const legacyRow=document.getElementById('tr-legacy-row');
   if(legacy>0){legacyRow.style.display='flex';document.getElementById('tr-legacy-val').textContent='− '+fmt(legacy);}
   else{legacyRow.style.display='none';}
 
-  const label=depOut.length>0?`začátek pravidelných výběrů (rok ${refCalYr})`:`vrchol portfolia (rok ${refCalYr})`;
-  document.getElementById('tr-peak').closest('div').querySelector('span').textContent=
-    depOut.length>0?`Portfolio při začátku výběrů`:`Vrchol portfolia`;
-
   const msg=document.getElementById('tr-message');
   const totalDrawn=monthlyPmt*n;
-  msg.innerHTML=`Výpočet vychází z <strong>${label}</strong>. `
-    +`Za dobu čerpání vyberete celkem <strong>${fmt(totalDrawn)}</strong>`
-    +(ageAtRef?`, od věku <strong>${ageAtRef}</strong> do věku <strong>${ageAtEnd} let</strong>`:'')+`. `
-    +`Portfolio klesá na nulu na konci horizontu.`;
+  msg.innerHTML=`Za ${yearsDrawdown} let čerpání vyberete celkem <strong>${fmt(totalDrawn)}</strong>`
+    +(ageAtRef?`, od věku <strong>${ageAtRef}</strong> do věku <strong>${ageAtEnd} let</strong>`:'')
+    +`. Portfolio se zhodnocuje ${retireRate*100} % p.a. a klesá na nulu na konci horizontu.`;
   msg.style.color='var(--txt2)';
 }
+
+// Slider listener — converts age back to year offset
+document.getElementById('tr-retire-slider').addEventListener('input',e=>{
+  const by=getBirthYear();
+  const sy=getStartYear();
+  if(!by)return;
+  const selectedAge=parseInt(e.target.value);
+  const baseRefYr=getWithdrawalStartYr()||0;
+  const baseAge=by+baseRefYr-sy;
+  trSliderOffset=selectedAge-baseAge;
+  // last stored rows — re-render target only
+  const rows=simulate();
+  renderTargetIncome(rows);
+});
 function renderMilestones(rows){
   const el=document.getElementById('main-milestones');el.innerHTML='';
   const hor=getHorizon();
