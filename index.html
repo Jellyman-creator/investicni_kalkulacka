@@ -314,7 +314,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
         <div class="card-hdr"><div class="card-dot" style="background:var(--blue)"></div><div class="card-title">Základní parametry</div></div>
         <div class="card-body">
           <div class="inp-group"><label class="inp-label">Počáteční investice</label><div class="inp-wrap"><input type="number" id="startAmount" value="0" min="0" step="10000"><span class="inp-unit">Kč</span></div></div>
-          <div class="inp-group"><label class="inp-label">Rok zahájení</label><div class="inp-wrap"><input type="number" id="startYear" value="2026" min="2000" max="2100"></div></div>
+          <div class="inp-group"><label class="inp-label">Rok zahájení</label><div class="inp-wrap"><input type="number" id="startYear" min="2000" max="2100"></div></div>
           <div class="inp-group">
             <label class="inp-label">Investiční horizont</label>
             <div class="slider-wrap"><input type="range" id="horizon-slider" min="1" max="70" value="40"><div class="slider-val"><span id="horizon-val">40</span> <span>let</span></div></div>
@@ -528,7 +528,7 @@ let chartInst=null,ruleId=0;
 let prevHorizon=40; // tracks last known horizon for proportional rescaling
 
 function getHorizon(){return Math.min(num(document.getElementById('horizon').value,40),MAX_YR);}
-function getStartYear(){return num(document.getElementById('startYear').value,2026);}
+function getStartYear(){return num(document.getElementById('startYear').value,2025);}
 
 // PHASE: get rate for year — fills gaps with last phase rate
 function getRateForYear(yr){
@@ -1048,7 +1048,7 @@ function getState(){
 }
 function applyState(s){
   document.getElementById('startAmount').value=s.startAmount||0;
-  document.getElementById('startYear').value=s.startYear||2026;
+  document.getElementById('startYear').value=s.startYear||new Date().getFullYear();
   const h=parseInt(s.horizon)||40;
   document.getElementById('horizon').value=h;
   document.getElementById('horizon-slider').value=h;
@@ -1071,7 +1071,7 @@ function applyState(s){
   });
   renderDepTL('in');renderDepTL('out');renderPhaseTL();renderRules('in');renderRules('out');renderTxTable('in');renderTxTable('out');recalc();
 }
-function saveState(){try{localStorage.setItem('inv-calc-v3',JSON.stringify(getState()));}catch(e){}}
+function saveState(){try{localStorage.setItem('inv-calc-v4',JSON.stringify(getState()));}catch(e){}}
 
 document.getElementById('btn-save').addEventListener('click',()=>{
   const a=document.createElement('a');
@@ -1170,10 +1170,20 @@ function initDefaultPhases(){
 }
 
 try{
-  const saved=localStorage.getItem('inv-calc-v3');
+  const saved=localStorage.getItem('inv-calc-v4');
   if(saved){applyState(JSON.parse(saved));}
-  else{prevHorizon=getHorizon();initDefaultPhases();renderDepTL('in');renderDepTL('out');renderPhaseTL();renderRules('in');renderRules('out');renderTxTable('in');renderTxTable('out');recalc();}
-}catch(e){prevHorizon=getHorizon();initDefaultPhases();renderDepTL('in');renderDepTL('out');renderPhaseTL();renderRules('in');renderRules('out');renderTxTable('in');renderTxTable('out');recalc();}
+  else{
+    document.getElementById('startYear').value=new Date().getFullYear();
+    prevHorizon=getHorizon();initDefaultPhases();
+    renderDepTL('in');renderDepTL('out');renderPhaseTL();
+    renderRules('in');renderRules('out');renderTxTable('in');renderTxTable('out');recalc();
+  }
+}catch(e){
+  document.getElementById('startYear').value=new Date().getFullYear();
+  prevHorizon=getHorizon();initDefaultPhases();
+  renderDepTL('in');renderDepTL('out');renderPhaseTL();
+  renderRules('in');renderRules('out');renderTxTable('in');renderTxTable('out');recalc();
+}
 </script>
 </body>
 </html>
