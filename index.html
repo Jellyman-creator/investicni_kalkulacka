@@ -1339,9 +1339,9 @@ function renderTargetIncome(rows){
   slider.value=refYr;
   // Labels
   if(by){
-    document.getElementById('tr-slider-min').textContent=(by+sliderMinYr-sy)+' let';
-    document.getElementById('tr-slider-max').textContent=(by+sliderMaxYr-sy)+' let';
-    const currentAge=by+refYr-sy;
+    document.getElementById('tr-slider-min').textContent=((sy+sliderMinYr)-by)+' let';
+    document.getElementById('tr-slider-max').textContent=((sy+sliderMaxYr)-by)+' let';
+    const currentAge=(sy+refYr)-by;
     const diff=trSliderOffset;
     document.getElementById('tr-slider-label').textContent=
       'rok '+(sy+refYr)+', '+currentAge+' let'+(diff===0?' (základní)':diff>0?' (+'+diff+' let)':' ('+diff+' let)');
@@ -1380,8 +1380,8 @@ function renderTargetIncome(rows){
   } else {monthlyPmt=n>0?capital/n:0;}
 
   const refCalYr=sy+refYr;
-  const ageAtRef=by?(by+refYr-sy):null;
-  const ageAtEnd=by?(by+hor-sy):null;
+  const ageAtRef=by?((sy+refYr)-by):null;
+  const ageAtEnd=by?((sy+hor)-by):null;
 
   // Update intro text dynamically
   const intro=document.getElementById('tr-intro');
