@@ -258,6 +258,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
   .topbar-actions .tb-btn span{display:none}
   .rb-row{flex-direction:column;align-items:stretch}
   .rb-field input,.rb-field select,.rb-field input.wide{width:100%}
+  #target-grid{grid-template-columns:1fr!important}
   .phase-presets{flex-direction:column}
 }
 @media(max-width:400px){.logo-sub{display:none}.kpi-val{font-size:13px}}
@@ -304,6 +305,19 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
     <div class="kpi"><div class="kpi-label">Celkem vloženo</div><div class="kpi-val" id="kpi-invested">0 Kč</div></div>
     <div class="kpi"><div class="kpi-label">Celkové výnosy</div><div class="kpi-val teal" id="kpi-returns">0 Kč</div></div>
     <div class="kpi"><div class="kpi-label">Cílová hodnota portfolia</div><div class="kpi-val teal" id="kpi-final">0 Kč</div></div>
+  </div>
+  <!-- Inflation controls -->
+  <div style="display:flex;align-items:center;gap:14px;padding:12px 0;flex-wrap:wrap">
+    <div style="display:flex;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:7px;padding:3px">
+      <button id="mode-nominal" class="sel" style="padding:6px 14px;font-size:12px;font-weight:600;font-family:var(--font);border:none;border-radius:5px;cursor:pointer;transition:all .15s;background:rgba(255,255,255,.15);color:#fff">Nominální hodnota</button>
+      <button id="mode-real" style="padding:6px 14px;font-size:12px;font-weight:600;font-family:var(--font);border:none;border-radius:5px;cursor:pointer;transition:all .15s;background:none;color:rgba(255,255,255,.55)">Reálná kupní síla</button>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:rgba(255,255,255,.5)">
+      <span>Inflace:</span>
+      <input type="number" id="inflation-rate" value="2.5" step="0.1" min="0" max="20" style="width:60px;padding:5px 8px;font-size:13px;font-family:var(--mono);border:1px solid rgba(255,255,255,.2);border-radius:5px;background:rgba(255,255,255,.08);color:#fff;outline:none;text-align:center">
+      <span>% p.a.</span>
+    </div>
+    <span id="real-mode-note" style="font-size:11px;color:rgba(255,255,255,.35);display:none">Hodnoty jsou přepočteny na dnešní kupní sílu</span>
   </div>
 </section>
 
@@ -471,10 +485,50 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
     </div>
   </div>
 
+  <!-- Kolik potřebuji investovat? -->
+  <div class="card">
+    <div class="card-hdr"><div class="card-dot" style="background:#a78bfa"></div><div class="card-title">Kolik potřebuji investovat?</div></div>
+    <div class="card-body">
+      <p style="font-size:13px;color:var(--txt2);margin-bottom:16px;line-height:1.6">Zadejte požadovaný měsíční příjem v důchodu a kalkulačka zobrazí, jak daleko jste od tohoto cíle. <strong>Příjem nezahrnuje státní důchod</strong> — jde pouze o výnosy z vašeho investičního portfolia.</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:16px" id="target-grid">
+        <div class="inp-group" style="margin-bottom:0">
+          <label class="inp-label">Cílový měsíční příjem v důchodu</label>
+          <div class="inp-wrap"><input type="number" id="target-income" placeholder="např. 30 000" step="1000" min="0"><span class="inp-unit">Kč/m</span></div>
+        </div>
+        <div class="inp-group" style="margin-bottom:0">
+          <label class="inp-label">Věk odchodu do důchodu</label>
+          <div class="inp-wrap"><input type="number" id="target-retire-age" value="67" min="50" max="80"><span class="inp-unit">let</span></div>
+        </div>
+        <div class="inp-group" style="margin-bottom:0">
+          <label class="inp-label">Výnos portfolia v důchodu</label>
+          <div class="inp-wrap"><input type="number" id="target-rate" value="3" step="0.5" min="0" max="20"><span class="inp-unit">% p.a.</span></div>
+        </div>
+      </div>
+      <div id="target-result" style="display:none;padding:14px;border-radius:8px;background:var(--bg);border:1px solid var(--border)">
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+          <div>
+            <div style="font-size:11px;color:var(--txt3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px">Portfolio potřebné v důchodu</div>
+            <div style="font-size:18px;font-weight:600;font-family:var(--mono);color:var(--txt)" id="tr-needed">—</div>
+          </div>
+          <div>
+            <div style="font-size:11px;color:var(--txt3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px">Odhadnuté portfolio v důchodu</div>
+            <div style="font-size:18px;font-weight:600;font-family:var(--mono)" id="tr-projected">—</div>
+          </div>
+          <div>
+            <div style="font-size:11px;color:var(--txt3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px">Rozdíl</div>
+            <div style="font-size:18px;font-weight:600;font-family:var(--mono)" id="tr-diff">—</div>
+          </div>
+        </div>
+        <div id="tr-message" style="margin-top:12px;font-size:13px;line-height:1.6;color:var(--txt2)"></div>
+      </div>
+      <div class="hint" style="margin-top:8px">Výpočet předpokládá, že v důchodu čerpáte pouze výnosy portfolia (portfolio samotné se nesnižuje). Věk odchodu do důchodu je vztažen k roku narození zadanému výše.</div>
+    </div>
+  </div>
+
   <!-- Simulace -->
   <div class="card">
     <div class="card-hdr"><div class="card-dot" style="background:var(--navy)"></div><div class="card-title">Simulace rok po roku</div></div>
-    <div class="sim-wrap" style="max-height:260px">
+    <div class="sim-wrap" style="max-height:200px">
       <table class="sim-table">
         <thead><tr><th style="text-align:center">Rok</th><th style="text-align:right">Rok</th><th>Výnos %</th><th>Měs. vklad</th><th>Jednoráz.</th><th>Výnos Kč</th><th>Kum. vloženo</th><th>Portfolio</th></tr></thead>
         <tbody id="sim-body"></tbody>
@@ -517,6 +571,17 @@ const MAX_YR=70;
 const fmt=n=>new Intl.NumberFormat('cs-CZ',{style:'currency',currency:'CZK',maximumFractionDigits:0}).format(Math.round(n||0));
 const fmtPct=n=>((n||0)*100).toFixed(1)+' %';
 const num=(v,f=0)=>{const p=parseFloat(v);return isNaN(p)?f:p;};
+
+// Real value adjustment
+function getInflation(){return num(document.getElementById('inflation-rate')?.value,2.5)/100;}
+function isRealMode(){return document.getElementById('mode-real')?.classList.contains('sel');}
+// Deflate a future value by inflation over 'years' years
+function toReal(nominalVal,years){
+  if(!isRealMode())return nominalVal;
+  return nominalVal/Math.pow(1+getInflation(),years);
+}
+// Format with real/nominal label
+function fmtR(val,yr){return fmt(toReal(val,yr));}
 
 // Palette for deposit/withdrawal TL
 const PAL_IN=[{bg:'#B5D4F4',tx:'#0C447C',bd:'#378ADD'},{bg:'#9FE1CB',tx:'#085041',bd:'#1D9E75'},{bg:'#C0DD97',tx:'#173404',bd:'#639922'},{bg:'#CECBF6',tx:'#26215C',bd:'#7F77DD'}];
@@ -1070,10 +1135,75 @@ function renderTxTable(kind){
 // KPIs
 function renderKPIs(rows){
   const last=rows[rows.length-1]||{};
+  const hor=getHorizon();
   document.getElementById('kpi-now').textContent=fmt(rows[0]?.portfolio||0);
   document.getElementById('kpi-invested').textContent=fmt(last.cumInv||0);
   document.getElementById('kpi-returns').textContent='+'+fmt(Math.max(0,last.cumRet||0));
-  document.getElementById('kpi-final').textContent=fmt(last.portfolio||0);
+  document.getElementById('kpi-final').textContent=fmtR(last.portfolio||0, hor);
+}
+
+// INFLATION MODE TOGGLE
+document.getElementById('mode-nominal').addEventListener('click',()=>{
+  document.getElementById('mode-nominal').classList.add('sel');
+  document.getElementById('mode-nominal').style.background='rgba(255,255,255,.15)';
+  document.getElementById('mode-nominal').style.color='#fff';
+  document.getElementById('mode-real').classList.remove('sel');
+  document.getElementById('mode-real').style.background='none';
+  document.getElementById('mode-real').style.color='rgba(255,255,255,.55)';
+  document.getElementById('real-mode-note').style.display='none';
+  recalc();
+});
+document.getElementById('mode-real').addEventListener('click',()=>{
+  document.getElementById('mode-real').classList.add('sel');
+  document.getElementById('mode-real').style.background='rgba(255,255,255,.15)';
+  document.getElementById('mode-real').style.color='#fff';
+  document.getElementById('mode-nominal').classList.remove('sel');
+  document.getElementById('mode-nominal').style.background='none';
+  document.getElementById('mode-nominal').style.color='rgba(255,255,255,.55)';
+  document.getElementById('real-mode-note').style.display='';
+  recalc();
+});
+document.getElementById('inflation-rate').addEventListener('input',()=>recalc());
+
+// TARGET INCOME CALCULATOR
+function renderTargetIncome(rows){
+  const income=num(document.getElementById('target-income').value,0);
+  if(!income){document.getElementById('target-result').style.display='none';return;}
+  const retireAge=num(document.getElementById('target-retire-age').value,67);
+  const retireRate=num(document.getElementById('target-rate').value,3)/100;
+  const by=getBirthYear();
+  const sy=getStartYear();
+  // find retirement year offset
+  let retireYr=null;
+  if(by){retireYr=Math.max(0,Math.min(getHorizon(),(by+retireAge)-sy));}
+  else{retireYr=Math.min(getHorizon(),67);} // fallback: year 67
+  // portfolio needed = annual income / rate (perpetuity formula)
+  const annualIncome=income*12;
+  const needed=retireRate>0?annualIncome/retireRate:0;
+  // projected portfolio at retirement from simulation
+  const retireRow=rows.find(r=>r.yr===retireYr)||rows[rows.length-1];
+  const projected=retireRow?retireRow.portfolio:0;
+  const diff=projected-needed;
+  document.getElementById('target-result').style.display='';
+  document.getElementById('tr-needed').textContent=fmt(needed);
+  const projEl=document.getElementById('tr-projected');
+  projEl.textContent=fmt(projected);
+  projEl.style.color=projected>=needed?'var(--grn-tx)':'var(--red-tx)';
+  const diffEl=document.getElementById('tr-diff');
+  diffEl.textContent=(diff>=0?'+':'')+fmt(diff);
+  diffEl.style.color=diff>=0?'var(--grn-tx)':'var(--red-tx)';
+  const msg=document.getElementById('tr-message');
+  if(diff>=0){
+    const surplus=Math.round(projected*retireRate/12);
+    msg.innerHTML=`✓ <strong>Cíl je dosažitelný.</strong> Při aktuálním nastavení bude vaše portfolio v důchodu generovat přibližně <strong>${fmt(surplus)} měsíčně</strong> — to je o ${fmt(surplus-income)} více, než požadujete.`;
+    msg.style.color='var(--grn-tx)';
+  } else {
+    const shortfall=Math.abs(diff);
+    const yearsLeft=retireYr;
+    const extraMonthly=yearsLeft>0?Math.round(shortfall/(yearsLeft*12*1.5)):shortfall;
+    msg.innerHTML=`✗ <strong>Cíl zatím není dosažitelný.</strong> Chybí přibližně ${fmt(shortfall)}. Zvažte zvýšení měsíčních vkladů (orientačně o ${fmt(extraMonthly)}/měs.), delší investiční horizont nebo vyšší výnos.`;
+    msg.style.color='var(--red-tx)';
+  }
 }
 function renderMilestones(rows){
   const el=document.getElementById('main-milestones');el.innerHTML='';
@@ -1086,7 +1216,7 @@ function renderMilestones(rows){
   marks.forEach(yr=>{
     const r=rows.find(r=>r.yr===yr);if(!r)return;
     const d=document.createElement('div');d.className='ms';
-    d.innerHTML=`<div class="ms-yr">Rok ${yr}</div><div class="ms-val">${fmt(r.portfolio)}</div><div class="ms-gain">+${fmt(Math.max(0,r.cumRet))} výnosy</div>`;
+    d.innerHTML=`<div class="ms-yr">Rok ${yr}</div><div class="ms-val">${fmtR(r.portfolio,yr)}</div><div class="ms-gain">+${fmt(Math.max(0,r.cumRet))} výnosy</div>`;
     el.appendChild(d);
   });
 }
@@ -1123,7 +1253,7 @@ function renderSimTable(rows){
   rows.forEach(r=>{
     const tr=document.createElement('tr');
     if(ms.has(r.yr))tr.className='milestone';
-    tr.innerHTML=`<td>${r.yr}</td><td style="text-align:right">${r.calYr}</td><td style="text-align:right">${fmtPct(r.rate)}</td><td style="text-align:right">${r.monthly!==0?fmt(r.monthly):'—'}</td><td style="text-align:right" class="${r.tx>0?'pos':r.tx<0?'neg':''}">${r.tx!==0?fmt(r.tx):'—'}</td><td style="text-align:right" class="${r.gain>0?'pos':r.gain<0?'neg':''}">${r.yr>0?fmt(r.gain):'—'}</td><td style="text-align:right">${fmt(r.cumInv)}</td><td style="text-align:right;font-weight:600">${fmt(r.portfolio)}</td>`;
+    tr.innerHTML=`<td>${r.yr}</td><td style="text-align:right">${r.calYr}</td><td style="text-align:right">${fmtPct(r.rate)}</td><td style="text-align:right">${r.monthly!==0?fmt(r.monthly):'—'}</td><td style="text-align:right" class="${r.tx>0?'pos':r.tx<0?'neg':''}">${r.tx!==0?fmt(r.tx):'—'}</td><td style="text-align:right" class="${r.gain>0?'pos':r.gain<0?'neg':''}">${r.yr>0?fmt(r.gain):'—'}</td><td style="text-align:right">${fmt(r.cumInv)}</td><td style="text-align:right;font-weight:600">${fmtR(r.portfolio,r.yr)}</td>`;
     tb.appendChild(tr);
   });
 }
@@ -1131,6 +1261,7 @@ function renderSimTable(rows){
 function recalc(){
   const rows=simulate();
   renderKPIs(rows);renderMilestones(rows);renderChart(rows);renderSimTable(rows);
+  renderTargetIncome(rows);
   saveState();
 }
 
@@ -1232,6 +1363,10 @@ document.getElementById('horizon-slider').addEventListener('input',e=>{
 }));
 document.getElementById('birthYear').addEventListener('input',()=>{
   renderDepTL('in');renderDepTL('out');renderPhaseTL();
+  recalc();
+});
+['target-income','target-retire-age','target-rate'].forEach(id=>{
+  document.getElementById(id).addEventListener('input',()=>recalc());
 });
 
 function drawBars(id,data,c1,c2){
