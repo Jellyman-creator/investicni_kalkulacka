@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Investiční kalkulačka</title>
+<title>Celoživotní investiční kalkulačka</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
@@ -281,7 +281,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
 <nav class="topbar">
   <a class="logo" href="#">
     <div class="logo-mark"><svg viewBox="0 0 15 15" fill="none"><polyline points="1,12 4.5,7 7.5,9 11,3.5 14,5.5" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-    <div><div class="logo-name">Investiční kalkulačka</div><div class="logo-sub">Simulace portfolia</div></div>
+    <div><div class="logo-name">Celoživotní investiční kalkulačka</div><div class="logo-sub">Simulace portfolia</div></div>
   </a>
   <div class="topbar-actions">
     <button class="tb-btn" id="btn-save"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 2h8l2 2v8a1 1 0 01-1 1H3a1 1 0 01-1-1V2z"/><path d="M5 2v3h4V2M4 8h6"/></svg><span>Uložit nastavení</span></button>
@@ -428,7 +428,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
 
   <!-- FÁZE ZHODNOCENÍ — timeline -->
   <div class="card">
-    <div class="card-hdr"><div class="card-dot" style="background:var(--teal)"></div><div class="card-title">Fáze zhodnocení portfolia</div></div>
+    <div class="card-hdr"><div class="card-dot" style="background:var(--teal)"></div><div class="card-title">Zhodnocení portfolia</div></div>
     <div class="card-body">
       <p class="hint" style="margin-bottom:14px">Klikni na segment pro nastavení strategie · Táhni okraje pro změnu délky · Celý horizont je automaticky pokryt — poslední fáze se natáhne do konce</p>
       <div class="tl-axis-wrap"><div class="tl-axis" id="ph-axis"></div></div>
@@ -521,7 +521,7 @@ let depIn=[], depOut=[];
 let txIn =Array.from({length:MAX_YR+1},(_,i)=>({yr:i,val:0,desc:''}));
 let txOut=Array.from({length:MAX_YR+1},(_,i)=>({yr:i,val:0,desc:''}));
 let rulesIn=[],rulesOut=[];
-let phases=[]; // {from,to,rate,name,custom}  — covers entire horizon automatically
+let phases=[]; // {from,to,rate,name,custom}
 let selIn=null,selOut=null,selPh=null,drag=null;
 let modeIn='repeat',modeOut='repeat';
 let chartInst=null,ruleId=0;
@@ -544,12 +544,24 @@ function getRateForYear(yr){
   return sorted[sorted.length-1].rate/100;
 }
 
-// AUTO-COVER: after any change snap last phase's .to to horizon
-function snapPhasesToHorizon(){
+// FULL COVERAGE: after any change, fill any gap at the end with a new Conservative phase.
+// Never forcibly extend an existing phase — instead add a new one.
+function ensureFullCoverage(){
   const hor=getHorizon();
   if(!phases.length)return;
-  const sorted=phases.sort((a,b)=>a.from-b.from);
-  sorted[sorted.length-1].to=hor;
+  sortArr(phases);
+  // clamp all phases to horizon
+  phases.forEach(p=>{p.to=Math.min(p.to,hor);p.from=Math.min(p.from,hor);if(p.from>p.to)p.to=p.from;});
+  // remove zero-width phases that ended up out of range
+  for(let i=phases.length-1;i>=0;i--){if(phases[i].from>hor)phases.splice(i,1);}
+  if(!phases.length)return;
+  sortArr(phases);
+  const last=phases[phases.length-1];
+  if(last.to<hor){
+    // gap at end — add new Conservative phase
+    phases.push({from:last.to+1,to:hor,rate:3,name:'Konzervativní',custom:false});
+    sortArr(phases);
+  }
 }
 
 // SIMULATE
@@ -624,7 +636,7 @@ function startTLDrag(e,kind,idx,side){
     const arr=drag.kind==='in'?depIn:drag.kind==='out'?depOut:phases;
     if(drag.side==='l'){arr[drag.idx].from=Math.min(yr,arr[drag.idx].to);noOverlap(arr,drag.idx,'l');}
     else{arr[drag.idx].to=Math.max(yr,arr[drag.idx].from);noOverlap(arr,drag.idx,'r');}
-    if(drag.kind==='ph'){snapPhasesToHorizon();syncPhEditor(drag.idx);renderPhaseTL();}
+    if(drag.kind==='ph'){ensureFullCoverage();syncPhEditor(drag.idx);renderPhaseTL();}
     else{syncDepEditor(drag.kind,drag.idx);renderDepTL(drag.kind);}
     recalc();
   };
@@ -755,7 +767,7 @@ function renderPhaseTL(){
   if(empty)trackEl.appendChild(empty);
   if(!phases.length){if(empty)empty.style.display='flex';return;}
   if(empty)empty.style.display='none';
-  snapPhasesToHorizon();
+  ensureFullCoverage();
   sortArr(phases);
   phases.forEach((seg,i)=>{
     const left=((seg.from-1)/hor)*100;
@@ -805,7 +817,7 @@ function syncPhEditor(idx){
   const t=parseInt(document.getElementById('phe-to').value)||1;
   phases[selPh].from=Math.max(1,f);phases[selPh].to=Math.max(f,t);
   noOverlap(phases,selPh,'r');noOverlap(phases,selPh,'l');
-  snapPhasesToHorizon();renderPhaseTL();recalc();
+  ensureFullCoverage();renderPhaseTL();recalc();
 }));
 document.getElementById('phe-rate').addEventListener('input',()=>{
   if(selPh===null||!phases[selPh])return;
@@ -829,29 +841,50 @@ document.querySelectorAll('.phase-preset-btn').forEach(b=>b.addEventListener('cl
 document.getElementById('ph-add').addEventListener('click',()=>{
   const hor=getHorizon();
   sortArr(phases);
+  // Find a gap or split the last phase to make room
   let start=1;
   for(const s of phases){if(start>=s.from&&start<=s.to)start=s.to+1;}
-  start=Math.min(start,hor);
-  const newPh={from:start,to:Math.min(start+9,hor),rate:6,name:'Vyvážená',custom:false};
-  phases.push(newPh);
-  sortArr(phases);
-  const ni=phases.findIndex(p=>p.from===start);
-  noOverlap(phases,ni,'r');
-  snapPhasesToHorizon();
-  openPhEditor(ni);
+  if(start>hor){
+    // No free space — split the last phase in half
+    const last=phases[phases.length-1];
+    const mid=Math.floor((last.from+last.to)/2);
+    if(mid<=last.from){alert('Nelze přidat další fázi — horizont je příliš krátký.');return;}
+    const newTo=last.to;
+    last.to=mid;
+    const newPh={from:mid+1,to:newTo,rate:3,name:'Konzervativní',custom:false};
+    phases.push(newPh);
+    sortArr(phases);
+    ensureFullCoverage();
+    openPhEditor(phases.length-1);
+  } else {
+    start=Math.min(start,hor);
+    const newPh={from:start,to:Math.min(start+9,hor),rate:6,name:'Vyvážená',custom:false};
+    phases.push(newPh);
+    sortArr(phases);
+    const ni=phases.findIndex(p=>p.from===start);
+    noOverlap(phases,ni,'r');
+    ensureFullCoverage();
+    openPhEditor(ni);
+  }
   renderPhaseTL();recalc();
 });
 document.getElementById('ph-track').addEventListener('click',e=>{
   const hor=getHorizon();
   const yr=Math.max(1,Math.min(hor,Math.round((e.clientX-e.currentTarget.getBoundingClientRect().left)/e.currentTarget.getBoundingClientRect().width*hor)+1));
   sortArr(phases);
-  if(phases.findIndex(p=>yr>=p.from&&yr<=p.to)<0){
+  const hitIdx=phases.findIndex(p=>yr>=p.from&&yr<=p.to);
+  if(hitIdx>=0){
+    // clicked inside existing phase — just open its editor
+    openPhEditor(hitIdx);
+    renderPhaseTL();
+  } else {
+    // clicked in a gap — fill it
     const newPh={from:yr,to:Math.min(yr+9,hor),rate:6,name:'Vyvážená',custom:false};
     phases.push(newPh);
     sortArr(phases);
     const ni=phases.findIndex(p=>p.from===yr);
     noOverlap(phases,ni,'r');
-    snapPhasesToHorizon();
+    ensureFullCoverage();
     openPhEditor(ni);
     renderPhaseTL();recalc();
   }
@@ -1064,7 +1097,8 @@ document.getElementById('horizon-slider').addEventListener('input',e=>{
   const v=e.target.value;
   document.getElementById('horizon').value=v;
   document.getElementById('horizon-val').textContent=v;
-  snapPhasesToHorizon();
+  if(!phases.length)initDefaultPhases();
+  ensureFullCoverage();
   renderDepTL('in');renderDepTL('out');renderPhaseTL();
   renderTxTable('in');renderTxTable('out');recalc();
 });
@@ -1093,11 +1127,22 @@ bindDepLive('out');
 drawBars('bad-bars',[[15,0],[18,1],[22,3],[27,6],[32,10],[37,14],[42,19],[47,24],[50,28],[51,29],[51,29]],'#5DADE2','rgba(93,173,226,.3)');
 drawBars('good-bars',[[50,29],[47,32],[44,35],[41,38],[39,41],[38,44],[37,47],[37,50],[37,54]],'#5DADE2','#4ECDA0');
 
+function initDefaultPhases(){
+  const hor=getHorizon();
+  const t1=Math.floor(hor/3);
+  const t2=Math.floor(hor*2/3);
+  phases=[
+    {from:1,  to:t1,  rate:10,name:'Dynamická',   custom:false},
+    {from:t1+1,to:t2, rate:6, name:'Vyvážená',    custom:false},
+    {from:t2+1,to:hor,rate:3, name:'Konzervativní',custom:false},
+  ];
+}
+
 try{
   const saved=localStorage.getItem('inv-calc-v3');
   if(saved){applyState(JSON.parse(saved));}
-  else{renderDepTL('in');renderDepTL('out');renderPhaseTL();renderRules('in');renderRules('out');renderTxTable('in');renderTxTable('out');recalc();}
-}catch(e){renderDepTL('in');renderDepTL('out');renderPhaseTL();renderRules('in');renderRules('out');renderTxTable('in');renderTxTable('out');recalc();}
+  else{initDefaultPhases();renderDepTL('in');renderDepTL('out');renderPhaseTL();renderRules('in');renderRules('out');renderTxTable('in');renderTxTable('out');recalc();}
+}catch(e){initDefaultPhases();renderDepTL('in');renderDepTL('out');renderPhaseTL();renderRules('in');renderRules('out');renderTxTable('in');renderTxTable('out');recalc();}
 </script>
 </body>
 </html>
