@@ -1194,7 +1194,6 @@ document.getElementById('tx-type-out').addEventListener('click',()=>{
 
 // Redirect rbin-add to use txKind
 document.getElementById('rbin-add').removeEventListener('click',()=>addRule('in'));
-document.getElementById('rbin-add').addEventListener('click',()=>addRule(txKind));
 
 // Show rules for both kinds combined
 const origRenderRules=renderRules;
@@ -1529,7 +1528,7 @@ function applyState(s){
   });
   renderDepTL('in');renderDepTL('out');renderPhaseTL();renderRulesUnified();renderTxTable('in');renderTxTable('out');recalc();
 }
-function saveState(){try{localStorage.setItem('inv-calc-v5',JSON.stringify(getState()));}catch(e){}}
+function saveState(){try{localStorage.setItem('inv-calc-v6',JSON.stringify(getState()));}catch(e){}}
 
 document.getElementById('btn-save').addEventListener('click',()=>{
   const a=document.createElement('a');
@@ -1650,7 +1649,7 @@ document.getElementById('btn-reset').addEventListener('click',()=>{
   document.getElementById('ph-editor').classList.remove('open');
   renderDepTL('in');renderDepTL('out');renderPhaseTL();
   renderRulesUnified();renderTxTable('in');renderTxTable('out');recalc();
-  localStorage.removeItem('inv-calc-v5');
+  localStorage.removeItem('inv-calc-v6');
 });
 
 
@@ -1674,14 +1673,19 @@ function initDefaultPhases(){
 document.getElementById('startYear').value = new Date().getFullYear();
 
 try{
-  const saved=localStorage.getItem('inv-calc-v5');
-  if(saved){applyState(JSON.parse(saved));}
-  else{
+  const saved=localStorage.getItem('inv-calc-v6');
+  if(saved){
+    applyState(JSON.parse(saved));
+    // Safety: if phases ended up empty, reinitialize
+    if(!phases||!phases.length){initDefaultPhases();renderPhaseTL();}
+    recalc();
+  } else{
     prevHorizon=getHorizon();initDefaultPhases();
     renderDepTL('in');renderDepTL('out');renderPhaseTL();
     renderRulesUnified();renderTxTable('in');renderTxTable('out');recalc();
   }
 }catch(e){
+  console.warn('Init error:',e);
   document.getElementById('startYear').value=new Date().getFullYear();
   prevHorizon=getHorizon();initDefaultPhases();
   renderDepTL('in');renderDepTL('out');renderPhaseTL();
