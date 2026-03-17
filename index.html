@@ -368,32 +368,32 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
   <div class="card">
     <div class="card-hdr"><div class="card-dot" style="background:#f59e0b"></div><div class="card-title">Pravidelné vklady/výběry</div></div>
     <div class="card-body">
-      <p class="hint" style="margin-bottom:14px">Klikni na segment pro editaci · Táhni okraje pro změnu délky · Každé období je buď vklad nebo výběr</p>
-      <!-- Vklady row -->
-      <div class="tl-section">
-        <div class="tl-section-label"><span class="tl-badge dep">Vklady</span> měsíční investice do portfolia &nbsp;·&nbsp; <span style="color:var(--red-tx);font-weight:600">Výběry</span> měsíční čerpání</div>
-        <div class="tl-axis-wrap"><div class="tl-axis" id="tl-axis-in"></div></div>
-        <div class="tl-track" id="tl-track-in" data-kind="in" style="height:80px">
-          <div class="tl-empty-msg" style="flex-direction:column;gap:4px">
-            <span>Klikni nahoře pro <strong style="color:var(--grn-tx)">vklad +</strong></span>
-            <span>Klikni dole pro <strong style="color:var(--red-tx)">výběr −</strong></span>
-          </div>
-        </div>
-        <button class="btn-add-seg" data-kind="in">+ přidat období</button>
-        <div class="tl-editor" id="tl-editor-in">
-          <!-- type toggle -->
-          <div style="width:100%;display:flex;gap:6px;margin-bottom:4px">
-            <button class="toggle-opt sel" id="tei-type-dep" style="padding:5px 12px;font-size:12px;background:var(--grn-lt);color:var(--grn-tx);border:1px solid var(--grn-bd)">Vklad +</button>
-            <button class="toggle-opt" id="tei-type-out" style="padding:5px 12px;font-size:12px">Výběr −</button>
-          </div>
-          <div class="tl-ef"><label>Od roku</label><input type="number" id="tei-from" min="1" max="70"></div>
-          <div class="tl-ef"><label>Do roku</label><input type="number" id="tei-to" min="1" max="70"></div>
-          <div class="tl-ef" style="flex:2"><label id="tei-val-label">Měsíční vklad (Kč)</label><input type="number" id="tei-val" step="500" min="0"></div>
-          <button class="btn danger" id="tei-del">Smazat</button>
-          <button class="btn" id="tei-cancel">Zavřít</button>
+      <!-- Two action buttons -->
+      <div style="display:flex;gap:10px;margin-bottom:16px">
+        <button id="dep-btn-in" style="flex:1;padding:10px 16px;font-size:14px;font-weight:600;font-family:var(--font);border:2px solid #4ECDA0;border-radius:8px;background:var(--grn-lt);color:var(--grn-tx);cursor:pointer;transition:all .15s">+ Přidat vklad</button>
+        <button id="dep-btn-out" style="flex:1;padding:10px 16px;font-size:14px;font-weight:600;font-family:var(--font);border:2px solid #F87171;border-radius:8px;background:var(--red-lt);color:var(--red-tx);cursor:pointer;transition:all .15s">− Přidat výběr</button>
+      </div>
+      <!-- Timeline axis + track -->
+      <div class="tl-axis-wrap"><div class="tl-axis" id="tl-axis-in"></div></div>
+      <div id="tl-track-in" style="position:relative;height:80px;border-radius:7px;background:var(--bg);border:1px solid var(--border);overflow:hidden;user-select:none;touch-action:pan-y">
+        <!-- Permanent row divider -->
+        <div style="position:absolute;left:0;right:0;top:40px;height:1px;background:var(--border2);pointer-events:none;z-index:1"></div>
+        <div style="position:absolute;right:6px;top:12px;font-size:9px;font-weight:700;color:var(--grn-tx);opacity:.5;pointer-events:none;text-transform:uppercase;letter-spacing:.05em">vklady +</div>
+        <div style="position:absolute;right:6px;top:53px;font-size:9px;font-weight:700;color:var(--red-tx);opacity:.5;pointer-events:none;text-transform:uppercase;letter-spacing:.05em">výběry −</div>
+        <div class="tl-empty-msg" id="dep-empty-msg" style="pointer-events:none;flex-direction:column;gap:3px">
+          <span style="font-size:12px;color:var(--txt3)">Kliknutím na tlačítka výše přidejte vklady nebo výběry</span>
         </div>
       </div>
-      <div class="hint">Vklady a výběry se sečtou po měsících. Výběry jsou automaticky záporné.</div>
+      <!-- Editor panel — shown when a segment is selected -->
+      <div id="tl-editor-in" class="tl-editor">
+        <div id="dep-editor-type-badge" style="font-size:12px;font-weight:700;padding:4px 10px;border-radius:5px;background:var(--grn-lt);color:var(--grn-tx);border:1px solid var(--grn-bd)">Vklad +</div>
+        <div class="tl-ef"><label>Od roku</label><input type="number" id="tei-from" min="1" max="70"></div>
+        <div class="tl-ef"><label>Do roku</label><input type="number" id="tei-to" min="1" max="70"></div>
+        <div class="tl-ef" style="flex:2"><label id="tei-val-label">Měsíční vklad (Kč)</label><input type="number" id="tei-val" step="500" min="0" placeholder="0"></div>
+        <button class="btn danger" id="tei-del">Smazat</button>
+        <button class="btn" id="tei-cancel">Zavřít</button>
+      </div>
+      <div class="hint" style="margin-top:8px">Vklady (zelené) a výběry (červené) nesmí ve stejném období překrývat. Klikni na segment pro editaci, táhni okraje pro změnu délky.</div>
     </div>
   </div>
 
@@ -819,156 +819,135 @@ function startPhaseDrag(e,idx,side){
 
 // DEP TL
 function renderDepTL(kind){
-  // We only render on the single visible track ('in')
-  // Both depIn (green) and depOut (red) are shown together
-  if(kind==='out'){return;} // depOut has no visible track now
+  if(kind==='out')return;
   const trackEl=document.getElementById('tl-track-in');
+  if(!trackEl)return;
   const hor=getHorizon();
   renderAxis('tl-axis-in',hor);
-  const empty=trackEl.querySelector('.tl-empty-msg');
-  trackEl.innerHTML='';
-  if(empty)trackEl.appendChild(empty);
-  const total=depIn.length+depOut.length;
-  if(!total){if(empty)empty.style.display='flex';return;}
-  if(empty)empty.style.display='none';
+  // Remove only .tl-seg elements, keep the permanent structure
+  trackEl.querySelectorAll('.tl-seg').forEach(s=>s.remove());
+  const emptyMsg=document.getElementById('dep-empty-msg');
+  if(emptyMsg)emptyMsg.style.display=(depIn.length+depOut.length)?'none':'flex';
   sortArr(depIn);sortArr(depOut);
-  // Draw divider + row labels
-  const divider=document.createElement('div');
-  divider.style.cssText='position:absolute;left:0;right:0;top:40px;height:1px;background:var(--border2);pointer-events:none;z-index:1;';
-  trackEl.appendChild(divider);
-  const lblD=document.createElement('div');
-  lblD.style.cssText='position:absolute;right:6px;top:11px;font-size:9px;font-weight:700;color:#0A5940;opacity:.45;pointer-events:none;text-transform:uppercase;letter-spacing:.05em;';
-  lblD.textContent='vklady +';
-  trackEl.appendChild(lblD);
-  const lblO=document.createElement('div');
-  lblO.style.cssText='position:absolute;right:6px;top:52px;font-size:9px;font-weight:700;color:#8B2500;opacity:.45;pointer-events:none;text-transform:uppercase;letter-spacing:.05em;';
-  lblO.textContent='výběry −';
-  trackEl.appendChild(lblO);
-  depIn.forEach((seg,i)=>{
+
+  function makeSeg(seg,i,k){
+    const isIn=k==='in';
     const left=((seg.from-1)/hor)*100;
-    const width=((seg.to-seg.from+1)/hor)*100;
+    const width=Math.max(((seg.to-seg.from+1)/hor)*100,.5);
+    const sel=(isIn?selIn:selOut)===i;
     const el=document.createElement('div');
-    el.className='tl-seg'+(selIn===i?' sel':'');
-    el.style.cssText=`left:${left}%;width:${Math.max(width,0.5)}%;background:#d1f5e8;color:#0A5940;border:2px solid #4ECDA0;font-size:13px;font-weight:700;top:2px;height:36px;`;
-    const lbl=document.createElement('span');lbl.className='tl-seg-label';
-    lbl.textContent='+'+fmtV(seg.val);
-    const inp=document.createElement('input');inp.type='number';inp.className='tl-seg-input';inp.value=seg.val;inp.step=500;inp.min=0;
-    inp.addEventListener('click',e=>e.stopPropagation());
-    inp.addEventListener('input',()=>{depIn[i].val=Math.abs(num(inp.value,0));lbl.textContent='+'+fmtV(depIn[i].val);syncDepEditor('in',i);recalc();});
-    inp.addEventListener('blur',()=>{inp.classList.remove('visible');lbl.style.display='';});
-    el.appendChild(lbl);el.appendChild(inp);
-    el.addEventListener('click',e=>{
-      if(e.target===inp)return;
-      e.stopPropagation();
-      openDepEditor('in',i);
-      lbl.style.display='none';inp.classList.add('visible');inp.focus();inp.select();
-    });
+    el.className='tl-seg'+(sel?' sel':'');
+    el.style.cssText=`position:absolute;left:${left}%;width:${width}%;border-radius:5px;`
+      +`display:flex;align-items:center;justify-content:center;`
+      +`font-size:13px;font-weight:700;cursor:pointer;overflow:hidden;white-space:nowrap;touch-action:none;`
+      +(isIn?`top:2px;height:36px;background:#d1f5e8;color:#0A5940;border:2px solid #4ECDA0;`
+             :`top:43px;height:35px;background:#fde8e8;color:#8B2500;border:2px solid #F87171;`);
+    const lbl=document.createElement('span');
+    lbl.style.cssText='pointer-events:none;padding:0 8px;overflow:hidden;text-overflow:ellipsis;';
+    lbl.textContent=(isIn?'+':'−')+fmtV(seg.val);
+    el.appendChild(lbl);
+    el.addEventListener('click',e=>{e.stopPropagation();openDepEditor(k,i);});
     ['l','r'].forEach(s=>{
       const h=document.createElement('div');h.className='tl-handle '+s;
-      const sd=ev=>{ev.stopPropagation();startDepDrag(ev,'in',i,s);};
-      h.addEventListener('mousedown',sd);h.addEventListener('touchstart',sd,{passive:false});
+      h.addEventListener('mousedown',ev=>{ev.stopPropagation();startDepDrag(ev,k,i,s);});
+      h.addEventListener('touchstart',ev=>{ev.stopPropagation();startDepDrag(ev,k,i,s);},{passive:false});
       el.appendChild(h);
     });
     trackEl.appendChild(el);
-  });
-  // Render depOut segments (red)
-  depOut.forEach((seg,i)=>{
-    const left=((seg.from-1)/hor)*100;
-    const width=((seg.to-seg.from+1)/hor)*100;
-    const el=document.createElement('div');
-    el.className='tl-seg'+(selOut===i?' sel':'');
-    el.style.cssText=`left:${left}%;width:${Math.max(width,0.5)}%;background:#fde8e8;color:#8B2500;border:2px solid #F87171;font-size:13px;font-weight:700;top:42px;height:36px;bottom:auto;`;
-    const lbl=document.createElement('span');lbl.className='tl-seg-label';
-    lbl.textContent='−'+fmtV(seg.val);
-    const inp=document.createElement('input');inp.type='number';inp.className='tl-seg-input';inp.value=seg.val;inp.step=500;inp.min=0;
-    inp.addEventListener('click',e=>e.stopPropagation());
-    inp.addEventListener('input',()=>{depOut[i].val=Math.abs(num(inp.value,0));lbl.textContent='−'+fmtV(depOut[i].val);syncDepEditor('out',i);recalc();});
-    inp.addEventListener('blur',()=>{inp.classList.remove('visible');lbl.style.display='';});
-    el.appendChild(lbl);el.appendChild(inp);
-    el.addEventListener('click',e=>{
-      if(e.target===inp)return;
-      e.stopPropagation();
-      openDepEditor('out',i);
-      lbl.style.display='none';inp.classList.add('visible');inp.focus();inp.select();
-    });
-    ['l','r'].forEach(s=>{
-      const h=document.createElement('div');h.className='tl-handle '+s;
-      const sd=ev=>{ev.stopPropagation();startDepDrag(ev,'out',i,s);};
-      h.addEventListener('mousedown',sd);h.addEventListener('touchstart',sd,{passive:false});
-      el.appendChild(h);
-    });
-    trackEl.appendChild(el);
-  });
+  }
+  depIn.forEach((seg,i)=>makeSeg(seg,i,'in'));
+  depOut.forEach((seg,i)=>makeSeg(seg,i,'out'));
 }
 function fmtV(v){return v===0?'0 Kč/m':new Intl.NumberFormat('cs-CZ',{maximumFractionDigits:0}).format(v)+' Kč/m';}
+
 function openDepEditor(kind,idx){
   if(kind==='in')selIn=idx;else selOut=idx;
-  document.getElementById('tl-editor-'+kind).classList.add('open');
-  syncDepEditor(kind,idx);
-  renderDepTL(kind);
+  // Update badge color
+  const badge=document.getElementById('dep-editor-type-badge');
+  if(badge){
+    if(kind==='in'){
+      badge.textContent='Vklad +';
+      badge.style.cssText='font-size:12px;font-weight:700;padding:4px 10px;border-radius:5px;background:var(--grn-lt);color:var(--grn-tx);border:1px solid var(--grn-bd)';
+    } else {
+      badge.textContent='Výběr −';
+      badge.style.cssText='font-size:12px;font-weight:700;padding:4px 10px;border-radius:5px;background:var(--red-lt);color:var(--red-tx);border:1px solid var(--red-bd)';
+    }
+  }
+  const valLabel=document.getElementById('tei-val-label');
+  if(valLabel)valLabel.textContent=kind==='in'?'Měsíční vklad (Kč)':'Měsíční výběr (Kč)';
+  document.getElementById('tl-editor-in').classList.add('open');
+  syncDepEditorUnified(kind,idx);
+  renderDepTL('in');
 }
-function syncDepEditor(kind,idx){
+function syncDepEditorUnified(kind,idx){
   const arr=kind==='in'?depIn:depOut;
   if(idx===null||!arr[idx])return;
   const s=arr[idx];
-  if(kind==='in'){document.getElementById('tei-from').value=s.from;document.getElementById('tei-to').value=s.to;document.getElementById('tei-val').value=s.val;}
-  else{document.getElementById('teo-from').value=s.from;document.getElementById('teo-to').value=s.to;document.getElementById('teo-val').value=s.val;}
+  document.getElementById('tei-from').value=s.from;
+  document.getElementById('tei-to').value=s.to;
+  document.getElementById('tei-val').value=s.val;
+  // Store current kind for live edits
+  document.getElementById('tl-editor-in').dataset.kind=kind;
+  document.getElementById('tl-editor-in').dataset.idx=idx;
 }
-function bindDepLive(kind){
-  const ids=kind==='in'?['tei-from','tei-to','tei-val']:['teo-from','teo-to','teo-val'];
-  ids.forEach(id=>document.getElementById(id).addEventListener('input',()=>{
-    const arr=kind==='in'?depIn:depOut;
-    const sel=kind==='in'?selIn:selOut;
-    if(sel===null||!arr[sel])return;
-    const f=parseInt(document.getElementById(ids[0]).value)||1;
-    const t=parseInt(document.getElementById(ids[1]).value)||1;
-    const v=Math.abs(parseFloat(document.getElementById(ids[2]).value)||0);
-    arr[sel]={...arr[sel],from:Math.max(1,f),to:Math.max(f,t),val:v};
-    noOverlap(arr,sel,'r');noOverlap(arr,sel,'l');
-    renderDepTL(kind);recalc();
-  }));
+// Unified live editor for single tl-editor-in
+function bindDepLive(){
+  ['tei-from','tei-to','tei-val'].forEach(id=>{
+    document.getElementById(id).addEventListener('input',()=>{
+      const ed=document.getElementById('tl-editor-in');
+      const kind=ed.dataset.kind||'in';
+      const idx=parseInt(ed.dataset.idx);
+      const arr=kind==='in'?depIn:depOut;
+      if(isNaN(idx)||!arr[idx])return;
+      const hor=getHorizon();
+      const f=Math.max(1,Math.min(hor,parseInt(document.getElementById('tei-from').value)||1));
+      const t=Math.max(f,Math.min(hor,parseInt(document.getElementById('tei-to').value)||f));
+      const v=Math.abs(parseFloat(document.getElementById('tei-val').value)||0);
+      arr[idx]={...arr[idx],from:f,to:t,val:v};
+      noOverlap(arr,idx,'r');noOverlap(arr,idx,'l');
+      renderDepTL('in');recalc();
+    });
+  });
 }
+
 function addDepSeg(kind){
   const arr=kind==='in'?depIn:depOut;
   const hor=getHorizon();
   sortArr(arr);
+  // Find first free slot (no overlap within same array)
   let start=1;
   for(const s of arr){if(start>=s.from&&start<=s.to)start=s.to+1;}
   start=Math.min(start,hor);
-  arr.push({from:start,to:Math.min(start+9,hor),val:0});
+  const newSeg={from:start,to:Math.min(start+9,hor),val:0};
+  arr.push(newSeg);
   sortArr(arr);
-  const ni=arr.findIndex(s=>s.from===start);
+  const ni=arr.findIndex(s=>s.from===newSeg.from&&s.to===newSeg.to);
   noOverlap(arr,ni,'r');
   openDepEditor(kind,ni);
-  renderDepTL(kind);
+  renderDepTL('in');
 }
-// Single visible track click — top 40px = vklad, bottom 40px = výběr
-const depTrack=document.getElementById('tl-track-in');
-depTrack.addEventListener('click',e=>{
-  const hor=getHorizon();
-  const rect=depTrack.getBoundingClientRect();
-  const yr=Math.max(1,Math.min(hor,Math.round((e.clientX-rect.left)/rect.width*hor)+1));
-  // Which row? top = depIn, bottom = depOut
-  const isOut=e.clientY-rect.top>rect.height/2;
-  const kind=isOut?'out':'in';
-  const arr=isOut?depOut:depIn;
-  sortArr(arr);
-  if(arr.findIndex(s=>yr>=s.from&&yr<=s.to)<0){
-    arr.push({from:yr,to:Math.min(yr+9,hor),val:0});
-    sortArr(arr);
-    const ni=arr.findIndex(s=>s.from===yr);
-    noOverlap(arr,ni,'r');
-    openDepEditor(kind,ni);
-    renderDepTL('in');
-  }
-});
-// btn-add-seg uses depEditorType toggle
-document.querySelectorAll('.btn-add-seg[data-kind="in"]').forEach(b=>b.addEventListener('click',()=>addDepSeg(depEditorType||'in')));
 
-document.getElementById('tei-del').addEventListener('click',()=>{if(selIn===null)return;depIn.splice(selIn,1);selIn=null;document.getElementById('tl-editor-in').classList.remove('open');renderDepTL('in');recalc();});
-document.getElementById('tei-cancel').addEventListener('click',()=>{selIn=null;document.getElementById('tl-editor-in').classList.remove('open');renderDepTL('in');});
-document.getElementById('teo-del').addEventListener('click',()=>{if(selOut===null)return;depOut.splice(selOut,1);selOut=null;document.getElementById('tl-editor-out').classList.remove('open');renderDepTL('out');recalc();});
-document.getElementById('teo-cancel').addEventListener('click',()=>{selOut=null;document.getElementById('tl-editor-out').classList.remove('open');renderDepTL('out');});
+// Button listeners
+document.getElementById('dep-btn-in').addEventListener('click',()=>addDepSeg('in'));
+document.getElementById('dep-btn-out').addEventListener('click',()=>addDepSeg('out'));
+
+// Delete / cancel from unified editor
+document.getElementById('tei-del').addEventListener('click',()=>{
+  const ed=document.getElementById('tl-editor-in');
+  const kind=ed.dataset.kind||'in';
+  const idx=parseInt(ed.dataset.idx);
+  const arr=kind==='in'?depIn:depOut;
+  if(!isNaN(idx))arr.splice(idx,1);
+  if(kind==='in')selIn=null;else selOut=null;
+  ed.classList.remove('open');
+  renderDepTL('in');recalc();
+});
+document.getElementById('tei-cancel').addEventListener('click',()=>{
+  selIn=null;selOut=null;
+  document.getElementById('tl-editor-in').classList.remove('open');
+  renderDepTL('in');
+});
+
 
 // PHASE TL
 function renderPhaseTL(){
@@ -1133,49 +1112,6 @@ document.getElementById('phe-del').addEventListener('click',()=>{
 document.getElementById('phe-cancel').addEventListener('click',()=>{
   selPh=null;document.getElementById('ph-editor').classList.remove('open');renderPhaseTL();
 });
-
-// Hidden depOut track/editor — kept for JS compatibility, the single visual track handles both
-// TYPE TOGGLE for regular deposits editor
-let depEditorType='in'; // 'in' or 'out'
-document.getElementById('tei-type-dep').addEventListener('click',()=>{
-  depEditorType='in';
-  document.getElementById('tei-type-dep').classList.add('sel');
-  document.getElementById('tei-type-out').classList.remove('sel');
-  document.getElementById('tei-val-label').textContent='Měsíční vklad (Kč)';
-  // If editing a segment, move it to depIn
-  if(selIn!==null&&depIn[selIn]){/* already in depIn */}
-  if(selOut!==null&&depOut[selOut]){
-    const seg=depOut.splice(selOut,1)[0];
-    depIn.push(seg);sortArr(depIn);
-    selIn=depIn.length-1;selOut=null;
-    renderDepTL('in');renderDepTL('out');recalc();
-  }
-});
-document.getElementById('tei-type-out').addEventListener('click',()=>{
-  depEditorType='out';
-  document.getElementById('tei-type-out').classList.add('sel');
-  document.getElementById('tei-type-dep').classList.remove('sel');
-  document.getElementById('tei-val-label').textContent='Měsíční výběr (Kč)';
-  // If editing a segment in depIn, move it to depOut
-  if(selIn!==null&&depIn[selIn]){
-    const seg=depIn.splice(selIn,1)[0];
-    depOut.push(seg);sortArr(depOut);
-    selOut=depOut.length-1;selIn=null;
-    renderDepTL('in');renderDepTL('out');recalc();
-  }
-});
-
-// When opening dep editor, set type toggle to match which array the segment is in
-const origOpenDepEditor=openDepEditor;
-// Patch: after openDepEditor, sync type toggle
-const _origOpen=openDepEditor;
-function openDepEditorWithType(kind,idx){
-  _origOpen(kind,idx);
-  depEditorType=kind;
-  document.getElementById('tei-type-dep').classList.toggle('sel',kind==='in');
-  document.getElementById('tei-type-out').classList.toggle('sel',kind==='out');
-  document.getElementById('tei-val-label').textContent=kind==='in'?'Měsíční vklad (Kč)':'Měsíční výběr (Kč)';
-}
 
 // ONE-OFF type toggle
 let txKind='in'; // current active kind for one-off
@@ -1649,16 +1585,10 @@ document.getElementById('btn-reset').addEventListener('click',()=>{
   modeIn='repeat';modeOut='repeat';
   txKind='in';
   trSliderOffset=0;
-  // reset toggle-in only (toggle-out no longer exists)
   const toggleIn=document.getElementById('toggle-in');
   if(toggleIn) toggleIn.querySelectorAll('.toggle-opt').forEach(b=>b.classList.toggle('sel',b.dataset.mode==='repeat'));
   document.getElementById('txin-repeat').style.display='';
   document.getElementById('txin-manual').style.display='none';
-  // reset type buttons
-  document.getElementById('tx-type-in').classList.add('sel');
-  document.getElementById('tx-type-out').classList.remove('sel');
-  document.getElementById('tei-type-dep').classList.add('sel');
-  document.getElementById('tei-type-out').classList.remove('sel');
   initDefaultPhases();
   selIn=null;selOut=null;selPh=null;
   document.getElementById('tl-editor-in').classList.remove('open');
@@ -1670,8 +1600,8 @@ document.getElementById('btn-reset').addEventListener('click',()=>{
 });
 
 
-bindDepLive('in');
-bindDepLive('out');
+bindDepLive();
+
 drawBars('bad-bars',[[15,0],[18,1],[22,3],[27,6],[32,10],[37,14],[42,19],[47,24],[50,28],[51,29],[51,29]],'#5DADE2','rgba(93,173,226,.3)');
 drawBars('good-bars',[[50,29],[47,32],[44,35],[41,38],[39,41],[38,44],[37,47],[37,50],[37,54]],'#5DADE2','#4ECDA0');
 
