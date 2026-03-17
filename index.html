@@ -578,6 +578,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
   </div>
 </div>
 
+<script>
 const MAX_YR=70;
 const fmt=n=>new Intl.NumberFormat('cs-CZ',{style:'currency',currency:'CZK',maximumFractionDigits:0}).format(Math.round(n||0));
 const fmtPct=n=>((n||0)*100).toFixed(1)+' %';
