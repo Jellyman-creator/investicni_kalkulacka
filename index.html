@@ -528,7 +528,7 @@ let chartInst=null,ruleId=0;
 let prevHorizon=40; // tracks last known horizon for proportional rescaling
 
 function getHorizon(){return Math.min(num(document.getElementById('horizon').value,40),MAX_YR);}
-function getStartYear(){return num(document.getElementById('startYear').value,2025);}
+function getStartYear(){return num(document.getElementById('startYear').value,2026);}
 
 // PHASE: get rate for year — fills gaps with last phase rate
 function getRateForYear(yr){
