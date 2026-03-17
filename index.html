@@ -329,7 +329,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
       <div class="card">
         <div class="card-hdr"><div class="card-dot" style="background:var(--blue)"></div><div class="card-title">Základní parametry</div></div>
         <div class="card-body">
-          <div class="inp-group"><label class="inp-label">Počáteční investice</label><div class="inp-wrap"><input type="number" id="startAmount" value="0" min="0" step="10000"><span class="inp-unit">Kč</span></div></div>
+          <div class="inp-group"><label class="inp-label">Počáteční investice</label><div class="inp-wrap"><input type="number" id="startAmount" placeholder="např. 1 000 000" min="0" step="10000"><span class="inp-unit">Kč</span></div></div>
           <div class="inp-group"><label class="inp-label">Rok zahájení</label><div class="inp-wrap"><input type="number" id="startYear" min="2000" max="2100"></div></div>
           <div class="inp-group">
             <label class="inp-label">Investiční horizont</label>
@@ -685,7 +685,7 @@ function getTxNet(yr){
   return inV-outV;
 }
 function simulate(){
-  const start=num(document.getElementById('startAmount').value,0);
+  const start=num(document.getElementById('startAmount').value||'0',0);
   const startYr=getStartYear();
   const hor=getHorizon();
   const rows=[];
@@ -928,8 +928,12 @@ function addDepSeg(kind){
   const arr=kind==='in'?depIn:depOut;
   const hor=getHorizon();
   sortArr(arr);
-  // Find first free slot (no overlap within same array)
   let start=1;
+  if(kind==='out'&&depIn.length>0){
+    // Start withdrawal after the last deposit
+    sortArr(depIn);
+    start=depIn[depIn.length-1].to+1;
+  }
   for(const s of arr){if(start>=s.from&&start<=s.to)start=s.to+1;}
   start=Math.min(start,hor);
   const newSeg={from:start,to:Math.min(start+9,hor),val:0};
@@ -939,6 +943,11 @@ function addDepSeg(kind){
   noOverlap(arr,ni,'r');
   openDepEditor(kind,ni);
   renderDepTL('in');
+  // Focus on value input after short delay
+  setTimeout(()=>{
+    const inp=document.getElementById('tei-val');
+    if(inp){inp.focus();inp.select();}
+  },50);
 }
 
 // Button listeners
@@ -1346,7 +1355,15 @@ function renderTargetIncome(rows){
   const yearsDrawdown=hor-refYr;
 
   if(refPortfolio<=0||yearsDrawdown<=0){
-    document.getElementById('target-result').style.display='none';
+    document.getElementById('target-result').style.display='';  // show so slider works
+    document.getElementById('tr-monthly').textContent='—';
+    document.getElementById('tr-monthly-sub').textContent='Zadejte počáteční investici nebo vklady';
+    document.getElementById('tr-peak').textContent='—';
+    document.getElementById('tr-capital').textContent='—';
+    document.getElementById('tr-period').textContent='—';
+    document.getElementById('tr-retire-age-val').textContent='—';
+    document.getElementById('tr-message').innerHTML='';
+    document.getElementById('tr-legacy-row').style.display='none';
     return;
   }
 
@@ -1466,7 +1483,7 @@ function getState(){
   return{startAmount:document.getElementById('startAmount').value,startYear:document.getElementById('startYear').value,horizon:document.getElementById('horizon').value,depIn,depOut,txIn,txOut,rulesIn,rulesOut,phases,modeIn,modeOut};
 }
 function applyState(s){
-  document.getElementById('startAmount').value=s.startAmount||0;
+  document.getElementById('startAmount').value=s.startAmount||'';
   document.getElementById('startYear').value=s.startYear||new Date().getFullYear();
   const h=parseInt(s.horizon)||40;
   document.getElementById('horizon').value=h;
@@ -1586,7 +1603,8 @@ resetBtn.addEventListener('mouseout',()=>{resetBtn.style.background='var(--surfa
 // RESET
 document.getElementById('btn-reset').addEventListener('click',()=>{
   if(!confirm('Opravdu chcete vynulovat všechny hodnoty?'))return;
-  document.getElementById('startAmount').value=0;
+  document.getElementById('startAmount').value='';
+  document.getElementById('startAmount').placeholder='např. 1 000 000';
   document.getElementById('startYear').value=new Date().getFullYear();
   const defHor=40;
   document.getElementById('horizon').value=defHor;
