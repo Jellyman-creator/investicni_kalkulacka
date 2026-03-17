@@ -681,16 +681,28 @@ function simulate(){
   const startYr=getStartYear();
   const hor=getHorizon();
   const rows=[];
-  let portfolio=start,cumInv=start;
+  let portfolio=start, cumInv=start, cumWithdrawn=0;
   for(let yr=0;yr<=hor;yr++){
     const rate=getRateForYear(yr);
     const monthly=getMonthlyNet(yr);
     const annDep=monthly*12;
     const tx=getTxNet(yr);
     let gain=0;
-    if(yr===0){portfolio=start+tx;cumInv=start+(tx>0?tx:0);}
-    else{gain=(portfolio+(annDep+tx)/2)*rate;portfolio+=annDep+tx+gain;cumInv+=annDep+(tx>0?tx:0);}
-    rows.push({yr,calYr:startYr+yr,rate,monthly,annDep,tx,gain,cumInv,cumRet:portfolio-cumInv,portfolio});
+    if(yr===0){
+      portfolio=start+(tx>0?tx:0)-(tx<0?Math.abs(tx):0);
+      cumInv=start+(tx>0?tx:0);
+      cumWithdrawn=(tx<0?Math.abs(tx):0);
+    } else {
+      gain=(portfolio+(annDep+tx)/2)*rate;
+      portfolio+=annDep+tx+gain;
+      // cumInv only grows with positive inflows
+      if(annDep>0) cumInv+=annDep;
+      if(tx>0) cumInv+=tx;
+      // track withdrawals separately
+      if(annDep<0) cumWithdrawn+=Math.abs(annDep);
+      if(tx<0) cumWithdrawn+=Math.abs(tx);
+    }
+    rows.push({yr,calYr:startYr+yr,rate,monthly,annDep,tx,gain,cumInv,cumWithdrawn,cumRet:Math.max(0,portfolio-cumInv),portfolio});
   }
   return rows;
 }
@@ -1263,11 +1275,15 @@ function renderChart(rows){
   const sy=getStartYear();
   const hor=getHorizon();
   const step=hor<=20?5:hor<=40?5:10;
+  // For each year: show portfolio split as deposited portion vs gain portion
+  // When portfolio < cumInv (loss/withdrawal phase), show only portfolio as deposited, gains=0
+  const depData=rows.map(r=>Math.round(Math.min(r.cumInv, Math.max(0,r.portfolio))));
+  const gainData=rows.map(r=>Math.round(Math.max(0,r.portfolio-r.cumInv)));
   chartInst=new Chart(canvas,{
     type:'bar',
     data:{labels:rows.map(r=>r.calYr),datasets:[
-      {label:'Vložená částka',data:rows.map(r=>Math.round(r.cumInv)),backgroundColor:'#5DADE2',stack:'s'},
-      {label:'Výnosy',data:rows.map(r=>Math.round(Math.max(0,r.cumRet))),backgroundColor:'#4ECDA0',stack:'s'},
+      {label:'Vložená částka',data:depData,backgroundColor:'#5DADE2',stack:'s'},
+      {label:'Výnosy',data:gainData,backgroundColor:'#4ECDA0',stack:'s'},
     ]},
     options:{responsive:true,maintainAspectRatio:false,
       scales:{
@@ -1277,7 +1293,7 @@ function renderChart(rows){
       plugins:{legend:{display:false},tooltip:{callbacks:{
         title:([i])=>`Rok ${i.label}`,
         label:i=>`${i.dataset.label}: ${fmt(i.raw)}`,
-        footer:items=>`Celkem: ${fmt(items.reduce((s,i)=>s+(i.raw||0),0))}`
+        footer:items=>{const r=rows[items[0].dataIndex];return `Portfolio: ${fmt(r.portfolio)}\nVloženo celkem: ${fmt(r.cumInv)}`;}
       }}}
     }
   });
