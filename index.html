@@ -401,24 +401,28 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
   <div class="card">
     <div class="card-hdr"><div class="card-dot" style="background:var(--teal)"></div><div class="card-title">Jednorázové vklady/výběry</div></div>
     <div class="card-body">
-      <!-- Type toggle -->
-      <div style="display:flex;gap:0;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:3px;width:fit-content;margin-bottom:14px">
-        <button class="toggle-opt sel" id="tx-type-in" style="padding:7px 16px;font-size:13px">Vklad +</button>
-        <button class="toggle-opt" id="tx-type-out" style="padding:7px 16px;font-size:13px">Výběr −</button>
+      <!-- Two action buttons -->
+      <div style="display:flex;gap:10px;margin-bottom:16px">
+        <button id="tx-btn-in" style="flex:1;padding:10px 16px;font-size:14px;font-weight:600;font-family:var(--font);border:2px solid #4ECDA0;border-radius:8px;background:var(--grn-lt);color:var(--grn-tx);cursor:pointer;transition:all .15s">+ Přidat vklad</button>
+        <button id="tx-btn-out" style="flex:1;padding:10px 16px;font-size:14px;font-weight:600;font-family:var(--font);border:2px solid #F87171;border-radius:8px;background:var(--red-lt);color:var(--red-tx);cursor:pointer;transition:all .15s">− Přidat výběr</button>
       </div>
+      <!-- Mode toggle -->
       <div class="toggle-bar" id="toggle-in">
         <button class="toggle-opt sel" data-mode="repeat">Opakovaně</button>
         <button class="toggle-opt" data-mode="manual">Rok po roku</button>
       </div>
       <!-- Repeat view -->
       <div id="txin-repeat">
-        <div class="rule-builder">
+        <div class="rule-builder" id="tx-rule-form">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+            <div id="tx-form-badge" style="font-size:12px;font-weight:700;padding:4px 12px;border-radius:6px;background:var(--grn-lt);color:var(--grn-tx);border:1px solid var(--grn-bd)">Vklad +</div>
+          </div>
           <div class="rb-row">
-            <div class="rb-field"><label id="rb-val-label">Částka (Kč)</label><input type="number" id="rbin-val" placeholder="např. 50 000" step="1000" min="0"></div>
+            <div class="rb-field"><label>Částka (Kč)</label><input type="number" id="rbin-val" placeholder="např. 50 000" step="1000" min="0"></div>
             <div class="rb-field"><label>Od roku</label><input type="number" id="rbin-from" value="1" min="1" max="70" style="width:76px"></div>
             <div class="rb-field"><label>Do roku</label><input type="number" id="rbin-to" value="10" min="1" max="70" style="width:76px"></div>
             <div class="rb-field"><label>Každých N let</label><select id="rbin-every"><option value="1">každý rok</option><option value="2">každé 2 roky</option><option value="3">každé 3 roky</option><option value="5" selected>každých 5 let</option><option value="10">každých 10 let</option></select></div>
-            <div class="rb-field" style="flex:1;min-width:180px"><label id="rb-desc-label">Popis</label><input type="text" id="rbin-desc" class="wide" placeholder="např. prodej nemovitosti, dědictví atp."></div>
+            <div class="rb-field" style="flex:1;min-width:160px"><label id="rb-desc-label">Popis</label><input type="text" id="rbin-desc" class="wide" placeholder="např. prodej nemovitosti atp."></div>
             <button class="btn primary" id="rbin-add" style="align-self:flex-end">Přidat</button>
           </div>
         </div>
@@ -427,8 +431,8 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
       <!-- Manual view -->
       <div id="txin-manual" style="display:none">
         <div class="tx-scroll" style="max-height:220px"><table class="tx-table"><thead><tr><th style="width:55px;text-align:center">Rok</th><th style="width:70px">Rok</th><th class="r">Částka (Kč)</th><th>Popis</th></tr></thead><tbody id="tbody-in"></tbody></table></div>
+        <div class="hint" style="margin-top:6px">Kladná = vklad (zelená) · Záporná = výběr (červená)</div>
       </div>
-      <div class="hint" id="tx-hint" style="margin-top:8px">Kladná hodnota = vklad. Záporná = výběr, odečítá se z portfolia.</div>
     </div>
   </div>
 
@@ -763,19 +767,29 @@ function renderAxis(axisElId,hor){
 // DEP drag (deposits/withdrawals — independent segments, can have gaps)
 function startDepDrag(e,kind,idx,side){
   if(e.cancelable)e.preventDefault();
-  const rect=document.getElementById('tl-track-'+kind).getBoundingClientRect();
-  drag={kind,idx,side,rect};
+  // Both kinds render on tl-track-in
+  const rect=document.getElementById('tl-track-in').getBoundingClientRect();
+  const arr=kind==='in'?depIn:depOut;
+  // Capture direct object reference to avoid index drift
+  const seg=arr[idx];
   const move=ev=>{
     const cx=ev.touches?ev.touches[0].clientX:ev.clientX;
     const hor=getHorizon();
     const yr=Math.max(1,Math.min(hor,Math.round((cx-rect.left)/rect.width*hor)+1));
-    const arr=kind==='in'?depIn:depOut;
-    if(side==='l'){arr[idx].from=Math.min(yr,arr[idx].to);noOverlap(arr,idx,'l');}
-    else{arr[idx].to=Math.max(yr,arr[idx].from);noOverlap(arr,idx,'r');}
-    syncDepEditor(kind,idx);renderDepTL(kind);recalc();
+    if(side==='l'){seg.from=Math.min(yr,seg.to-1);}
+    else{seg.to=Math.max(yr,seg.from+1);}
+    // Clamp to horizon
+    seg.from=Math.max(1,Math.min(hor,seg.from));
+    seg.to=Math.max(seg.from,Math.min(hor,seg.to));
+    // Sync editor if this segment is open
+    const ed=document.getElementById('tl-editor-in');
+    if(ed.dataset.kind===kind&&parseInt(ed.dataset.idx)===idx){
+      document.getElementById('tei-from').value=seg.from;
+      document.getElementById('tei-to').value=seg.to;
+    }
+    renderDepTL('in');recalc();
   };
   const up=()=>{
-    drag=null;
     document.removeEventListener('mousemove',move);document.removeEventListener('mouseup',up);
     document.removeEventListener('touchmove',move);document.removeEventListener('touchend',up);
   };
@@ -1113,34 +1127,35 @@ document.getElementById('phe-cancel').addEventListener('click',()=>{
   selPh=null;document.getElementById('ph-editor').classList.remove('open');renderPhaseTL();
 });
 
-// ONE-OFF type toggle
+// ONE-OFF type buttons
 let txKind='in'; // current active kind for one-off
-document.getElementById('tx-type-in').addEventListener('click',()=>{
-  txKind='in';
-  document.getElementById('tx-type-in').classList.add('sel');
-  document.getElementById('tx-type-out').classList.remove('sel');
-  document.getElementById('rb-val-label').textContent='Částka (Kč)';
-  document.getElementById('rb-desc-label').textContent='Popis';
-  document.getElementById('rbin-val').placeholder='např. 50 000';
-  document.getElementById('rbin-desc').placeholder='např. prodej nemovitosti, dědictví atp.';
-  document.getElementById('tx-hint').textContent='Kladná hodnota = vklad. Přičte se k portfoliu.';
-  // Show rules for current kind
+function setTxKind(kind){
+  txKind=kind;
+  const badge=document.getElementById('tx-form-badge');
+  if(badge){
+    if(kind==='in'){
+      badge.textContent='Vklad +';
+      badge.style.cssText='font-size:12px;font-weight:700;padding:4px 12px;border-radius:6px;background:var(--grn-lt);color:var(--grn-tx);border:1px solid var(--grn-bd)';
+      document.getElementById('rbin-val').placeholder='např. 50 000';
+      document.getElementById('rbin-desc').placeholder='např. prodej nemovitosti, dědictví atp.';
+    } else {
+      badge.textContent='Výběr −';
+      badge.style.cssText='font-size:12px;font-weight:700;padding:4px 12px;border-radius:6px;background:var(--red-lt);color:var(--red-tx);border:1px solid var(--red-bd)';
+      document.getElementById('rbin-val').placeholder='např. 700 000';
+      document.getElementById('rbin-desc').placeholder='např. koupě auta, rekonstrukce bytu atp.';
+    }
+  }
+  // Switch to repeat mode and show form
+  const toggleIn=document.getElementById('toggle-in');
+  if(toggleIn){
+    toggleIn.querySelectorAll('.toggle-opt').forEach(b=>b.classList.toggle('sel',b.dataset.mode==='repeat'));
+    document.getElementById('txin-repeat').style.display='';
+    document.getElementById('txin-manual').style.display='none';
+  }
   renderRulesUnified();
-});
-document.getElementById('tx-type-out').addEventListener('click',()=>{
-  txKind='out';
-  document.getElementById('tx-type-out').classList.add('sel');
-  document.getElementById('tx-type-in').classList.remove('sel');
-  document.getElementById('rb-val-label').textContent='Částka (Kč)';
-  document.getElementById('rb-desc-label').textContent='Popis';
-  document.getElementById('rbin-val').placeholder='např. 700 000';
-  document.getElementById('rbin-desc').placeholder='např. koupě auta, rekonstrukce bytu atp.';
-  document.getElementById('tx-hint').textContent='Zadejte kladnou hodnotu — výběr se automaticky odečte od portfolia.';
-  renderRulesUnified();
-});
-
-// Redirect rbin-add to use txKind
-document.getElementById('rbin-add').removeEventListener('click',()=>addRule('in'));
+}
+document.getElementById('tx-btn-in').addEventListener('click',()=>setTxKind('in'));
+document.getElementById('tx-btn-out').addEventListener('click',()=>setTxKind('out'));
 
 // Show rules for both kinds combined
 const origRenderRules=renderRules;
