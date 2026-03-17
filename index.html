@@ -631,25 +631,69 @@ function renderAxis(axisElId,hor){
   }
 }
 
-// Unified drag handler for all tracks
-function startTLDrag(e,kind,idx,side){
+// DEP drag (deposits/withdrawals — independent segments, can have gaps)
+function startDepDrag(e,kind,idx,side){
   if(e.cancelable)e.preventDefault();
-  const trackId=kind==='ph'?'ph-track':'tl-track-'+kind;
-  const rect=document.getElementById(trackId).getBoundingClientRect();
+  const rect=document.getElementById('tl-track-'+kind).getBoundingClientRect();
   drag={kind,idx,side,rect};
   const move=ev=>{
     const cx=ev.touches?ev.touches[0].clientX:ev.clientX;
     const hor=getHorizon();
-    const yr=Math.max(1,Math.min(hor,Math.round((cx-drag.rect.left)/drag.rect.width*hor)+1));
-    const arr=drag.kind==='in'?depIn:drag.kind==='out'?depOut:phases;
-    if(drag.side==='l'){arr[drag.idx].from=Math.min(yr,arr[drag.idx].to);noOverlap(arr,drag.idx,'l');}
-    else{arr[drag.idx].to=Math.max(yr,arr[drag.idx].from);noOverlap(arr,drag.idx,'r');}
-    if(drag.kind==='ph'){syncPhEditor(drag.idx);renderPhaseTL();}
-    else{syncDepEditor(drag.kind,drag.idx);renderDepTL(drag.kind);}
-    recalc();
+    const yr=Math.max(1,Math.min(hor,Math.round((cx-rect.left)/rect.width*hor)+1));
+    const arr=kind==='in'?depIn:depOut;
+    if(side==='l'){arr[idx].from=Math.min(yr,arr[idx].to);noOverlap(arr,idx,'l');}
+    else{arr[idx].to=Math.max(yr,arr[idx].from);noOverlap(arr,idx,'r');}
+    syncDepEditor(kind,idx);renderDepTL(kind);recalc();
   };
   const up=()=>{
-    if(drag&&drag.kind==='ph'){ensureFullCoverage();renderPhaseTL();recalc();}
+    drag=null;
+    document.removeEventListener('mousemove',move);document.removeEventListener('mouseup',up);
+    document.removeEventListener('touchmove',move);document.removeEventListener('touchend',up);
+  };
+  document.addEventListener('mousemove',move);document.addEventListener('mouseup',up);
+  document.addEventListener('touchmove',move,{passive:false});document.addEventListener('touchend',up);
+}
+
+// PHASE drag — dragging a handle moves the BOUNDARY between two adjacent phases.
+// Left handle of phase[i]  = right boundary of phase[i-1].
+// Right handle of phase[i] = left boundary of phase[i+1].
+// This guarantees no gaps and no overlaps at all times.
+function startPhaseDrag(e,idx,side){
+  if(e.cancelable)e.preventDefault();
+  const rect=document.getElementById('ph-track').getBoundingClientRect();
+  drag={kind:'ph',idx,side,rect};
+  const move=ev=>{
+    const cx=ev.touches?ev.touches[0].clientX:ev.clientX;
+    const hor=getHorizon();
+    sortArr(phases);
+    // re-find idx after sort (phases may have been reordered)
+    const ph=phases[drag.idx];
+    if(!ph)return;
+    const MIN_LEN=1; // minimum years per phase
+    if(drag.side==='r'){
+      // moving right boundary: affects this phase and the next
+      const next=phases[drag.idx+1];
+      if(!next)return; // last phase — can't drag right (it's pinned to horizon end)
+      const rawYr=Math.round((cx-rect.left)/rect.width*hor);
+      const minBound=ph.from+MIN_LEN-1;
+      const maxBound=next.to-MIN_LEN;
+      const yr=Math.max(minBound,Math.min(maxBound,rawYr));
+      ph.to=yr;
+      next.from=yr+1;
+    } else {
+      // moving left boundary: affects previous phase and this one
+      const prev=phases[drag.idx-1];
+      if(!prev)return; // first phase — can't drag left (pinned to 1)
+      const rawYr=Math.round((cx-rect.left)/rect.width*hor)+1;
+      const minBound=prev.from+MIN_LEN;
+      const maxBound=ph.to-MIN_LEN+1;
+      const yr=Math.max(minBound,Math.min(maxBound,rawYr));
+      prev.to=yr-1;
+      ph.from=yr;
+    }
+    syncPhEditor(drag.idx);renderPhaseTL();recalc();
+  };
+  const up=()=>{
     drag=null;
     document.removeEventListener('mousemove',move);document.removeEventListener('mouseup',up);
     document.removeEventListener('touchmove',move);document.removeEventListener('touchend',up);
@@ -694,7 +738,7 @@ function renderDepTL(kind){
     });
     ['l','r'].forEach(s=>{
       const h=document.createElement('div');h.className='tl-handle '+s;
-      const sd=ev=>{ev.stopPropagation();startTLDrag(ev,kind,i,s);};
+      const sd=ev=>{ev.stopPropagation();startDepDrag(ev,kind,i,s);};
       h.addEventListener('mousedown',sd);h.addEventListener('touchstart',sd,{passive:false});
       el.appendChild(h);
     });
@@ -790,8 +834,11 @@ function renderPhaseTL(){
     el.appendChild(lbl);el.appendChild(sub);
     el.addEventListener('click',e=>{e.stopPropagation();openPhEditor(i);});
     ['l','r'].forEach(s=>{
+      // Left handle of first phase and right handle of last phase are pinned — hide them
+      if(s==='l'&&i===0)return;
+      if(s==='r'&&i===phases.length-1)return;
       const h=document.createElement('div');h.className='tl-handle '+s;
-      const sd=ev=>{ev.stopPropagation();startTLDrag(ev,'ph',i,s);};
+      const sd=ev=>{ev.stopPropagation();startPhaseDrag(ev,i,s);};
       h.addEventListener('mousedown',sd);h.addEventListener('touchstart',sd,{passive:false});
       el.appendChild(h);
     });
@@ -824,8 +871,17 @@ function syncPhEditor(idx){
   if(selPh===null||!phases[selPh])return;
   const f=parseInt(document.getElementById('phe-from').value)||1;
   const t=parseInt(document.getElementById('phe-to').value)||1;
-  phases[selPh].from=Math.max(1,f);phases[selPh].to=Math.max(f,t);
-  noOverlap(phases,selPh,'r');noOverlap(phases,selPh,'l');
+  const hor=getHorizon();
+  const MIN=1;
+  // adjust neighbours to stay gapless
+  const prev=phases[selPh-1];
+  const next=phases[selPh+1];
+  const newFrom=Math.max(prev?prev.from+MIN:1, Math.min(f, t-MIN+1));
+  const newTo  =Math.max(newFrom+MIN-1, Math.min(t, next?next.to-MIN:hor));
+  if(prev)prev.to=newFrom-1;
+  if(next)next.from=newTo+1;
+  phases[selPh].from=newFrom;
+  phases[selPh].to=newTo;
   ensureFullCoverage();renderPhaseTL();recalc();
 }));
 document.getElementById('phe-rate').addEventListener('input',()=>{
