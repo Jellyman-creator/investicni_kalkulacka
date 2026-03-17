@@ -832,13 +832,24 @@ function renderDepTL(kind){
   if(!total){if(empty)empty.style.display='flex';return;}
   if(empty)empty.style.display='none';
   sortArr(depIn);sortArr(depOut);
-  // Render depIn segments (green/blue)
+  // Draw divider + row labels
+  const divider=document.createElement('div');
+  divider.style.cssText='position:absolute;left:0;right:0;top:40px;height:1px;background:var(--border2);pointer-events:none;z-index:1;';
+  trackEl.appendChild(divider);
+  const lblD=document.createElement('div');
+  lblD.style.cssText='position:absolute;right:6px;top:11px;font-size:9px;font-weight:700;color:#0A5940;opacity:.45;pointer-events:none;text-transform:uppercase;letter-spacing:.05em;';
+  lblD.textContent='vklady +';
+  trackEl.appendChild(lblD);
+  const lblO=document.createElement('div');
+  lblO.style.cssText='position:absolute;right:6px;top:52px;font-size:9px;font-weight:700;color:#8B2500;opacity:.45;pointer-events:none;text-transform:uppercase;letter-spacing:.05em;';
+  lblO.textContent='výběry −';
+  trackEl.appendChild(lblO);
   depIn.forEach((seg,i)=>{
     const left=((seg.from-1)/hor)*100;
     const width=((seg.to-seg.from+1)/hor)*100;
     const el=document.createElement('div');
     el.className='tl-seg'+(selIn===i?' sel':'');
-    el.style.cssText=`left:${left}%;width:${Math.max(width,0.5)}%;background:#d1f5e8;color:#0A5940;border:2px solid #4ECDA0;font-size:13px;font-weight:700;`;
+    el.style.cssText=`left:${left}%;width:${Math.max(width,0.5)}%;background:#d1f5e8;color:#0A5940;border:2px solid #4ECDA0;font-size:13px;font-weight:700;top:2px;height:36px;`;
     const lbl=document.createElement('span');lbl.className='tl-seg-label';
     lbl.textContent='+'+fmtV(seg.val);
     const inp=document.createElement('input');inp.type='number';inp.className='tl-seg-input';inp.value=seg.val;inp.step=500;inp.min=0;
@@ -866,7 +877,7 @@ function renderDepTL(kind){
     const width=((seg.to-seg.from+1)/hor)*100;
     const el=document.createElement('div');
     el.className='tl-seg'+(selOut===i?' sel':'');
-    el.style.cssText=`left:${left}%;width:${Math.max(width,0.5)}%;background:#fde8e8;color:#8B2500;border:2px solid #F87171;font-size:13px;font-weight:700;top:24px;`;
+    el.style.cssText=`left:${left}%;width:${Math.max(width,0.5)}%;background:#fde8e8;color:#8B2500;border:2px solid #F87171;font-size:13px;font-weight:700;top:42px;height:36px;bottom:auto;`;
     const lbl=document.createElement('span');lbl.className='tl-seg-label';
     lbl.textContent='−'+fmtV(seg.val);
     const inp=document.createElement('input');inp.type='number';inp.className='tl-seg-input';inp.value=seg.val;inp.step=500;inp.min=0;
@@ -1636,19 +1647,25 @@ document.getElementById('btn-reset').addEventListener('click',()=>{
   txOut=Array.from({length:MAX_YR+1},(_,i)=>({yr:i,val:0,desc:''}));
   rulesIn=[];rulesOut=[];
   modeIn='repeat';modeOut='repeat';
-  // reset toggles to Opakovaně
-  ['in','out'].forEach(kind=>{
-    document.getElementById('toggle-'+kind).querySelectorAll('.toggle-opt').forEach(b=>b.classList.toggle('sel',b.dataset.mode==='repeat'));
-    document.getElementById('tx'+kind+'-repeat').style.display='';
-    document.getElementById('tx'+kind+'-manual').style.display='none';
-  });
+  txKind='in';
+  trSliderOffset=0;
+  // reset toggle-in only (toggle-out no longer exists)
+  const toggleIn=document.getElementById('toggle-in');
+  if(toggleIn) toggleIn.querySelectorAll('.toggle-opt').forEach(b=>b.classList.toggle('sel',b.dataset.mode==='repeat'));
+  document.getElementById('txin-repeat').style.display='';
+  document.getElementById('txin-manual').style.display='none';
+  // reset type buttons
+  document.getElementById('tx-type-in').classList.add('sel');
+  document.getElementById('tx-type-out').classList.remove('sel');
+  document.getElementById('tei-type-dep').classList.add('sel');
+  document.getElementById('tei-type-out').classList.remove('sel');
   initDefaultPhases();
   selIn=null;selOut=null;selPh=null;
   document.getElementById('tl-editor-in').classList.remove('open');
-  document.getElementById('tl-editor-out').classList.remove('open');
   document.getElementById('ph-editor').classList.remove('open');
-  renderDepTL('in');renderDepTL('out');renderPhaseTL();
-  renderRulesUnified();renderTxTable('in');renderTxTable('out');recalc();
+  document.getElementById('target-result').style.display='none';
+  renderDepTL('in');renderPhaseTL();
+  renderRulesUnified();renderTxTable('in');recalc();
   localStorage.removeItem('inv-calc-v6');
 });
 
