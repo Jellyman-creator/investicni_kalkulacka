@@ -1240,24 +1240,29 @@ function renderTargetIncome(rows){
   // Apply slider offset (only if birthYear is set)
   let refYr=Math.max(1,Math.min(hor, baseRefYr+trSliderOffset));
 
-  // Update slider UI
+  // Update slider UI — always visible
   const sliderWrap=document.getElementById('tr-slider-wrap');
+  sliderWrap.style.display='';
+  const slider=document.getElementById('tr-retire-slider');
+  // Slider range: baseRefYr ±15 years, clamped to 1–hor
+  const sliderMinYr=Math.max(1, baseRefYr-15);
+  const sliderMaxYr=Math.min(hor, baseRefYr+15);
+  slider.min=sliderMinYr; slider.max=sliderMaxYr;
+  slider.value=refYr;
+  // Labels
   if(by){
-    sliderWrap.style.display='';
-    const baseAge=by+baseRefYr-sy;
-    const slider=document.getElementById('tr-retire-slider');
-    const minAge=Math.max(40, baseAge-20);
-    const maxAge=Math.min(80, baseAge+20);
-    slider.min=minAge; slider.max=maxAge;
+    document.getElementById('tr-slider-min').textContent=(by+sliderMinYr-sy)+' let';
+    document.getElementById('tr-slider-max').textContent=(by+sliderMaxYr-sy)+' let';
     const currentAge=by+refYr-sy;
-    slider.value=currentAge;
-    document.getElementById('tr-slider-min').textContent=minAge+' let';
-    document.getElementById('tr-slider-max').textContent=maxAge+' let';
-    const diff=currentAge-baseAge;
+    const diff=trSliderOffset;
     document.getElementById('tr-slider-label').textContent=
-      currentAge+' let'+(diff===0?' (základní nastavení)':diff>0?' (+'+diff+' let)':' ('+diff+' let)');
+      currentAge+' let'+(diff===0?' (základní)':diff>0?' (+'+diff+' let)':' ('+diff+' let)');
   } else {
-    sliderWrap.style.display='none';
+    document.getElementById('tr-slider-min').textContent='rok '+(sy+sliderMinYr);
+    document.getElementById('tr-slider-max').textContent='rok '+(sy+sliderMaxYr);
+    const diff=trSliderOffset;
+    document.getElementById('tr-slider-label').textContent=
+      'rok '+(sy+refYr)+(diff===0?' (základní)':diff>0?' (+'+diff+' let)':' ('+diff+' let)');
   }
 
   const refRow=rows.find(r=>r.yr===refYr)||rows[rows.length-1];
@@ -1298,7 +1303,7 @@ function renderTargetIncome(rows){
   document.getElementById('tr-capital').textContent=fmt(capital);
   document.getElementById('tr-period').textContent=yearsDrawdown+' let';
   document.getElementById('tr-retire-age-val').textContent=
-    ageAtRef?(ageAtRef+' let, rok '+refCalYr):('rok '+refCalYr);
+    ageAtRef?(ageAtRef+' let'):'rok '+refCalYr;
 
   const legacyRow=document.getElementById('tr-legacy-row');
   if(legacy>0){legacyRow.style.display='flex';document.getElementById('tr-legacy-val').textContent='− '+fmt(legacy);}
@@ -1312,16 +1317,11 @@ function renderTargetIncome(rows){
   msg.style.color='var(--txt2)';
 }
 
-// Slider listener — converts age back to year offset
+// Slider listener — offset from base ref year
 document.getElementById('tr-retire-slider').addEventListener('input',e=>{
-  const by=getBirthYear();
-  const sy=getStartYear();
-  if(!by)return;
-  const selectedAge=parseInt(e.target.value);
+  const selectedYr=parseInt(e.target.value);
   const baseRefYr=getWithdrawalStartYr()||0;
-  const baseAge=by+baseRefYr-sy;
-  trSliderOffset=selectedAge-baseAge;
-  // last stored rows — re-render target only
+  trSliderOffset=selectedYr-baseRefYr;
   const rows=simulate();
   renderTargetIncome(rows);
 });
