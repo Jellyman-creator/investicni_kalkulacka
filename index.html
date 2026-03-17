@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Investiční kalkulačka — Simulace portfolia</title>
+<title>Investiční kalkulačka</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
@@ -12,7 +12,7 @@
   --navy:#1a2332;--blue:#4A9EE0;--teal:#4ECDA0;
   --red-lt:#fff5f5;--red-bd:#fde8e8;--red-tx:#8B2500;
   --grn-lt:#f0fdf8;--grn-bd:#d1f5e8;--grn-tx:#0A5940;
-  --bg:#f4f6f9;--surface:#ffffff;--border:#dde1e7;--border2:#c4c9d4;
+  --bg:#f4f6f9;--surface:#fff;--border:#dde1e7;--border2:#c4c9d4;
   --txt:#111827;--txt2:#374151;--txt3:#6b7280;
   --radius:10px;--font:'DM Sans',sans-serif;--mono:'DM Mono',monospace;
 }
@@ -21,64 +21,65 @@ html{scroll-behavior:smooth}
 body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15px;line-height:1.6}
 
 /* TOPBAR */
-.topbar{background:var(--navy);height:56px;display:flex;align-items:center;padding:0 28px;justify-content:space-between;position:sticky;top:0;z-index:100}
+.topbar{background:var(--navy);height:56px;display:flex;align-items:center;padding:0 24px;justify-content:space-between;position:sticky;top:0;z-index:100}
 .logo{display:flex;align-items:center;gap:10px;text-decoration:none}
-.logo-mark{width:30px;height:30px;background:var(--blue);border-radius:7px;display:flex;align-items:center;justify-content:center}
+.logo-mark{width:30px;height:30px;background:var(--blue);border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .logo-mark svg{width:16px;height:16px}
 .logo-name{font-size:15px;font-weight:600;color:#fff}
 .logo-sub{font-size:11px;color:rgba(255,255,255,.4);margin-top:1px}
-.topbar-actions{display:flex;gap:8px;align-items:center}
-.tb-btn{display:flex;align-items:center;gap:6px;padding:7px 13px;font-size:13px;font-family:var(--font);font-weight:500;border-radius:6px;cursor:pointer;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08);color:rgba(255,255,255,.85);transition:all .15s}
+.topbar-actions{display:flex;gap:6px;align-items:center;flex-shrink:0}
+.tb-btn{display:flex;align-items:center;gap:6px;padding:7px 12px;font-size:13px;font-family:var(--font);font-weight:500;border-radius:6px;cursor:pointer;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08);color:rgba(255,255,255,.85);transition:all .15s;white-space:nowrap}
 .tb-btn:hover{background:rgba(255,255,255,.15);color:#fff}
 .tb-btn.print{border-color:rgba(78,205,160,.35);color:var(--teal)}
 .tb-btn.print:hover{background:rgba(78,205,160,.12)}
 .tb-btn svg{width:14px;height:14px;flex-shrink:0}
-.help-btn{width:26px;height:26px;border-radius:50%;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.09);color:rgba(255,255,255,.65);font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;font-family:var(--font)}
+.help-btn{width:26px;height:26px;border-radius:50%;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.09);color:rgba(255,255,255,.65);font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;font-family:var(--font);flex-shrink:0}
 .help-btn:hover{background:rgba(255,255,255,.2);color:#fff}
 
 /* MODAL */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;align-items:center;justify-content:center;padding:20px}
 .modal-overlay.open{display:flex}
 .modal{background:var(--surface);border-radius:14px;max-width:480px;width:100%;padding:28px;position:relative}
-.modal h3{font-size:18px;font-weight:600;margin-bottom:5px;color:var(--txt)}
+.modal h3{font-size:18px;font-weight:600;margin-bottom:5px}
 .modal-sub{font-size:13px;color:var(--txt3);margin-bottom:22px;line-height:1.55}
 .modal-close{position:absolute;top:16px;right:16px;width:30px;height:30px;border-radius:50%;border:1px solid var(--border);background:none;cursor:pointer;font-size:16px;color:var(--txt2);display:flex;align-items:center;justify-content:center;font-family:var(--font);transition:all .15s}
-.modal-close:hover{background:var(--bg);color:var(--txt)}
+.modal-close:hover{background:var(--bg)}
 .modal-step{display:flex;gap:13px;margin-bottom:16px;align-items:flex-start}
 .modal-num{width:26px;height:26px;border-radius:50%;background:var(--navy);color:#fff;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
 .modal-text{font-size:14px;color:var(--txt2);line-height:1.65}
 .modal-text strong{color:var(--txt);font-weight:600}
-.modal-tip{background:#f0f7fd;border:1px solid #d0e8f8;border-radius:8px;padding:13px 15px;font-size:13px;color:#1e4d80;line-height:1.65;margin-top:6px}
+.modal-tip{background:#f0f7fd;border:1px solid #d0e8f8;border-radius:8px;padding:13px 15px;font-size:13px;color:#1e4d80;line-height:1.65}
 .modal-tip strong{font-weight:600}
 .modal-actions{display:flex;gap:8px;margin-top:22px;justify-content:flex-end}
 
 /* HERO */
-.hero{background:var(--navy);padding:52px 28px 0;overflow:hidden;position:relative}
+.hero{background:var(--navy);padding:48px 24px 0;overflow:hidden;position:relative}
 .hero::before{content:'';position:absolute;right:-80px;top:-80px;width:360px;height:360px;border-radius:50%;background:rgba(74,158,224,.06);pointer-events:none}
 .hero-eyebrow{font-size:12px;color:var(--blue);font-weight:600;letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px}
-.hero-title{font-size:28px;font-weight:300;color:#fff;line-height:1.25;margin-bottom:14px;max-width:540px}
+.hero-title{font-size:26px;font-weight:300;color:#fff;line-height:1.25;margin-bottom:14px;max-width:540px}
 .hero-title strong{font-weight:600;color:var(--teal)}
-.hero-body{font-size:14px;color:rgba(255,255,255,.55);line-height:1.75;max-width:480px;margin-bottom:28px}
-.hero-cta{display:inline-block;background:var(--blue);color:#fff;font-size:14px;font-weight:600;padding:11px 24px;border-radius:8px;cursor:pointer;text-decoration:none;transition:opacity .15s}
+.hero-body{font-size:14px;color:rgba(255,255,255,.55);line-height:1.75;max-width:480px;margin-bottom:24px}
+.hero-cta{display:inline-block;background:var(--blue);color:#fff;font-size:14px;font-weight:600;padding:10px 22px;border-radius:8px;cursor:pointer;text-decoration:none;transition:opacity .15s}
 .hero-cta:hover{opacity:.88}
-.kpi-strip{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid rgba(255,255,255,.08);margin-top:36px}
-.kpi{padding:18px 20px;border-right:1px solid rgba(255,255,255,.08)}
+.kpi-strip{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid rgba(255,255,255,.08);margin-top:28px}
+.kpi{padding:16px 18px;border-right:1px solid rgba(255,255,255,.08);min-width:0;overflow:hidden}
 .kpi:last-child{border-right:none}
-.kpi-label{font-size:11px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px}
-.kpi-val{font-size:20px;font-weight:600;color:#fff;font-family:var(--mono)}
+.kpi-label{font-size:10px;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kpi-val{font-size:17px;font-weight:600;color:#fff;font-family:var(--mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .kpi-val.blue{color:var(--blue)}
 .kpi-val.teal{color:var(--teal)}
 
 /* LAYOUT */
-.page{padding:28px;max-width:1100px;margin:0 auto}
-.grid-sidebar{display:grid;grid-template-columns:380px 1fr;gap:24px;align-items:start}
+.page{padding:24px;max-width:1100px;margin:0 auto}
+.top-grid{display:grid;grid-template-columns:340px 1fr;gap:24px;margin-bottom:20px;align-items:start}
 
 /* CARDS */
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:20px}
 .card:last-child{margin-bottom:0}
-.card-hdr{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:9px}
+.card-hdr{padding:13px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:9px;flex-wrap:wrap}
 .card-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
 .card-title{font-size:12px;font-weight:600;color:var(--txt2);text-transform:uppercase;letter-spacing:.05em}
+.card-sub{font-size:11px;color:var(--txt3);font-weight:400;text-transform:none;letter-spacing:0;margin-left:4px}
 .card-body{padding:18px}
 
 /* INPUTS */
@@ -86,99 +87,107 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
 .inp-group:last-child{margin-bottom:0}
 .inp-label{font-size:12px;color:var(--txt2);margin-bottom:6px;font-weight:600;display:block}
 .inp-wrap{position:relative}
-.inp-wrap input[type=number],.inp-wrap input[type=text]{width:100%;padding:10px 48px 10px 13px;font-size:14px;font-family:var(--mono);border:1px solid var(--border);border-radius:7px;background:var(--bg);color:var(--txt);outline:none;transition:border .15s}
+.inp-wrap input[type=number]{width:100%;padding:10px 50px 10px 13px;font-size:14px;font-family:var(--mono);border:1px solid var(--border);border-radius:7px;background:var(--bg);color:var(--txt);outline:none;transition:border .15s}
 .inp-wrap input:focus{border-color:var(--blue);background:#fff}
-.inp-unit{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--txt3);pointer-events:none;font-family:var(--font);font-weight:500}
+.inp-unit{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--txt3);pointer-events:none;font-weight:500}
 
 /* SLIDER */
 .slider-wrap{display:flex;align-items:center;gap:12px;margin-top:6px}
-.slider-wrap input[type=range]{flex:1;height:4px;accent-color:var(--blue);cursor:pointer}
-.slider-val{font-size:16px;font-weight:600;color:var(--txt);font-family:var(--mono);min-width:32px;text-align:right}
+.slider-wrap input[type=range]{flex:1;height:4px;accent-color:var(--blue);cursor:pointer;min-width:0}
+.slider-val{font-size:16px;font-weight:600;font-family:var(--mono);min-width:42px;text-align:right;white-space:nowrap}
 .slider-val span{font-size:12px;font-weight:400;color:var(--txt3)}
 
 /* PRESETS */
 .preset-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
-.preset{padding:7px 12px;font-size:13px;font-family:var(--font);font-weight:500;border:1px solid var(--border);border-radius:6px;background:none;color:var(--txt2);cursor:pointer;transition:all .15s;white-space:nowrap}
+.preset{padding:6px 11px;font-size:13px;font-family:var(--font);font-weight:500;border:1px solid var(--border);border-radius:6px;background:none;color:var(--txt2);cursor:pointer;transition:all .15s;white-space:nowrap}
 .preset:hover{border-color:var(--border2);color:var(--txt)}
 .preset.sel{background:var(--navy);color:#fff;border-color:var(--navy)}
 .preset.custom-sel{background:var(--blue);color:#fff;border-color:var(--blue)}
 
-/* PHASE CARDS */
-.phases-wrap{display:flex;flex-direction:column;gap:10px}
+/* PHASE GRID */
+.phases-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .phase-card{border:1px solid var(--border);border-radius:8px;overflow:hidden}
-.phase-card-hdr{padding:11px 14px;background:var(--bg);display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none}
+.phase-card-hdr{padding:10px 13px;background:var(--bg);display:flex;align-items:center;gap:9px;cursor:pointer;user-select:none}
 .phase-card-hdr:hover{background:#eceef2}
-.phase-num{width:24px;height:24px;border-radius:50%;background:var(--navy);color:#fff;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.phase-num{width:22px;height:22px;border-radius:50%;background:var(--navy);color:#fff;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .phase-label{font-size:13px;font-weight:600;color:var(--txt);flex:1}
-.phase-summary{font-size:12px;color:var(--txt3);font-family:var(--mono)}
-.phase-del{width:24px;height:24px;border-radius:50%;border:1px solid var(--border);background:none;cursor:pointer;font-size:15px;color:var(--txt3);display:flex;align-items:center;justify-content:center;transition:all .15s;font-family:var(--font);line-height:1}
+.phase-summary{font-size:11px;color:var(--txt3);font-family:var(--mono)}
+.phase-del{width:22px;height:22px;border-radius:50%;border:1px solid var(--border);background:none;cursor:pointer;font-size:14px;color:var(--txt3);display:flex;align-items:center;justify-content:center;transition:all .15s;font-family:var(--font);line-height:1;flex-shrink:0}
 .phase-del:hover{border-color:var(--red-bd);color:var(--red-tx);background:var(--red-lt)}
-.phase-card-body{padding:14px;border-top:1px solid var(--border);display:none}
-.phase-card-body.open{display:block}
-.phase-row{display:flex;gap:8px;align-items:flex-end;margin-bottom:12px;flex-wrap:wrap}
+.phase-body{padding:13px;border-top:1px solid var(--border);display:none}
+.phase-body.open{display:block}
+.phase-row{display:flex;gap:8px;align-items:flex-end;margin-bottom:10px;flex-wrap:wrap}
 .phase-row:last-child{margin-bottom:0}
-.phase-field{display:flex;flex-direction:column;gap:5px}
-.phase-field label{font-size:11px;color:var(--txt3);font-weight:600;text-transform:uppercase;letter-spacing:.03em}
-.phase-field input{padding:8px 10px;font-size:13px;font-family:var(--mono);border:1px solid var(--border);border-radius:6px;background:#fff;color:var(--txt);outline:none;width:90px}
+.phase-field{display:flex;flex-direction:column;gap:4px}
+.phase-field label{font-size:10px;color:var(--txt3);font-weight:600;text-transform:uppercase;letter-spacing:.03em}
+.phase-field input{padding:7px 9px;font-size:13px;font-family:var(--mono);border:1px solid var(--border);border-radius:6px;background:#fff;color:var(--txt);outline:none;width:80px}
 .phase-field input:focus{border-color:var(--blue)}
-.btn-add-phase{font-size:13px;font-weight:500;color:var(--blue);background:none;border:1px dashed #b5d4f4;border-radius:7px;padding:10px 14px;cursor:pointer;width:100%;margin-top:4px;font-family:var(--font);transition:all .15s}
+.btn-add-phase{font-size:13px;font-weight:500;color:var(--blue);background:none;border:1px dashed #b5d4f4;border-radius:7px;padding:10px;cursor:pointer;width:100%;margin-top:8px;font-family:var(--font);transition:all .15s;grid-column:1/-1}
 .btn-add-phase:hover{background:#f0f7fd}
 
 /* TIMELINE */
-.tl-axis{display:flex;justify-content:space-between;font-size:11px;color:var(--txt3);margin-bottom:5px;font-weight:500}
-.tl-track{position:relative;height:42px;border-radius:7px;background:var(--bg);border:1px solid var(--border);overflow:visible;cursor:crosshair;user-select:none}
-.tl-empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--txt3);pointer-events:none}
-.tl-seg{position:absolute;top:2px;bottom:2px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;cursor:pointer;overflow:visible;white-space:nowrap;transition:opacity .1s}
+.tl-section{margin-bottom:18px}
+.tl-section:last-of-type{margin-bottom:0}
+.tl-section-label{font-size:12px;font-weight:600;color:var(--txt2);margin-bottom:6px;display:flex;align-items:center;gap:7px}
+.tl-badge{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.tl-badge.dep{background:var(--grn-lt);color:var(--grn-tx)}
+.tl-badge.with{background:var(--red-lt);color:var(--red-tx)}
+.tl-axis-wrap{position:relative;height:16px;margin-bottom:4px}
+.tl-axis{position:absolute;inset:0;font-size:10px;color:var(--txt3);font-weight:500}
+.tl-axis span{position:absolute;transform:translateX(-50%)}
+.tl-track{position:relative;height:42px;border-radius:7px;background:var(--bg);border:1px solid var(--border);cursor:crosshair;user-select:none;touch-action:pan-y}
+.tl-empty-msg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--txt3);pointer-events:none}
+.tl-seg{position:absolute;top:2px;bottom:2px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;cursor:pointer;overflow:hidden;white-space:nowrap;touch-action:none}
 .tl-seg:hover{opacity:.88}
-.tl-seg.sel{outline:2px solid var(--txt);outline-offset:2px}
+.tl-seg.sel{outline:2px solid #333;outline-offset:2px}
 .tl-seg-val{pointer-events:none;padding:0 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.tl-seg-input{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:calc(100% - 20px);max-width:120px;text-align:center;font-size:12px;font-family:var(--mono);font-weight:600;background:rgba(255,255,255,.9);border:1px solid rgba(0,0,0,.2);border-radius:4px;padding:3px 6px;outline:none;display:none}
+.tl-seg-input{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:calc(100% - 18px);max-width:130px;text-align:center;font-size:12px;font-family:var(--mono);font-weight:600;background:rgba(255,255,255,.95);border:1px solid rgba(0,0,0,.18);border-radius:4px;padding:3px 5px;outline:none;display:none;z-index:3;touch-action:none}
 .tl-seg-input.visible{display:block}
-.tl-handle{position:absolute;top:0;bottom:0;width:10px;cursor:ew-resize;z-index:2;display:flex;align-items:center;justify-content:center}
-.tl-handle::after{content:'';width:3px;height:16px;background:rgba(0,0,0,.2);border-radius:2px}
+.tl-handle{position:absolute;top:0;bottom:0;width:12px;cursor:ew-resize;z-index:2;display:flex;align-items:center;justify-content:center;touch-action:none}
+.tl-handle::after{content:'';width:3px;height:16px;background:rgba(0,0,0,.22);border-radius:2px}
 .tl-handle.l{left:0}.tl-handle.r{right:0}
-.tl-editor{padding:14px;background:var(--bg);border-radius:8px;margin-top:10px;display:none;flex-wrap:wrap;gap:10px;align-items:flex-end;border:1px solid var(--border)}
+.tl-editor{padding:13px;background:var(--bg);border-radius:8px;margin-top:8px;display:none;flex-wrap:wrap;gap:9px;align-items:flex-end;border:1px solid var(--border)}
 .tl-editor.open{display:flex}
-.tl-ef{display:flex;flex-direction:column;gap:4px;flex:1;min-width:80px}
+.tl-ef{display:flex;flex-direction:column;gap:4px;flex:1;min-width:76px}
 .tl-ef label{font-size:11px;color:var(--txt3);font-weight:600;text-transform:uppercase;letter-spacing:.03em}
 .tl-ef input{padding:8px 10px;font-size:13px;font-family:var(--mono);border:1px solid var(--border);border-radius:6px;background:#fff;color:var(--txt);outline:none;width:100%}
 .tl-ef input:focus{border-color:var(--blue)}
 .hint{font-size:12px;color:var(--txt3);line-height:1.55;margin-top:7px}
 
 /* BUTTONS */
-.btn{padding:8px 15px;font-size:13px;font-family:var(--font);font-weight:500;border:1px solid var(--border);border-radius:6px;background:none;color:var(--txt);cursor:pointer;transition:all .15s;align-self:flex-end}
+.btn{padding:8px 14px;font-size:13px;font-family:var(--font);font-weight:500;border:1px solid var(--border);border-radius:6px;background:none;color:var(--txt);cursor:pointer;transition:all .15s;align-self:flex-end;white-space:nowrap}
 .btn:hover{background:var(--bg)}
 .btn.primary{background:var(--navy);color:#fff;border-color:transparent}
 .btn.primary:hover{opacity:.85}
 .btn.danger{color:var(--red-tx);border-color:var(--red-bd)}
 .btn.danger:hover{background:var(--red-lt)}
-.btn-add-seg{font-size:12px;font-weight:500;color:var(--blue);background:none;border:1px dashed #b5d4f4;border-radius:6px;padding:6px 12px;cursor:pointer;margin-top:8px;font-family:var(--font)}
+.btn-add-seg{font-size:12px;font-weight:500;color:var(--blue);background:none;border:1px dashed #b5d4f4;border-radius:6px;padding:5px 12px;cursor:pointer;margin-top:6px;font-family:var(--font)}
 .btn-add-seg:hover{background:#f0f7fd}
 
-/* TOGGLE SWITCH */
-.toggle-bar{display:flex;gap:0;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:3px;margin-bottom:14px;width:fit-content}
-.toggle-opt{padding:7px 16px;font-size:13px;font-weight:500;font-family:var(--font);border:none;background:none;color:var(--txt3);cursor:pointer;border-radius:6px;transition:all .15s}
+/* TOGGLE */
+.toggle-bar{display:flex;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:3px;margin-bottom:14px;width:fit-content}
+.toggle-opt{padding:7px 16px;font-size:13px;font-weight:500;font-family:var(--font);border:none;background:none;color:var(--txt3);cursor:pointer;border-radius:6px;transition:all .15s;white-space:nowrap}
 .toggle-opt.sel{background:var(--surface);color:var(--txt);box-shadow:0 1px 3px rgba(0,0,0,.1)}
 
-/* TX RULE BUILDER */
-.rule-builder{padding:14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;margin-bottom:14px}
-.rule-builder-row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:10px}
+/* RULE BUILDER */
+.rule-builder{padding:14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;margin-bottom:12px}
+.rb-row{display:flex;gap:9px;flex-wrap:wrap;align-items:flex-end}
 .rb-field{display:flex;flex-direction:column;gap:4px}
 .rb-field label{font-size:11px;color:var(--txt3);font-weight:600;text-transform:uppercase;letter-spacing:.03em}
-.rb-field input,.rb-field select{padding:8px 10px;font-size:13px;font-family:var(--mono);border:1px solid var(--border);border-radius:6px;background:#fff;color:var(--txt);outline:none}
-.rb-field input{width:110px}
+.rb-field input{padding:8px 10px;font-size:13px;font-family:var(--mono);border:1px solid var(--border);border-radius:6px;background:#fff;color:var(--txt);outline:none;width:120px}
+.rb-field input.wide{width:100%}
+.rb-field select{padding:8px 10px;font-size:13px;font-family:var(--font);border:1px solid var(--border);border-radius:6px;background:#fff;color:var(--txt);outline:none;min-width:140px}
 .rb-field input:focus,.rb-field select:focus{border-color:var(--blue)}
-.rules-list{display:flex;flex-direction:column;gap:6px}
+.rules-list{display:flex;flex-direction:column;gap:6px;margin-top:4px}
 .rule-tag{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--surface);border:1px solid var(--border);border-radius:6px;font-size:13px;color:var(--txt2)}
 .rule-tag-text{flex:1}
 .rule-tag strong{color:var(--txt);font-weight:600}
+.rule-tag.neg strong{color:var(--red-tx)}
 .rule-del{width:22px;height:22px;border-radius:50%;border:1px solid var(--border);background:none;cursor:pointer;font-size:14px;color:var(--txt3);display:flex;align-items:center;justify-content:center;transition:all .15s;font-family:var(--font)}
 .rule-del:hover{border-color:var(--red-bd);color:var(--red-tx);background:var(--red-lt)}
 
 /* TX TABLE */
-.fill-bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:10px 13px;background:var(--bg);border-radius:7px;margin-bottom:12px;font-size:13px;color:var(--txt2)}
-.fill-bar input{padding:7px 8px;font-size:13px;font-family:var(--mono);border:1px solid var(--border);border-radius:6px;background:#fff;color:var(--txt);width:88px;outline:none}
-.fill-bar input:focus{border-color:var(--blue)}
+.tx-scroll{overflow-y:auto}
 .tx-table{width:100%;border-collapse:collapse;font-size:13px}
 .tx-table th{padding:8px 8px;text-align:left;font-weight:600;font-size:11px;color:var(--txt3);border-bottom:1px solid var(--border);text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
 .tx-table th.r,.tx-table td.r{text-align:right}
@@ -186,12 +195,13 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
 .tx-table tr:last-child td{border-bottom:none}
 .tx-table tr:hover td{background:#f9fafb}
 .tx-table input[type=number],.tx-table input[type=text]{padding:5px 8px;font-size:13px;font-family:var(--mono);border:1px solid transparent;border-radius:5px;background:transparent;color:var(--txt);width:100%;outline:none;transition:all .12s}
+.tx-table input.neg{color:var(--red-tx);font-weight:600}
 .tx-table input:hover{border-color:var(--border)}
 .tx-table input:focus{border-color:var(--blue);background:#fff}
 
 /* SIM TABLE */
 .sim-wrap{overflow-x:auto;overflow-y:auto}
-.sim-table{width:100%;border-collapse:collapse;font-size:13px;min-width:600px}
+.sim-table{width:100%;border-collapse:collapse;font-size:13px;min-width:580px}
 .sim-table th{position:sticky;top:0;background:var(--bg);padding:9px 10px;text-align:right;font-weight:600;font-size:11px;color:var(--txt3);border-bottom:1px solid var(--border);white-space:nowrap;text-transform:uppercase;letter-spacing:.04em;z-index:1}
 .sim-table th:first-child{text-align:center}
 .sim-table td{padding:6px 10px;text-align:right;border-bottom:1px solid #edf0f4;font-variant-numeric:tabular-nums;font-family:var(--mono);font-size:12px;color:var(--txt)}
@@ -202,30 +212,29 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
 .neg{color:var(--red-tx);font-weight:600}
 
 /* CHART */
-.chart-wrap{position:relative;width:100%;height:320px}
-.legend{display:flex;gap:18px;font-size:13px;color:var(--txt2);margin-bottom:12px;flex-wrap:wrap}
+.chart-wrap{position:relative;width:100%;height:300px}
+.legend{display:flex;gap:16px;font-size:13px;color:var(--txt2);margin-bottom:12px;flex-wrap:wrap}
 .legend-item{display:flex;align-items:center;gap:7px}
-.legend-dot{width:11px;height:11px;border-radius:2px;flex-shrink:0}
+.legend-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
 .milestones-row{display:grid;border-top:1px solid var(--border)}
-.ms{padding:14px 14px;border-right:1px solid var(--border);text-align:center}
+.ms{padding:12px 14px;border-right:1px solid var(--border);text-align:center;min-width:0}
 .ms:last-child{border-right:none}
-.ms-yr{font-size:11px;color:var(--txt3);margin-bottom:3px;text-transform:uppercase;letter-spacing:.04em;font-weight:500}
-.ms-val{font-size:14px;font-weight:600;color:var(--txt);font-family:var(--mono)}
-.ms-gain{font-size:11px;color:var(--grn-tx);margin-top:2px;font-weight:600}
+.ms-yr{font-size:10px;color:var(--txt3);margin-bottom:3px;text-transform:uppercase;letter-spacing:.04em;font-weight:500}
+.ms-val{font-size:13px;font-weight:600;color:var(--txt);font-family:var(--mono);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ms-gain{font-size:11px;color:var(--grn-tx);margin-top:1px;font-weight:600}
 
 /* WHY SECTION */
-.why-section{background:var(--surface);padding:48px 28px;border-top:1px solid var(--border)}
+.why-section{background:var(--surface);padding:48px 24px;border-top:1px solid var(--border)}
 .section-eyebrow{font-size:12px;color:var(--blue);font-weight:600;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px}
 .section-h{font-size:22px;font-weight:400;color:var(--txt);margin-bottom:7px;line-height:1.3}
 .section-sub{font-size:14px;color:var(--txt2);line-height:1.7;max-width:560px;margin-bottom:28px}
-.compare-grid{display:grid;grid-template-columns:55fr 45fr;gap:0;border-radius:var(--radius);overflow:hidden;border:1px solid var(--border);margin-bottom:28px}
+.compare-grid{display:grid;grid-template-columns:55fr 45fr;border-radius:var(--radius);overflow:hidden;border:1px solid var(--border);margin-bottom:28px}
 .cc{display:flex;flex-direction:column}
 .cc-hdr{padding:12px 14px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:7px}
 .cc-hdr.bad{background:var(--red-lt);color:var(--red-tx);border-bottom:1px solid var(--red-bd)}
 .cc-hdr.good{background:var(--grn-lt);color:var(--grn-tx);border-bottom:1px solid var(--grn-bd)}
 .cc-icon{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
-.cc-icon.bad{background:var(--red-bd);color:var(--red-tx)}
-.cc-icon.good{background:var(--grn-bd);color:var(--grn-tx)}
+.cc-icon.bad{background:var(--red-bd);color:var(--red-tx)}.cc-icon.good{background:var(--grn-bd);color:var(--grn-tx)}
 .cc-body{padding:14px;flex:1;background:var(--surface)}
 .cc-bars{display:flex;align-items:flex-end;gap:3px;height:80px;margin-bottom:10px}
 .cc-caption{font-size:12px;color:var(--txt2);line-height:1.55}
@@ -249,35 +258,46 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
 .diff-check svg{width:10px;height:10px}
 .diff-text{font-size:14px;color:var(--txt2);line-height:1.55}
 .diff-text strong{color:var(--txt);font-weight:600}
-
-/* FOOTER */
-.footer{background:var(--navy);padding:20px 28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.footer{background:var(--navy);padding:20px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
 .footer span{font-size:12px;color:rgba(255,255,255,.35)}
 
 /* PRINT */
 @media print{
-  .topbar,.hero-cta,.why-section,.footer,.tl-editor,.btn-add-seg,.btn-add-phase,.phase-del,.fill-bar,.hint,.preset-row,.toggle-bar,.rule-builder,.btn-add-seg{display:none!important}
-  .hero{padding:20px 20px 0}
-  .page{padding:12px}
-  .card{break-inside:avoid;border:1px solid #ddd}
-  .chart-wrap{height:260px}
-  body{background:#fff}
-  .phase-card-body{display:block!important}
+  .topbar,.hero-cta,.why-section,.footer,.tl-editor,.btn-add-seg,.btn-add-phase,.phase-del,.hint,.preset-row,.toggle-bar,.rule-builder{display:none!important}
+  .hero{padding:16px 16px 0}
+  .page{padding:10px}
+  .card{break-inside:avoid;border:1px solid #ddd;margin-bottom:12px}
+  .chart-wrap{height:220px}
+  body{background:#fff;font-size:13px}
+  .phase-body{display:block!important}
   .sim-wrap{max-height:none!important;overflow:visible!important}
   .tx-scroll{max-height:none!important;overflow:visible!important}
+  .phases-grid,.top-grid{grid-template-columns:1fr 1fr}
+  .kpi-strip{grid-template-columns:repeat(4,1fr)}
 }
 
-@media(max-width:780px){
-  .grid-sidebar{grid-template-columns:1fr}
+/* RESPONSIVE */
+@media(max-width:720px){
   .kpi-strip{grid-template-columns:1fr 1fr}
+  .kpi{padding:12px 12px}
+  .kpi-val{font-size:14px}
+  .kpi-label{font-size:9px}
+  .top-grid{grid-template-columns:1fr!important}
   .insights-row{grid-template-columns:1fr}
   .compare-grid{grid-template-columns:1fr}
   .milestones-row{grid-template-columns:1fr 1fr}
-  .page{padding:14px}
-  .hero{padding:28px 16px 0}
-  .why-section{padding:28px 16px}
-  .topbar{padding:0 14px}
+  .page{padding:12px}
+  .hero{padding:24px 14px 0}
+  .why-section{padding:24px 14px}
+  .topbar{padding:0 12px}
   .topbar-actions .tb-btn span{display:none}
+  .phases-grid{grid-template-columns:1fr!important}
+  .rb-row{flex-direction:column;align-items:stretch}
+  .rb-field input,.rb-field select,.rb-field input.wide{width:100%}
+}
+@media(max-width:400px){
+  .logo-sub{display:none}
+  .kpi-val{font-size:13px}
 }
 </style>
 </head>
@@ -288,54 +308,26 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
   <div class="modal">
     <button class="modal-close" id="modal-close">×</button>
     <h3>Jak uložit a obnovit nastavení</h3>
-    <p class="modal-sub">Vaše nastavení lze uložit do souboru a kdykoli znovu načíst — na jakémkoli zařízení nebo prohlížeči.</p>
-    <div class="modal-step">
-      <div class="modal-num">1</div>
-      <div class="modal-text">Klikněte na tlačítko <strong>Uložit nastavení</strong> v horní liště. Prohlížeč stáhne soubor <strong>kalkulacka-nastaveni.json</strong> — malý textový soubor s vašimi čísly.</div>
-    </div>
-    <div class="modal-step">
-      <div class="modal-num">2</div>
-      <div class="modal-text">Soubor si uložte kamkoli — na počítač, do Google Drive nebo pošlete e-mailem sobě. Neobsahuje žádné osobní údaje.</div>
-    </div>
-    <div class="modal-step">
-      <div class="modal-num">3</div>
-      <div class="modal-text">Při příští návštěvě klikněte na <strong>Načíst nastavení</strong>, vyberte uložený soubor a kalkulačka se okamžitě vyplní přesně tak, jak jste ji nechali.</div>
-    </div>
-    <div class="modal-tip">
-      <strong>Tip:</strong> Můžete mít více souborů pro různé scénáře — např. <em>optimisticky.json</em> a <em>konzervativne.json</em> — a přepínat mezi nimi jedním kliknutím.
-    </div>
-    <div class="modal-actions">
-      <button class="btn primary" id="modal-ok">Rozumím</button>
-    </div>
+    <p class="modal-sub">Nastavení lze uložit do souboru a kdykoli načíst — na jakémkoli zařízení.</p>
+    <div class="modal-step"><div class="modal-num">1</div><div class="modal-text">Klikněte na <strong>Uložit nastavení</strong> — prohlížeč stáhne soubor <strong>kalkulacka-nastaveni.json</strong>.</div></div>
+    <div class="modal-step"><div class="modal-num">2</div><div class="modal-text">Soubor uložte kamkoli — na počítač, do Google Drive nebo e-mailem sobě.</div></div>
+    <div class="modal-step"><div class="modal-num">3</div><div class="modal-text">Při příští návštěvě klikněte na <strong>Načíst nastavení</strong> a vyberte soubor.</div></div>
+    <div class="modal-tip"><strong>Tip:</strong> Mějte více souborů pro různé scénáře a přepínejte jedním kliknutím.</div>
+    <div class="modal-actions"><button class="btn primary" id="modal-ok">Rozumím</button></div>
   </div>
 </div>
 
 <!-- TOPBAR -->
 <nav class="topbar">
   <a class="logo" href="#">
-    <div class="logo-mark">
-      <svg viewBox="0 0 15 15" fill="none"><polyline points="1,12 4.5,7 7.5,9 11,3.5 14,5.5" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    </div>
-    <div>
-      <div class="logo-name">Investiční kalkulačka</div>
-      <div class="logo-sub">Simulace portfolia</div>
-    </div>
+    <div class="logo-mark"><svg viewBox="0 0 15 15" fill="none"><polyline points="1,12 4.5,7 7.5,9 11,3.5 14,5.5" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <div><div class="logo-name">Investiční kalkulačka</div><div class="logo-sub">Simulace portfolia</div></div>
   </a>
   <div class="topbar-actions">
-    <button class="tb-btn" id="btn-save">
-      <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 2h8l2 2v8a1 1 0 01-1 1H3a1 1 0 01-1-1V2z"/><path d="M5 2v3h4V2M4 8h6"/></svg>
-      <span>Uložit nastavení</span>
-    </button>
-    <label class="tb-btn" style="cursor:pointer">
-      <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 2v7M4 6l3 3 3-3M2 11h10"/></svg>
-      <span>Načíst nastavení</span>
-      <input type="file" id="btn-load" accept=".json" style="display:none">
-    </label>
-    <button class="help-btn" id="btn-help" title="Jak uložit a obnovit nastavení?">?</button>
-    <button class="tb-btn print" onclick="window.print()">
-      <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="10" height="7" rx="1"/><path d="M4 5V3h6v2M4 9h2M4 11h6"/></svg>
-      <span>Tisknout / PDF</span>
-    </button>
+    <button class="tb-btn" id="btn-save"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 2h8l2 2v8a1 1 0 01-1 1H3a1 1 0 01-1-1V2z"/><path d="M5 2v3h4V2M4 8h6"/></svg><span>Uložit nastavení</span></button>
+    <label class="tb-btn" style="cursor:pointer"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 2v7M4 6l3 3 3-3M2 11h10"/></svg><span>Načíst nastavení</span><input type="file" id="btn-load" accept=".json" style="display:none"></label>
+    <button class="help-btn" id="btn-help" title="Jak uložit nastavení?">?</button>
+    <button class="tb-btn print" onclick="window.print()"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="10" height="7" rx="1"/><path d="M4 5V3h6v2M4 9h2M4 11h6"/></svg><span>Tisknout / PDF</span></button>
   </div>
 </nav>
 
@@ -343,63 +335,40 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
 <section class="hero">
   <div class="hero-eyebrow">Jiný pohled na investování</div>
   <div class="hero-title">Vaše portfolio nepřestane vydělávat,<br><strong>když přestanete pracovat</strong></div>
-  <div class="hero-body">Většina kalkulaček skončí v den odchodu do důchodu. Tato počítá dál — protože portfolio vydělává i když vy nepracujete.</div>
+  <div class="hero-body">Většina kalkulaček skončí v den odchodu do důchodu. Tato počítá dál.</div>
   <a class="hero-cta" href="#proc">Proč je to jinak?</a>
   <div class="kpi-strip">
     <div class="kpi"><div class="kpi-label">Portfolio dnes</div><div class="kpi-val blue" id="kpi-now">0 Kč</div></div>
     <div class="kpi"><div class="kpi-label">Celkem vloženo</div><div class="kpi-val" id="kpi-invested">0 Kč</div></div>
     <div class="kpi"><div class="kpi-label">Celkové výnosy</div><div class="kpi-val teal" id="kpi-returns">0 Kč</div></div>
-    <div class="kpi"><div class="kpi-label">Hodnota portfolia</div><div class="kpi-val teal" id="kpi-final">0 Kč</div></div>
+    <div class="kpi"><div class="kpi-label">Cílová hodnota portfolia</div><div class="kpi-val teal" id="kpi-final">0 Kč</div></div>
   </div>
 </section>
 
 <!-- KALKULAČKA -->
 <main class="page">
-  <div class="grid-sidebar" style="margin-bottom:24px">
+
+  <!-- Parametry + Graf -->
+  <div class="top-grid">
     <div>
-      <!-- Základní parametry -->
       <div class="card">
         <div class="card-hdr"><div class="card-dot" style="background:var(--blue)"></div><div class="card-title">Základní parametry</div></div>
         <div class="card-body">
-          <div class="inp-group">
-            <label class="inp-label">Počáteční investice</label>
-            <div class="inp-wrap"><input type="number" id="startAmount" value="0" min="0" step="10000"><span class="inp-unit">Kč</span></div>
-          </div>
-          <div class="inp-group">
-            <label class="inp-label">Rok zahájení</label>
-            <div class="inp-wrap"><input type="number" id="startYear" value="2025" min="2000" max="2100"></div>
-          </div>
+          <div class="inp-group"><label class="inp-label">Počáteční investice</label><div class="inp-wrap"><input type="number" id="startAmount" value="0" min="0" step="10000"><span class="inp-unit">Kč</span></div></div>
+          <div class="inp-group"><label class="inp-label">Rok zahájení</label><div class="inp-wrap"><input type="number" id="startYear" value="2025" min="2000" max="2100"></div></div>
           <div class="inp-group">
             <label class="inp-label">Investiční horizont</label>
-            <div class="slider-wrap">
-              <input type="range" id="horizon-slider" min="1" max="70" value="40">
-              <div class="slider-val"><span id="horizon-val">40</span> <span>let</span></div>
-            </div>
+            <div class="slider-wrap"><input type="range" id="horizon-slider" min="1" max="70" value="40"><div class="slider-val"><span id="horizon-val">40</span> <span>let</span></div></div>
             <input type="hidden" id="horizon" value="40">
           </div>
         </div>
       </div>
-
-      <!-- Fáze zhodnocení -->
-      <div class="card">
-        <div class="card-hdr"><div class="card-dot" style="background:var(--teal)"></div><div class="card-title">Fáze zhodnocení portfolia</div></div>
-        <div class="card-body">
-          <p class="hint" style="margin-bottom:14px">Každá fáze má vlastní strategii a délku. Klikněte na fázi pro rozbalení a úpravu.</p>
-          <div class="phases-wrap" id="phases-wrap"></div>
-          <button class="btn-add-phase" id="btn-add-phase">+ přidat další fázi</button>
-        </div>
-      </div>
     </div>
-
-    <!-- Graf -->
     <div>
       <div class="card">
         <div class="card-hdr"><div class="card-dot" style="background:var(--blue)"></div><div class="card-title">Vývoj portfolia</div></div>
         <div class="card-body">
-          <div class="legend">
-            <div class="legend-item"><div class="legend-dot" style="background:#5DADE2"></div><span>Vložená částka</span></div>
-            <div class="legend-item"><div class="legend-dot" style="background:#4ECDA0"></div><span>Výnosy z investice</span></div>
-          </div>
+          <div class="legend"><div class="legend-item"><div class="legend-dot" style="background:#5DADE2"></div><span>Vložená částka</span></div><div class="legend-item"><div class="legend-dot" style="background:#4ECDA0"></div><span>Výnosy z investice</span></div></div>
           <div class="chart-wrap"><canvas id="main-chart"></canvas></div>
         </div>
         <div class="milestones-row" id="main-milestones"></div>
@@ -411,109 +380,116 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
   <div class="card">
     <div class="card-hdr"><div class="card-dot" style="background:#f59e0b"></div><div class="card-title">Pravidelné vklady</div></div>
     <div class="card-body">
-      <p class="hint" style="margin-bottom:12px">Klikni na segment pro přímou editaci hodnoty · Táhni okraje pro změnu délky (segmenty se nepřekrývají) · Záporná hodnota = pravidelný výběr</p>
-      <div class="tl-axis" id="dep-axis"></div>
-      <div class="tl-track" id="dep-track"><div class="tl-empty" id="dep-empty">Klikni pro přidání prvního období</div></div>
-      <button class="btn-add-seg" id="dep-add">+ přidat období</button>
-      <div class="tl-editor" id="dep-editor">
-        <div class="tl-ef"><label>Od roku</label><input type="number" id="de-from" min="1" max="70"></div>
-        <div class="tl-ef"><label>Do roku</label><input type="number" id="de-to" min="1" max="70"></div>
-        <div class="tl-ef" style="flex:2"><label>Měsíční částka (Kč)</label><input type="number" id="de-val" step="500"></div>
-        <button class="btn danger" id="de-del">Smazat</button>
-        <button class="btn" id="de-cancel">Zavřít</button>
+      <p class="hint" style="margin-bottom:14px">Klikni na segment pro přímou editaci hodnoty · Táhni okraje pro změnu délky (bez překrývání) · Záporné hodnoty jsou červené automaticky</p>
+      <!-- Vklady -->
+      <div class="tl-section">
+        <div class="tl-section-label"><span class="tl-badge dep">Vklady</span> měsíční investice do portfolia</div>
+        <div class="tl-axis-wrap"><div class="tl-axis" id="tl-axis-in"></div></div>
+        <div class="tl-track" id="tl-track-in" data-kind="in"><div class="tl-empty-msg">Klikni na osu pro přidání prvního období</div></div>
+        <button class="btn-add-seg" data-kind="in">+ přidat období vkladů</button>
+        <div class="tl-editor" id="tl-editor-in">
+          <div class="tl-ef"><label>Od roku</label><input type="number" id="tei-from" min="1" max="70"></div>
+          <div class="tl-ef"><label>Do roku</label><input type="number" id="tei-to" min="1" max="70"></div>
+          <div class="tl-ef" style="flex:2"><label>Měsíční vklad (Kč)</label><input type="number" id="tei-val" step="500" min="0"></div>
+          <button class="btn danger" id="tei-del">Smazat</button>
+          <button class="btn" id="tei-cancel">Zavřít</button>
+        </div>
       </div>
-      <div class="hint">Hodnota 0 Kč = žádný vklad. Záporná = pravidelný měsíční výběr (např. v důchodu).</div>
+      <!-- Výběry -->
+      <div class="tl-section">
+        <div class="tl-section-label"><span class="tl-badge with">Výběry</span> měsíční čerpání (např. renta v důchodu)</div>
+        <div class="tl-axis-wrap"><div class="tl-axis" id="tl-axis-out"></div></div>
+        <div class="tl-track" id="tl-track-out" data-kind="out"><div class="tl-empty-msg">Klikni na osu pro přidání prvního období výběrů</div></div>
+        <button class="btn-add-seg" data-kind="out">+ přidat období výběrů</button>
+        <div class="tl-editor" id="tl-editor-out">
+          <div class="tl-ef"><label>Od roku</label><input type="number" id="teo-from" min="1" max="70"></div>
+          <div class="tl-ef"><label>Do roku</label><input type="number" id="teo-to" min="1" max="70"></div>
+          <div class="tl-ef" style="flex:2"><label>Měsíční výběr (Kč, kladně)</label><input type="number" id="teo-val" step="500" min="0"></div>
+          <button class="btn danger" id="teo-del">Smazat</button>
+          <button class="btn" id="teo-cancel">Zavřít</button>
+        </div>
+      </div>
+      <div class="hint">Vklady a výběry se v každém roce sečtou. Překrývání je povoleno — výběr se odečte od vkladu.</div>
     </div>
   </div>
 
-  <!-- Jednorázové vklady a výběry -->
+  <!-- Jednorázové VKLADY -->
   <div class="card">
-    <div class="card-hdr"><div class="card-dot" style="background:#a78bfa"></div><div class="card-title">Jednorázové vklady a výběry</div></div>
+    <div class="card-hdr"><div class="card-dot" style="background:var(--teal)"></div><div class="card-title">Jednorázové vklady<span class="card-sub">— prodej nemovitosti, dědictví, mimořádný příjem</span></div></div>
     <div class="card-body">
-      <div class="toggle-bar">
-        <button class="toggle-opt sel" id="tx-toggle-repeat" data-mode="repeat">Opakovaně</button>
-        <button class="toggle-opt" id="tx-toggle-manual" data-mode="manual">Rok po roku</button>
+      <div class="toggle-bar" id="toggle-in">
+        <button class="toggle-opt sel" data-mode="repeat">Opakovaně</button>
+        <button class="toggle-opt" data-mode="manual">Rok po roku</button>
       </div>
-
-      <!-- OPAKOVANĚ -->
-      <div id="tx-repeat-view">
+      <div id="txin-repeat">
         <div class="rule-builder">
-          <div class="rule-builder-row">
-            <div class="rb-field">
-              <label>Částka (Kč)</label>
-              <input type="number" id="rb-val" placeholder="např. 50000" step="1000">
-            </div>
-            <div class="rb-field">
-              <label>Od roku</label>
-              <input type="number" id="rb-from" value="1" min="1" max="70" style="width:80px">
-            </div>
-            <div class="rb-field">
-              <label>Do roku</label>
-              <input type="number" id="rb-to" value="10" min="1" max="70" style="width:80px">
-            </div>
-            <div class="rb-field">
-              <label>Každých N let</label>
-              <select id="rb-every">
-                <option value="1">každý rok</option>
-                <option value="2">každé 2 roky</option>
-                <option value="3">každé 3 roky</option>
-                <option value="5" selected>každých 5 let</option>
-                <option value="10">každých 10 let</option>
-              </select>
-            </div>
-            <button class="btn primary" id="rb-add">Přidat pravidlo</button>
+          <div class="rb-row">
+            <div class="rb-field"><label>Částka (Kč)</label><input type="number" id="rbin-val" placeholder="např. 50 000" step="1000" min="0"></div>
+            <div class="rb-field"><label>Od roku</label><input type="number" id="rbin-from" value="1" min="1" max="70" style="width:76px"></div>
+            <div class="rb-field"><label>Do roku</label><input type="number" id="rbin-to" value="10" min="1" max="70" style="width:76px"></div>
+            <div class="rb-field"><label>Každých N let</label><select id="rbin-every"><option value="1">každý rok</option><option value="2">každé 2 roky</option><option value="3">každé 3 roky</option><option value="5" selected>každých 5 let</option><option value="10">každých 10 let</option></select></div>
+            <div class="rb-field" style="flex:1;min-width:200px"><label>Popis</label><input type="text" id="rbin-desc" class="wide" placeholder="např. prodej nemovitosti, dědictví atp."></div>
+            <button class="btn primary" id="rbin-add" style="align-self:flex-end">Přidat</button>
           </div>
-          <div class="hint" style="margin-top:0;margin-bottom:8px">Kladná částka = vklad / investice · Záporná = výběr (např. −700 000 Kč na nové auto každých 5 let)</div>
         </div>
-        <div class="rules-list" id="rules-list"></div>
-        <div class="hint" style="margin-top:8px">Pravidla se zapisují do tabulky rok po roku. Přepnutím na "Rok po roku" je lze doladit jednotlivě.</div>
+        <div class="rules-list" id="rules-in"></div>
       </div>
-
-      <!-- ROK PO ROKU -->
-      <div id="tx-manual-view" style="display:none">
-        <div class="fill-bar">
-          <span>Rychlé vyplnění:</span>
-          <span>od roku</span><input type="number" id="fill-from" value="1" min="1" max="70">
-          <span>do roku</span><input type="number" id="fill-to" value="5" min="1" max="70">
-          <input type="number" id="fill-val" placeholder="částka" style="width:120px">
-          <span>Kč</span>
-          <button class="btn primary" id="fill-btn">Vyplnit</button>
-        </div>
-        <div class="tx-scroll" style="max-height:240px;overflow-y:auto">
-          <table class="tx-table">
-            <thead><tr>
-              <th style="width:60px;text-align:center">Rok</th>
-              <th style="width:80px">Kalend.</th>
-              <th class="r">Částka (Kč)</th>
-              <th>Popis</th>
-            </tr></thead>
-            <tbody id="tx-body"></tbody>
-          </table>
-        </div>
-        <div class="hint" style="margin-top:8px">Kladná = vklad / investice · Záporná = výběr · Nula = žádná transakce</div>
+      <div id="txin-manual" style="display:none">
+        <div class="tx-scroll" style="max-height:220px"><table class="tx-table"><thead><tr><th style="width:55px;text-align:center">Rok</th><th style="width:70px">Rok</th><th class="r">Vklad (Kč)</th><th>Popis</th></tr></thead><tbody id="tbody-in"></tbody></table></div>
       </div>
+      <div class="hint" style="margin-top:8px">Kladná hodnota = jednorázový vklad / reinvestice</div>
     </div>
   </div>
 
-  <!-- Simulace rok po roku -->
+  <!-- Jednorázové VÝBĚRY -->
+  <div class="card">
+    <div class="card-hdr"><div class="card-dot" style="background:var(--red-tx)"></div><div class="card-title">Jednorázové výběry<span class="card-sub">— koupě auta, rekonstrukce bytu, velké výdaje</span></div></div>
+    <div class="card-body">
+      <div class="toggle-bar" id="toggle-out">
+        <button class="toggle-opt sel" data-mode="repeat">Opakovaně</button>
+        <button class="toggle-opt" data-mode="manual">Rok po roku</button>
+      </div>
+      <div id="txout-repeat">
+        <div class="rule-builder">
+          <div class="rb-row">
+            <div class="rb-field"><label>Částka (Kč)</label><input type="number" id="rbout-val" placeholder="např. 700 000" step="10000" min="0"></div>
+            <div class="rb-field"><label>Od roku</label><input type="number" id="rbout-from" value="1" min="1" max="70" style="width:76px"></div>
+            <div class="rb-field"><label>Do roku</label><input type="number" id="rbout-to" value="10" min="1" max="70" style="width:76px"></div>
+            <div class="rb-field"><label>Každých N let</label><select id="rbout-every"><option value="1">každý rok</option><option value="2">každé 2 roky</option><option value="3">každé 3 roky</option><option value="5" selected>každých 5 let</option><option value="10">každých 10 let</option></select></div>
+            <div class="rb-field" style="flex:1;min-width:200px"><label>Popis</label><input type="text" id="rbout-desc" class="wide" placeholder="např. koupě auta, rekonstrukce bytu atp."></div>
+            <button class="btn primary" id="rbout-add" style="align-self:flex-end">Přidat</button>
+          </div>
+        </div>
+        <div class="rules-list" id="rules-out"></div>
+      </div>
+      <div id="txout-manual" style="display:none">
+        <div class="tx-scroll" style="max-height:220px"><table class="tx-table"><thead><tr><th style="width:55px;text-align:center">Rok</th><th style="width:70px">Rok</th><th class="r">Výběr (Kč)</th><th>Popis</th></tr></thead><tbody id="tbody-out"></tbody></table></div>
+      </div>
+      <div class="hint" style="margin-top:8px">Zadejte kladnou hodnotu — výběr se automaticky odečte od portfolia</div>
+    </div>
+  </div>
+
+  <!-- Simulace -->
   <div class="card">
     <div class="card-hdr"><div class="card-dot" style="background:var(--navy)"></div><div class="card-title">Simulace rok po roku</div></div>
     <div class="sim-wrap" style="max-height:260px">
       <table class="sim-table">
-        <thead><tr>
-          <th style="text-align:center">Rok</th>
-          <th>Kalend.</th>
-          <th>Zhodnocení</th>
-          <th>Měs. vklad</th>
-          <th>Jednoráz.</th>
-          <th>Výnos</th>
-          <th>Kum. vloženo</th>
-          <th>Portfolio</th>
-        </tr></thead>
+        <thead><tr><th style="text-align:center">Rok</th><th style="text-align:right">Rok</th><th>Výnos %</th><th>Měs. vklad</th><th>Jednoráz.</th><th>Výnos Kč</th><th>Kum. vloženo</th><th>Portfolio</th></tr></thead>
         <tbody id="sim-body"></tbody>
       </table>
     </div>
   </div>
+
+  <!-- Fáze zhodnocení -->
+  <div class="card">
+    <div class="card-hdr"><div class="card-dot" style="background:var(--teal)"></div><div class="card-title">Fáze zhodnocení portfolia</div></div>
+    <div class="card-body">
+      <p class="hint" style="margin-bottom:14px">Každá fáze má vlastní strategii a délku. Klikněte na fázi pro rozbalení.</p>
+      <div class="phases-grid" id="phases-wrap"></div>
+      <button class="btn-add-phase" id="btn-add-phase">+ přidat další fázi</button>
+    </div>
+  </div>
+
 </main>
 
 <!-- PROČ JE TO JINAK -->
@@ -521,146 +497,85 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
   <div style="max-width:1100px;margin:0 auto">
     <div class="section-eyebrow">Proč je to jinak</div>
     <div class="section-h">Dvě kalkulačky, dva různé světy</div>
-    <div class="section-sub">Tradiční kalkulačky modelují portfolio jen do odchodu do důchodu. Tato počítá dál — protože portfolio vydělává i když vy nepracujete.</div>
-    <div class="shared-axis">
-      <span class="axis-age">25 let</span>
-      <div class="axis-track">
-        <div class="milestone-pin">
-          <div class="milestone-tag">65 let — odchod do důchodu</div>
-          <div class="milestone-line"></div>
-        </div>
-      </div>
-      <span class="axis-age">85 let</span>
-    </div>
+    <div class="section-sub">Tradiční kalkulačky modelují portfolio jen do odchodu do důchodu. Tato počítá dál.</div>
+    <div class="shared-axis"><span class="axis-age">25 let</span><div class="axis-track"><div class="milestone-pin"><div class="milestone-tag">65 let — odchod do důchodu</div><div class="milestone-line"></div></div></div><span class="axis-age">85 let</span></div>
     <div class="compare-grid">
-      <div class="cc" style="border-right:1px solid var(--border)">
-        <div class="cc-hdr bad"><div class="cc-icon bad">✕</div>Tradiční kalkulačka — končí v 65 letech</div>
-        <div class="cc-body">
-          <div class="cc-bars" id="bad-bars"></div>
-          <div class="cc-caption"><strong>Portfolio se v 65 přestane počítat.</strong> Předpokládá se výběr a postupná spotřeba. Co se děje s vaším majetkem dalších 20 let, kalkulačka neřeší.</div>
-        </div>
-      </div>
-      <div class="cc">
-        <div class="cc-hdr good"><div class="cc-icon good">✓</div>Tato kalkulačka — pokračuje dál</div>
-        <div class="cc-body">
-          <div class="cc-bars" id="good-bars"></div>
-          <div class="cc-caption"><strong>Portfolio v 65 nekončí — jen změní režim.</strong> Nižší výnosy, žádné vklady, pravidelné výběry — a přesto roste nebo se udržuje.</div>
-        </div>
-      </div>
+      <div class="cc" style="border-right:1px solid var(--border)"><div class="cc-hdr bad"><div class="cc-icon bad">✕</div>Tradiční — končí v 65 letech</div><div class="cc-body"><div class="cc-bars" id="bad-bars"></div><div class="cc-caption"><strong>Portfolio se v 65 přestane počítat.</strong> Co se děje s majetkem dalších 20 let, kalkulačka neřeší.</div></div></div>
+      <div class="cc"><div class="cc-hdr good"><div class="cc-icon good">✓</div>Tato kalkulačka — pokračuje dál</div><div class="cc-body"><div class="cc-bars" id="good-bars"></div><div class="cc-caption"><strong>Portfolio v 65 nekončí — jen změní režim.</strong> Nižší výnosy, pravidelné výběry — a přesto roste.</div></div></div>
     </div>
     <div class="insights-row">
-      <div class="insight">
-        <div class="insight-num">3 %</div>
-        <div class="insight-label">stačí po odchodu do důchodu</div>
-        <div class="insight-sub">I konzervativní zhodnocení generuje z celoživotního portfolia výnos, který pokryje značnou část spotřeby.</div>
-      </div>
-      <div class="insight">
-        <div class="insight-num teal">70 let</div>
-        <div class="insight-label">celý životní horizont v jednom grafu</div>
-        <div class="insight-sub">Produktivní léta, přechod na konzervu, důchod — vše v jediné simulaci bez nutnosti přepočítávat.</div>
-      </div>
-      <div class="insight">
-        <div class="insight-num">rok po roku</div>
-        <div class="insight-label">přesné zadání vkladů i výběrů</div>
-        <div class="insight-sub">Každý rok lze nastavit jinak — různé vklady, jednorázové investice, výběry na dovolenou nebo rekonstrukci.</div>
-      </div>
+      <div class="insight"><div class="insight-num">3 %</div><div class="insight-label">stačí po odchodu do důchodu</div><div class="insight-sub">I konzervativní zhodnocení pokryje značnou část spotřeby z celoživotního portfolia.</div></div>
+      <div class="insight"><div class="insight-num teal">70 let</div><div class="insight-label">celý životní horizont v jednom grafu</div><div class="insight-sub">Produktivní léta, přechod na konzervu, důchod — vše v jediné simulaci.</div></div>
+      <div class="insight"><div class="insight-num">rok po roku</div><div class="insight-label">přesné zadání vkladů i výběrů</div><div class="insight-sub">Každý rok jinak — vklady, investice, výběry na dovolenou nebo rekonstrukci.</div></div>
     </div>
     <div class="divider"></div>
     <div class="section-h" style="font-size:16px;margin-bottom:14px">Co tato kalkulačka umí, co ostatní neumí</div>
     <div class="diff-list">
-      <div class="diff-item">
-        <div class="diff-check"><svg viewBox="0 0 9 9"><polyline points="1,4.5 3.5,7 8,2" stroke="var(--grn-tx)" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg></div>
-        <div class="diff-text"><strong>Simulace po odchodu do důchodu</strong> — portfolio se nemaže, ale dál roste za sníženého zhodnocení a pokrývá výběry na spotřebu</div>
-      </div>
-      <div class="diff-item">
-        <div class="diff-check"><svg viewBox="0 0 9 9"><polyline points="1,4.5 3.5,7 8,2" stroke="var(--grn-tx)" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg></div>
-        <div class="diff-text"><strong>Proměnlivé měsíční vklady</strong> — různé částky pro různá životní období; nula v důchodu je plnohodnotná hodnota</div>
-      </div>
-      <div class="diff-item">
-        <div class="diff-check"><svg viewBox="0 0 9 9"><polyline points="1,4.5 3.5,7 8,2" stroke="var(--grn-tx)" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg></div>
-        <div class="diff-text"><strong>Postupná změna strategie</strong> — přechod z dynamického portfolia na konzervativní se promítá do výpočtu plynule</div>
-      </div>
-      <div class="diff-item">
-        <div class="diff-check"><svg viewBox="0 0 9 9"><polyline points="1,4.5 3.5,7 8,2" stroke="var(--grn-tx)" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg></div>
-        <div class="diff-text"><strong>Jednorázové transakce rok po roku</strong> — mimořádný příjem, prodej nemovitosti, pravidelný výběr každých 5 let — to vše ovlivní přesný výpočet</div>
-      </div>
+      <div class="diff-item"><div class="diff-check"><svg viewBox="0 0 9 9"><polyline points="1,4.5 3.5,7 8,2" stroke="var(--grn-tx)" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg></div><div class="diff-text"><strong>Simulace po odchodu do důchodu</strong> — portfolio dál roste a pokrývá výběry na spotřebu</div></div>
+      <div class="diff-item"><div class="diff-check"><svg viewBox="0 0 9 9"><polyline points="1,4.5 3.5,7 8,2" stroke="var(--grn-tx)" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg></div><div class="diff-text"><strong>Proměnlivé měsíční vklady i výběry</strong> — různé částky pro různá životní období</div></div>
+      <div class="diff-item"><div class="diff-check"><svg viewBox="0 0 9 9"><polyline points="1,4.5 3.5,7 8,2" stroke="var(--grn-tx)" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg></div><div class="diff-text"><strong>Postupná změna strategie</strong> — plynulý přechod z dynamického portfolia na konzervativní</div></div>
+      <div class="diff-item"><div class="diff-check"><svg viewBox="0 0 9 9"><polyline points="1,4.5 3.5,7 8,2" stroke="var(--grn-tx)" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg></div><div class="diff-text"><strong>Jednorázové transakce rok po roku</strong> — prodej nemovitosti, výběr každých 5 let — vše v přesném výpočtu</div></div>
     </div>
   </div>
 </section>
+<footer class="footer"><span>Výpočty jsou orientační. Nezohledňují inflaci, daně ani poplatky správce fondu.</span><span>Nástroj je zdarma a bez registrace</span></footer>
 
-<footer class="footer">
-  <span>Výpočty jsou orientační. Nezohledňují inflaci, daně ani poplatky správce fondu.</span>
-  <span>Nástroj je zdarma a bez registrace</span>
-</footer>
 
 <script>
-const MAX_YR = 70;
-const fmt = n => new Intl.NumberFormat('cs-CZ',{style:'currency',currency:'CZK',maximumFractionDigits:0}).format(Math.round(n||0));
-const fmtPct = n => ((n||0)*100).toFixed(1)+' %';
-const num = (v,f=0) => { const p=parseFloat(v); return isNaN(p)?f:p; };
-
-const PRESETS = [
-  {label:'Dynamická',val:10,sub:'10 %'},
-  {label:'Vyvážená',val:6,sub:'6 %'},
-  {label:'Konzervativní',val:3,sub:'3 %'},
-];
-const DEP_PAL = [
-  {bg:'#B5D4F4',tx:'#0C447C',bd:'#378ADD'},
-  {bg:'#9FE1CB',tx:'#085041',bd:'#1D9E75'},
-  {bg:'#FAC775',tx:'#412402',bd:'#BA7517'},
-  {bg:'#F4C0D1',tx:'#4B1528',bd:'#D4537E'},
-  {bg:'#CECBF6',tx:'#26215C',bd:'#7F77DD'},
-  {bg:'#C0DD97',tx:'#173404',bd:'#639922'},
-];
+const MAX_YR=70;
+const fmt=n=>new Intl.NumberFormat('cs-CZ',{style:'currency',currency:'CZK',maximumFractionDigits:0}).format(Math.round(n||0));
+const fmtPct=n=>((n||0)*100).toFixed(1)+' %';
+const num=(v,f=0)=>{const p=parseFloat(v);return isNaN(p)?f:p;};
+const PRESETS=[{label:'Dynamická',val:10,sub:'10 %'},{label:'Vyvážená',val:6,sub:'6 %'},{label:'Konzervativní',val:3,sub:'3 %'}];
+const PAL_IN=[{bg:'#B5D4F4',tx:'#0C447C',bd:'#378ADD'},{bg:'#9FE1CB',tx:'#085041',bd:'#1D9E75'},{bg:'#C0DD97',tx:'#173404',bd:'#639922'},{bg:'#CECBF6',tx:'#26215C',bd:'#7F77DD'}];
+const PAL_OUT=[{bg:'#FECACA',tx:'#7f1d1d',bd:'#F87171'},{bg:'#FED7AA',tx:'#7c2d12',bd:'#FB923C'},{bg:'#FECDD3',tx:'#881337',bd:'#FB7185'},{bg:'#FDE68A',tx:'#78350f',bd:'#FBBF24'}];
 
 // STATE
-let phases = [
-  {years:10,rate:10,preset:'Dynamická',custom:false},
-  {years:10,rate:6, preset:'Vyvážená', custom:false},
-  {years:10,rate:6, preset:'Vyvážená', custom:false},
-  {years:10,rate:3, preset:'Konzervativní',custom:false},
-];
-let depSegs = [];   // {from, to, val} — from/to are year numbers (1-based)
-let txData  = Array.from({length:MAX_YR+1},(_,i)=>({yr:i,val:0,desc:''}));
-let txRules = [];   // {val, from, to, every, id}
-let selDep  = null;
-let drag    = null;
-let chartInst = null;
-let txMode  = 'repeat'; // 'repeat' | 'manual'
-let ruleIdCtr = 0;
+let phases=[{years:10,rate:10,preset:'Dynamická',custom:false},{years:10,rate:6,preset:'Vyvážená',custom:false},{years:10,rate:6,preset:'Vyvážená',custom:false},{years:10,rate:3,preset:'Konzervativní',custom:false}];
+let depIn=[];   // {from,to,val} vklady (positive = monthly deposit)
+let depOut=[];  // {from,to,val} výběry (stored positive, subtracted in sim)
+let txIn =Array.from({length:MAX_YR+1},(_,i)=>({yr:i,val:0,desc:''}));
+let txOut=Array.from({length:MAX_YR+1},(_,i)=>({yr:i,val:0,desc:''}));
+let rulesIn=[],rulesOut=[];
+let selIn=null,selOut=null,drag=null;
+let modeIn='repeat',modeOut='repeat';
+let chartInst=null,ruleId=0;
+
+function getHorizon(){return Math.min(num(document.getElementById('horizon').value,40),MAX_YR);}
+function getStartYear(){return num(document.getElementById('startYear').value,2025);}
 
 // SIMULATE
-function getHorizon(){ return Math.min(num(document.getElementById('horizon').value,40), MAX_YR); }
-
 function getRateForYear(yr){
   let cum=0;
-  for(const p of phases){
-    if(yr>=cum && yr<cum+p.years) return p.rate/100;
-    cum+=p.years;
-  }
+  for(const p of phases){if(yr>=cum&&yr<cum+p.years)return p.rate/100;cum+=p.years;}
   return phases[phases.length-1].rate/100;
 }
-function getMonthly(yr){
-  // yr is 1-based for segments
-  for(const s of depSegs){ if(yr>=s.from && yr<=s.to) return s.val; }
-  return 0;
+function getMonthlyNet(yr){
+  if(yr===0)return 0;
+  let net=0;
+  for(const s of depIn){if(yr>=s.from&&yr<=s.to)net+=s.val;}
+  for(const s of depOut){if(yr>=s.from&&yr<=s.to)net-=s.val;}
+  return net;
 }
-function getTx(yr){ return txData.filter(t=>t.yr===yr).reduce((s,t)=>s+num(t.val),0); }
-
+function getTxNet(yr){
+  const inV=txIn[yr]?num(txIn[yr].val):0;
+  const outV=txOut[yr]?num(txOut[yr].val):0;
+  return inV-outV;
+}
 function simulate(){
-  const start  = num(document.getElementById('startAmount').value,0);
-  const startYr= num(document.getElementById('startYear').value,2025);
-  const hor    = getHorizon();
-  const rows   = [];
-  let portfolio= start, cumInv=start;
-  for(let yr=0; yr<=hor; yr++){
-    const rate   = getRateForYear(yr);
-    const monthly= getMonthly(yr);   // yr 0 → 0 because no seg covers 0
-    const annDep = monthly*12;
-    const tx     = getTx(yr);
-    let gain     = 0;
-    if(yr===0){ portfolio=start+tx; cumInv=start+tx; }
-    else{ gain=(portfolio+(annDep+tx)/2)*rate; portfolio+=annDep+tx+gain; cumInv+=annDep+tx; }
+  const start=num(document.getElementById('startAmount').value,0);
+  const startYr=getStartYear();
+  const hor=getHorizon();
+  const rows=[];
+  let portfolio=start,cumInv=start;
+  for(let yr=0;yr<=hor;yr++){
+    const rate=getRateForYear(yr);
+    const monthly=getMonthlyNet(yr);
+    const annDep=monthly*12;
+    const tx=getTxNet(yr);
+    let gain=0;
+    if(yr===0){portfolio=start+tx;cumInv=start+(tx>0?tx:0);}
+    else{gain=(portfolio+(annDep+tx)/2)*rate;portfolio+=annDep+tx+gain;cumInv+=annDep+(tx>0?tx:0);}
     rows.push({yr,calYr:startYr+yr,rate,monthly,annDep,tx,gain,cumInv,cumRet:portfolio-cumInv,portfolio});
   }
   return rows;
@@ -671,305 +586,295 @@ function renderPhases(){
   const wrap=document.getElementById('phases-wrap');
   wrap.innerHTML='';
   phases.forEach((ph,i)=>{
-    const div=document.createElement('div'); div.className='phase-card';
-    const btns=PRESETS.map(p=>`<button class="preset${ph.preset===p.label&&!ph.custom?' sel':''}" data-phase="${i}" data-preset="${p.label}" data-val="${p.val}">${p.label} <span style="opacity:.55;font-size:12px">${p.sub}</span></button>`).join('');
-    div.innerHTML=`
-      <div class="phase-card-hdr" data-idx="${i}">
-        <div class="phase-num">${i+1}</div>
-        <div class="phase-label">Fáze ${i+1}</div>
-        <div class="phase-summary">${ph.years} let · ${ph.rate} % p.a.</div>
-        ${phases.length>1?`<button class="phase-del" data-del="${i}">×</button>`:''}
-      </div>
-      <div class="phase-card-body${i===0?' open':''}" id="phase-body-${i}">
-        <div class="phase-row">
-          <div class="phase-field"><label>Délka fáze (let)</label><input type="number" class="ph-years" data-i="${i}" value="${ph.years}" min="1" max="70"></div>
-        </div>
-        <div class="phase-row">
-          <div class="phase-field" style="width:100%">
-            <label>Strategie</label>
-            <div class="preset-row">${btns}<button class="preset${ph.custom?' custom-sel':''}" data-phase="${i}" data-preset="custom">Vlastní %</button></div>
-          </div>
-        </div>
-        <div class="phase-row" id="cr-${i}" style="display:${ph.custom?'flex':'none'}">
-          <div class="phase-field"><label>Vlastní výnos (% p.a.)</label><input type="number" class="ph-rate" data-i="${i}" value="${ph.rate}" step="0.5" min="0" max="50"></div>
-        </div>
-      </div>`;
+    const div=document.createElement('div');div.className='phase-card';
+    const btns=PRESETS.map(p=>`<button class="preset${ph.preset===p.label&&!ph.custom?' sel':''}" data-phase="${i}" data-pname="${p.label}" data-pval="${p.val}">${p.label} <span style="opacity:.5;font-size:11px">${p.sub}</span></button>`).join('');
+    div.innerHTML=`<div class="phase-card-hdr" data-idx="${i}"><div class="phase-num">${i+1}</div><div class="phase-label">Fáze ${i+1}</div><div class="phase-summary">${ph.years} let · ${ph.rate} % p.a.</div>${phases.length>1?`<button class="phase-del" data-del="${i}">×</button>`:''}</div><div class="phase-body${i===0?' open':''}" id="phb-${i}"><div class="phase-row"><div class="phase-field"><label>Délka (let)</label><input type="number" class="ph-yr" data-i="${i}" value="${ph.years}" min="1" max="70"></div></div><div class="phase-row"><div class="phase-field" style="width:100%"><label>Strategie</label><div class="preset-row">${btns}<button class="preset${ph.custom?' custom-sel':''}" data-phase="${i}" data-pname="custom">Vlastní %</button></div></div></div>${ph.custom?`<div class="phase-row"><div class="phase-field"><label>Výnos % p.a.</label><input type="number" class="ph-rt" data-i="${i}" value="${ph.rate}" step="0.5" min="0" max="50"></div></div>`:''}</div>`;
     wrap.appendChild(div);
   });
-  wrap.querySelectorAll('.phase-card-hdr').forEach(hdr=>{
-    hdr.addEventListener('click',e=>{ if(e.target.closest('.phase-del')) return; document.getElementById('phase-body-'+hdr.dataset.idx).classList.toggle('open'); });
-  });
-  wrap.querySelectorAll('.phase-del').forEach(btn=>{
-    btn.addEventListener('click',e=>{ e.stopPropagation(); phases.splice(+btn.dataset.del,1); renderPhases(); recalc(); });
-  });
-  wrap.querySelectorAll('.preset').forEach(btn=>{
-    btn.addEventListener('click',()=>{
-      const i=+btn.dataset.phase;
-      if(btn.dataset.preset==='custom'){ phases[i].custom=true; phases[i].preset=''; }
-      else { phases[i].custom=false; phases[i].preset=btn.dataset.preset; phases[i].rate=+btn.dataset.val; }
-      renderPhases(); recalc();
-    });
-  });
-  wrap.querySelectorAll('.ph-years').forEach(inp=>{
-    inp.addEventListener('input',()=>{ phases[+inp.dataset.i].years=Math.max(1,num(inp.value,1)); recalc(); });
-  });
-  wrap.querySelectorAll('.ph-rate').forEach(inp=>{
-    inp.addEventListener('input',()=>{ phases[+inp.dataset.i].rate=num(inp.value,0); recalc(); });
-  });
+  wrap.querySelectorAll('.phase-card-hdr').forEach(h=>h.addEventListener('click',e=>{if(e.target.closest('.phase-del'))return;document.getElementById('phb-'+h.dataset.idx).classList.toggle('open');}));
+  wrap.querySelectorAll('.phase-del').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();phases.splice(+b.dataset.del,1);renderPhases();recalc();}));
+  wrap.querySelectorAll('.preset').forEach(b=>b.addEventListener('click',()=>{
+    const i=+b.dataset.phase;
+    if(b.dataset.pname==='custom'){phases[i].custom=true;phases[i].preset='';}
+    else{phases[i].custom=false;phases[i].preset=b.dataset.pname;phases[i].rate=+b.dataset.pval;}
+    renderPhases();recalc();
+  }));
+  wrap.querySelectorAll('.ph-yr').forEach(inp=>inp.addEventListener('input',()=>{phases[+inp.dataset.i].years=Math.max(1,num(inp.value,1));recalc();}));
+  wrap.querySelectorAll('.ph-rt').forEach(inp=>inp.addEventListener('input',()=>{phases[+inp.dataset.i].rate=num(inp.value,0);recalc();}));
 }
-document.getElementById('btn-add-phase').addEventListener('click',()=>{ phases.push({years:10,rate:3,preset:'Konzervativní',custom:false}); renderPhases(); recalc(); });
+document.getElementById('btn-add-phase').addEventListener('click',()=>{phases.push({years:10,rate:3,preset:'Konzervativní',custom:false});renderPhases();recalc();});
 
-// TIMELINE — no-overlap logic
-// Sort segments by from. When dragging right handle of seg[i]:
-//   if new to >= next seg's from → push next seg's from right (and clamp its to if needed)
-// When dragging left handle of seg[i]:
-//   if new from <= prev seg's to → push prev seg's to left
-
-function sortSegs(){ depSegs.sort((a,b)=>a.from-b.from); }
-
-function applyNoOverlap(changedIdx, side){
-  sortSegs();
-  const idx=depSegs.findIndex((_,i)=>i===changedIdx);
-  if(idx<0) return;
+// TIMELINE ENGINE
+// No-overlap: sort segs; after changing seg[idx], push neighbours away
+function sortSegs(arr){arr.sort((a,b)=>a.from-b.from);}
+function noOverlap(arr,idx,side){
+  sortSegs(arr);
   if(side==='r'){
-    // pushing segments to the right
-    for(let i=idx+1; i<depSegs.length; i++){
-      if(depSegs[i].from <= depSegs[i-1].to){
-        const shift = depSegs[i-1].to - depSegs[i].from + 1;
-        depSegs[i].from += shift;
-        depSegs[i].to   += shift;
-        if(depSegs[i].to > MAX_YR){ depSegs[i].to=MAX_YR; depSegs[i].from=Math.min(depSegs[i].from,MAX_YR); }
-      }
+    for(let i=idx+1;i<arr.length;i++){
+      if(arr[i].from<=arr[i-1].to){const sh=arr[i-1].to-arr[i].from+1;arr[i].from+=sh;arr[i].to+=sh;}
+      if(arr[i].to>MAX_YR){arr[i].to=MAX_YR;arr[i].from=Math.min(arr[i].from,MAX_YR);}
     }
   } else {
-    // pushing segments to the left
-    for(let i=idx-1; i>=0; i--){
-      if(depSegs[i].to >= depSegs[i+1].from){
-        depSegs[i].to = depSegs[i+1].from - 1;
-        if(depSegs[i].to < depSegs[i].from){ depSegs[i].to=depSegs[i].from; }
-      }
-    }
+    for(let i=idx-1;i>=0;i--){if(arr[i].to>=arr[i+1].from)arr[i].to=arr[i+1].from-1;if(arr[i].to<arr[i].from)arr[i].to=arr[i].from;}
   }
 }
 
-function renderTL(){
-  const track=document.getElementById('dep-track');
-  const axis =document.getElementById('dep-axis');
-  const empty=document.getElementById('dep-empty');
-  axis.innerHTML='';
-  const hor=getHorizon();
-  // axis labels
-  const step = hor<=20?2:hor<=40?5:10;
-  for(let y=1;y<=hor;y+=step){ const s=document.createElement('span'); s.textContent=y; s.style.position='absolute'; s.style.left=((y-1)/(hor-1)*100)+'%'; s.style.transform='translateX(-50%)'; axis.appendChild(s); }
-  axis.style.position='relative'; axis.style.height='16px';
-  // segs
-  track.innerHTML='';
-  if(empty) track.appendChild(empty);
-  if(depSegs.length===0){ if(empty) empty.style.display='flex'; return; }
-  if(empty) empty.style.display='none';
+function renderAxis(axisEl,hor){
+  axisEl.innerHTML='';
+  const step=hor<=15?2:hor<=30?5:hor<=50?5:10;
+  const sy=getStartYear();
+  for(let y=step;y<=hor;y+=step){
+    const s=document.createElement('span');
+    s.textContent=sy+y;
+    s.style.left=((y/hor)*100)+'%';
+    axisEl.appendChild(s);
+  }
+}
 
-  sortSegs();
-  depSegs.forEach((seg,i)=>{
-    const left=((seg.from-1)/(hor))*100;
-    const width=((seg.to-seg.from+1)/(hor))*100;
-    const p=DEP_PAL[i%DEP_PAL.length];
+function renderTL(kind){
+  const arr=kind==='in'?depIn:depOut;
+  const pal=kind==='in'?PAL_IN:PAL_OUT;
+  const trackEl=document.getElementById('tl-track-'+kind);
+  const axisEl=document.getElementById('tl-axis-'+kind);
+  const sel=kind==='in'?selIn:selOut;
+  const hor=getHorizon();
+  renderAxis(axisEl,hor);
+  // clear track but keep empty msg
+  const empty=trackEl.querySelector('.tl-empty-msg');
+  trackEl.innerHTML='';
+  if(empty)trackEl.appendChild(empty);
+  if(arr.length===0){if(empty)empty.style.display='flex';return;}
+  if(empty)empty.style.display='none';
+  sortSegs(arr);
+  arr.forEach((seg,i)=>{
+    const left=((seg.from-1)/hor)*100;
+    const width=((seg.to-seg.from+1)/hor)*100;
+    const p=pal[i%pal.length];
     const el=document.createElement('div');
-    el.className='tl-seg'+(selDep===i?' sel':'');
-    el.style.cssText=`left:${left}%;width:${Math.max(width,1)}%;background:${p.bg};color:${p.tx};border:1px solid ${p.bd};`;
-    // value label (click to edit inline)
-    const lbl=document.createElement('span');
-    lbl.className='tl-seg-val';
-    lbl.textContent=seg.val===0?'0 Kč/m':new Intl.NumberFormat('cs-CZ',{maximumFractionDigits:0}).format(seg.val)+' Kč/m';
-    // inline input
-    const inp=document.createElement('input');
-    inp.type='number'; inp.className='tl-seg-input'; inp.value=seg.val; inp.step=500;
+    el.className='tl-seg'+(sel===i?' sel':'');
+    el.style.cssText=`left:${left}%;width:${Math.max(width,0.5)}%;background:${p.bg};color:${p.tx};border:1px solid ${p.bd};`;
+    const lbl=document.createElement('span');lbl.className='tl-seg-val';
+    lbl.textContent=formatSegVal(seg.val,kind);
+    const inp=document.createElement('input');inp.type='number';inp.className='tl-seg-input';inp.value=seg.val;inp.step=500;inp.min=0;
     inp.addEventListener('click',e=>e.stopPropagation());
-    inp.addEventListener('input',()=>{ depSegs[i].val=num(inp.value,0); lbl.textContent=depSegs[i].val===0?'0 Kč/m':new Intl.NumberFormat('cs-CZ',{maximumFractionDigits:0}).format(depSegs[i].val)+' Kč/m'; syncEditorFields(i); recalc(); });
-    inp.addEventListener('blur',()=>{ inp.classList.remove('visible'); lbl.style.display=''; });
-    el.appendChild(lbl); el.appendChild(inp);
-    el.addEventListener('click',e=>{ e.stopPropagation(); if(e.target===inp) return; openDepEditor(i); lbl.style.display='none'; inp.classList.add('visible'); inp.focus(); inp.select(); });
+    inp.addEventListener('input',()=>{
+      arr[i].val=Math.abs(num(inp.value,0));
+      lbl.textContent=formatSegVal(arr[i].val,kind);
+      syncEditor(kind,i);recalc();
+    });
+    inp.addEventListener('blur',()=>{inp.classList.remove('visible');lbl.style.display='';});
+    el.appendChild(lbl);el.appendChild(inp);
+    el.addEventListener('click',e=>{
+      if(e.target===inp)return;
+      e.stopPropagation();
+      openEditor(kind,i);
+      lbl.style.display='none';inp.classList.add('visible');inp.focus();inp.select();
+    });
+    // touch drag support
     ['l','r'].forEach(s=>{
-      const h=document.createElement('div'); h.className=`tl-handle ${s}`;
-      h.addEventListener('mousedown',e=>{ e.stopPropagation(); startDrag(e,i,s); });
+      const h=document.createElement('div');h.className='tl-handle '+s;
+      const startDrag=e=>{e.stopPropagation();e.preventDefault();startTLDrag(e,kind,i,s);};
+      h.addEventListener('mousedown',startDrag);
+      h.addEventListener('touchstart',startDrag,{passive:false});
       el.appendChild(h);
     });
-    track.appendChild(el);
+    trackEl.appendChild(el);
   });
 }
 
-function openDepEditor(i){
-  selDep=i;
-  document.getElementById('dep-editor').classList.add('open');
-  syncEditorFields(i);
-  renderTL();
-}
-function syncEditorFields(i){
-  if(i===null||!depSegs[i]) return;
-  document.getElementById('de-from').value=depSegs[i].from;
-  document.getElementById('de-to').value=depSegs[i].to;
-  document.getElementById('de-val').value=depSegs[i].val;
+function formatSegVal(val,kind){
+  const v=Math.abs(val);
+  const s=v===0?'0 Kč/m':new Intl.NumberFormat('cs-CZ',{maximumFractionDigits:0}).format(v)+' Kč/m';
+  return kind==='out'?'−'+s:s;
 }
 
-// Live update from editor fields (no "Použít" button)
-function bindEditorLive(){
-  ['de-from','de-to','de-val'].forEach(id=>{
+function openEditor(kind,idx){
+  if(kind==='in'){selIn=idx;}else{selOut=idx;}
+  const ed=document.getElementById('tl-editor-'+kind);
+  ed.classList.add('open');
+  syncEditor(kind,idx);
+  renderTL(kind);
+}
+function syncEditor(kind,idx){
+  const arr=kind==='in'?depIn:depOut;
+  if(idx===null||!arr[idx])return;
+  const s=arr[idx];
+  if(kind==='in'){
+    document.getElementById('tei-from').value=s.from;
+    document.getElementById('tei-to').value=s.to;
+    document.getElementById('tei-val').value=s.val;
+  } else {
+    document.getElementById('teo-from').value=s.from;
+    document.getElementById('teo-to').value=s.to;
+    document.getElementById('teo-val').value=s.val;
+  }
+}
+
+// Live editor sync
+function bindEditorLive(kind){
+  const fields=kind==='in'?['tei-from','tei-to','tei-val']:['teo-from','teo-to','teo-val'];
+  fields.forEach(id=>{
     document.getElementById(id).addEventListener('input',()=>{
-      if(selDep===null||!depSegs[selDep]) return;
-      const f=parseInt(document.getElementById('de-from').value)||1;
-      const t=parseInt(document.getElementById('de-to').value)||1;
-      const v=parseFloat(document.getElementById('de-val').value)||0;
-      depSegs[selDep]={...depSegs[selDep],from:Math.max(1,f),to:Math.max(f,t),val:v};
-      applyNoOverlap(selDep, 'r'); applyNoOverlap(selDep, 'l');
-      renderTL(); recalc();
+      const arr=kind==='in'?depIn:depOut;
+      const sel=kind==='in'?selIn:selOut;
+      if(sel===null||!arr[sel])return;
+      const f=parseInt(document.getElementById(fields[0]).value)||1;
+      const t=parseInt(document.getElementById(fields[1]).value)||1;
+      const v=Math.abs(parseFloat(document.getElementById(fields[2]).value)||0);
+      arr[sel]={...arr[sel],from:Math.max(1,f),to:Math.max(f,t),val:v};
+      noOverlap(arr,sel,'r');noOverlap(arr,sel,'l');
+      renderTL(kind);recalc();
     });
   });
 }
 
-function startDrag(e,idx,side){
-  e.preventDefault();
-  drag={idx,side,rect:document.getElementById('dep-track').getBoundingClientRect()};
-  document.addEventListener('mousemove',onDrag);
-  document.addEventListener('mouseup',stopDrag);
+// Drag
+function startTLDrag(e,kind,idx,side){
+  if(e.cancelable)e.preventDefault();
+  const trackEl=document.getElementById('tl-track-'+kind);
+  const rect=trackEl.getBoundingClientRect();
+  drag={kind,idx,side,rect};
+  const move=ev=>{
+    const cx=ev.touches?ev.touches[0].clientX:ev.clientX;
+    const hor=getHorizon();
+    const raw=(cx-drag.rect.left)/drag.rect.width;
+    const yr=Math.max(1,Math.min(hor,Math.round(raw*hor)+1));
+    const arr=drag.kind==='in'?depIn:depOut;
+    const sel=drag.kind==='in'?selIn:selOut;
+    if(drag.side==='l'){arr[drag.idx].from=Math.min(yr,arr[drag.idx].to);noOverlap(arr,drag.idx,'l');}
+    else{arr[drag.idx].to=Math.max(yr,arr[drag.idx].from);noOverlap(arr,drag.idx,'r');}
+    syncEditor(drag.kind,drag.idx);
+    renderTL(drag.kind);recalc();
+  };
+  const up=()=>{drag=null;document.removeEventListener('mousemove',move);document.removeEventListener('mouseup',up);document.removeEventListener('touchmove',move);document.removeEventListener('touchend',up);};
+  document.addEventListener('mousemove',move);document.addEventListener('mouseup',up);
+  document.addEventListener('touchmove',move,{passive:false});document.addEventListener('touchend',up);
 }
-function onDrag(e){
-  if(!drag) return;
-  const hor=getHorizon();
-  const raw=(e.clientX-drag.rect.left)/drag.rect.width;
-  const yr=Math.round(Math.max(0,Math.min(1,raw))*hor)+1; // 1-based
-  const clampedYr=Math.max(1,Math.min(hor,yr));
-  sortSegs();
-  const realIdx=drag.idx; // index after sort may differ — use stable ref
-  const seg=depSegs[realIdx];
-  if(drag.side==='l'){
-    depSegs[realIdx]={...seg, from:Math.min(clampedYr, seg.to)};
-    applyNoOverlap(realIdx,'l');
-  } else {
-    depSegs[realIdx]={...seg, to:Math.max(clampedYr, seg.from)};
-    applyNoOverlap(realIdx,'r');
-  }
-  if(selDep===realIdx) syncEditorFields(realIdx);
-  renderTL(); recalc();
-}
-function stopDrag(){ drag=null; document.removeEventListener('mousemove',onDrag); document.removeEventListener('mouseup',stopDrag); }
 
-document.getElementById('dep-track').addEventListener('click',e=>{
+function addSeg(kind){
+  const arr=kind==='in'?depIn:depOut;
   const hor=getHorizon();
-  const raw=(e.clientX-e.currentTarget.getBoundingClientRect().left)/e.currentTarget.getBoundingClientRect().width;
-  const yr=Math.max(1,Math.min(hor,Math.round(raw*hor)+1));
-  sortSegs();
-  if(depSegs.findIndex(s=>yr>=s.from&&yr<=s.to)<0){
-    depSegs.push({from:yr,to:Math.min(yr+4,hor),val:0});
-    sortSegs();
-    const ni=depSegs.findIndex(s=>s.from===yr);
-    applyNoOverlap(ni,'r');
-    openDepEditor(ni);
-  }
-});
-document.getElementById('dep-add').addEventListener('click',()=>{
-  const hor=getHorizon();
-  // find first free slot
-  sortSegs();
+  sortSegs(arr);
   let start=1;
-  for(const s of depSegs){ if(start>=s.from&&start<=s.to) start=s.to+1; }
+  for(const s of arr){if(start>=s.from&&start<=s.to)start=s.to+1;}
   start=Math.min(start,hor);
-  depSegs.push({from:start,to:Math.min(start+9,hor),val:0});
-  sortSegs();
-  const ni=depSegs.findIndex(s=>s.from===start);
-  applyNoOverlap(ni,'r');
-  openDepEditor(ni);
-});
-document.getElementById('de-del').addEventListener('click',()=>{
-  if(selDep===null) return;
-  depSegs.splice(selDep,1); selDep=null;
-  document.getElementById('dep-editor').classList.remove('open');
-  renderTL(); recalc();
-});
-document.getElementById('de-cancel').addEventListener('click',()=>{
-  selDep=null; document.getElementById('dep-editor').classList.remove('open'); renderTL();
-});
+  arr.push({from:start,to:Math.min(start+9,hor),val:0});
+  sortSegs(arr);
+  const ni=arr.findIndex(s=>s.from===start);
+  noOverlap(arr,ni,'r');
+  openEditor(kind,ni);
+  renderTL(kind);
+}
 
-// TX RULES
-function applyRulesToTx(){
-  // reset all to 0
-  txData.forEach(r=>{r.val=0;r.desc='';});
-  txRules.forEach(rule=>{
-    for(let y=rule.from; y<=Math.min(rule.to,MAX_YR); y+=rule.every){
-      txData[y].val=(txData[y].val||0)+rule.val;
-      if(rule.desc) txData[y].desc=rule.desc;
+// Track click
+['in','out'].forEach(kind=>{
+  const trackEl=document.getElementById('tl-track-'+kind);
+  trackEl.addEventListener('click',e=>{
+    const hor=getHorizon();
+    const arr=kind==='in'?depIn:depOut;
+    const rect=trackEl.getBoundingClientRect();
+    const yr=Math.max(1,Math.min(hor,Math.round((e.clientX-rect.left)/rect.width*hor)+1));
+    sortSegs(arr);
+    if(arr.findIndex(s=>yr>=s.from&&yr<=s.to)<0){
+      arr.push({from:yr,to:Math.min(yr+9,hor),val:0});
+      sortSegs(arr);
+      const ni=arr.findIndex(s=>s.from===yr);
+      noOverlap(arr,ni,'r');
+      openEditor(kind,ni);
+      renderTL(kind);
     }
   });
+  document.querySelectorAll('.btn-add-seg[data-kind="'+kind+'"]').forEach(b=>b.addEventListener('click',()=>addSeg(kind)));
+});
+
+// Editor buttons
+document.getElementById('tei-del').addEventListener('click',()=>{if(selIn===null)return;depIn.splice(selIn,1);selIn=null;document.getElementById('tl-editor-in').classList.remove('open');renderTL('in');recalc();});
+document.getElementById('tei-cancel').addEventListener('click',()=>{selIn=null;document.getElementById('tl-editor-in').classList.remove('open');renderTL('in');});
+document.getElementById('teo-del').addEventListener('click',()=>{if(selOut===null)return;depOut.splice(selOut,1);selOut=null;document.getElementById('tl-editor-out').classList.remove('open');renderTL('out');recalc();});
+document.getElementById('teo-cancel').addEventListener('click',()=>{selOut=null;document.getElementById('tl-editor-out').classList.remove('open');renderTL('out');});
+
+// TX RULES
+function applyRules(){
+  txIn.forEach(r=>{r.val=0;r.desc='';});
+  txOut.forEach(r=>{r.val=0;r.desc='';});
+  rulesIn.forEach(rule=>{for(let y=rule.from;y<=Math.min(rule.to,MAX_YR);y+=rule.every){txIn[y].val=(txIn[y].val||0)+rule.val;if(rule.desc&&!txIn[y].desc)txIn[y].desc=rule.desc;}});
+  rulesOut.forEach(rule=>{for(let y=rule.from;y<=Math.min(rule.to,MAX_YR);y+=rule.every){txOut[y].val=(txOut[y].val||0)+rule.val;if(rule.desc&&!txOut[y].desc)txOut[y].desc=rule.desc;}});
 }
-
-function renderRulesList(){
-  const el=document.getElementById('rules-list');
-  el.innerHTML='';
-  if(txRules.length===0){
-    el.innerHTML='<div style="font-size:13px;color:var(--txt3);padding:6px 0">Zatím žádná pravidla. Přidejte první výše.</div>';
-    return;
-  }
-  txRules.forEach((rule,i)=>{
-    const sign=rule.val>=0?'+':'';
-    const every=rule.every===1?'každý rok':`každých ${rule.every} let`;
-    const div=document.createElement('div'); div.className='rule-tag';
-    div.innerHTML=`<div class="rule-tag-text"><strong>${sign}${new Intl.NumberFormat('cs-CZ',{maximumFractionDigits:0}).format(rule.val)} Kč</strong> — ${every}, roky ${rule.from}–${rule.to}</div><button class="rule-del" data-i="${i}">×</button>`;
-    el.appendChild(div);
+function renderRules(kind){
+  const list=document.getElementById('rules-'+kind);
+  const arr=kind==='in'?rulesIn:rulesOut;
+  list.innerHTML='';
+  if(!arr.length){list.innerHTML='<div style="font-size:13px;color:var(--txt3);padding:4px 0">Zatím žádná pravidla.</div>';return;}
+  arr.forEach((r,i)=>{
+    const every=r.every===1?'každý rok':`každých ${r.every} let`;
+    const tag=document.createElement('div');tag.className='rule-tag'+(kind==='out'?' neg':'');
+    tag.innerHTML=`<div class="rule-tag-text"><strong>${kind==='out'?'−':''}${new Intl.NumberFormat('cs-CZ',{maximumFractionDigits:0}).format(r.val)} Kč</strong> — ${every}, roky ${r.from}–${r.to}${r.desc?' · '+r.desc:''}</div><button class="rule-del" data-i="${i}">×</button>`;
+    list.appendChild(tag);
   });
-  el.querySelectorAll('.rule-del').forEach(btn=>{
-    btn.addEventListener('click',()=>{ txRules.splice(+btn.dataset.i,1); applyRulesToTx(); renderRulesList(); renderTxTable(); recalc(); });
-  });
+  list.querySelectorAll('.rule-del').forEach(b=>b.addEventListener('click',()=>{(kind==='in'?rulesIn:rulesOut).splice(+b.dataset.i,1);applyRules();renderRules(kind);renderTxTable(kind);recalc();}));
 }
+function addRule(kind){
+  const pfx=kind==='in'?'rbin':'rbout';
+  const val=Math.abs(parseFloat(document.getElementById(pfx+'-val').value)||0);
+  const from=parseInt(document.getElementById(pfx+'-from').value)||1;
+  const to=parseInt(document.getElementById(pfx+'-to').value)||from;
+  const every=parseInt(document.getElementById(pfx+'-every').value)||1;
+  const desc=document.getElementById(pfx+'-desc').value.trim();
+  if(!val){alert('Zadejte částku.');return;}
+  (kind==='in'?rulesIn:rulesOut).push({val,from:Math.max(1,from),to:Math.min(Math.max(from,to),MAX_YR),every,desc,id:++ruleId});
+  applyRules();renderRules(kind);renderTxTable(kind);recalc();
+  document.getElementById(pfx+'-val').value='';
+  document.getElementById(pfx+'-desc').value='';
+}
+document.getElementById('rbin-add').addEventListener('click',()=>addRule('in'));
+document.getElementById('rbout-add').addEventListener('click',()=>addRule('out'));
 
-document.getElementById('rb-add').addEventListener('click',()=>{
-  const val=parseFloat(document.getElementById('rb-val').value)||0;
-  const from=parseInt(document.getElementById('rb-from').value)||1;
-  const to=parseInt(document.getElementById('rb-to').value)||1;
-  const every=parseInt(document.getElementById('rb-every').value)||1;
-  if(val===0){alert('Zadejte částku.');return;}
-  txRules.push({val,from:Math.max(1,from),to:Math.max(from,Math.min(to,MAX_YR)),every,id:++ruleIdCtr});
-  applyRulesToTx(); renderRulesList(); renderTxTable(); recalc();
-  document.getElementById('rb-val').value='';
+// TOGGLE
+['in','out'].forEach(kind=>{
+  document.getElementById('toggle-'+kind).querySelectorAll('.toggle-opt').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      document.getElementById('toggle-'+kind).querySelectorAll('.toggle-opt').forEach(b=>b.classList.remove('sel'));
+      btn.classList.add('sel');
+      const mode=btn.dataset.mode;
+      if(kind==='in')modeIn=mode;else modeOut=mode;
+      document.getElementById('txin-repeat').style.display=kind==='in'&&mode==='repeat'?'':'none';
+      document.getElementById('txin-manual').style.display=kind==='in'&&mode==='manual'?'':'none';
+      document.getElementById('txout-repeat').style.display=kind==='out'&&mode==='repeat'?'':'none';
+      document.getElementById('txout-manual').style.display=kind==='out'&&mode==='manual'?'':'none';
+      if(mode==='manual')renderTxTable(kind);
+    });
+  });
 });
 
-// TX TOGGLE
-document.getElementById('tx-toggle-repeat').addEventListener('click',()=>{
-  txMode='repeat';
-  document.getElementById('tx-toggle-repeat').classList.add('sel');
-  document.getElementById('tx-toggle-manual').classList.remove('sel');
-  document.getElementById('tx-repeat-view').style.display='';
-  document.getElementById('tx-manual-view').style.display='none';
-});
-document.getElementById('tx-toggle-manual').addEventListener('click',()=>{
-  txMode='manual';
-  document.getElementById('tx-toggle-manual').classList.add('sel');
-  document.getElementById('tx-toggle-repeat').classList.remove('sel');
-  document.getElementById('tx-repeat-view').style.display='none';
-  document.getElementById('tx-manual-view').style.display='';
-  renderTxTable();
-});
-
-// TX TABLE (rok po roku, starts at year 1)
-function renderTxTable(){
-  const startYr=num(document.getElementById('startYear').value,2025);
+// TX TABLE
+function renderTxTable(kind){
+  const arr=kind==='in'?txIn:txOut;
+  const tbId=kind==='in'?'tbody-in':'tbody-out';
+  const tb=document.getElementById(tbId);
   const hor=getHorizon();
-  const tb=document.getElementById('tx-body');
+  const sy=getStartYear();
   tb.innerHTML='';
-  for(let i=1; i<=hor; i++){
-    const row=txData[i]||{yr:i,val:0,desc:''};
+  for(let i=1;i<=hor;i++){
+    const row=arr[i]||{yr:i,val:0,desc:''};
+    const neg=kind==='out'&&row.val>0||kind==='in'&&row.val<0;
     const tr=document.createElement('tr');
-    tr.innerHTML=`<td style="text-align:center;color:var(--txt3)">${i}</td><td style="color:var(--txt3)">${startYr+i}</td><td class="r"><input type="number" value="${row.val}" step="1000" data-i="${i}" class="txi" style="text-align:right"></td><td><input type="text" value="${row.desc||''}" placeholder="popis…" data-i="${i}" class="dsc"></td>`;
+    tr.innerHTML=`<td style="text-align:center;color:var(--txt3)">${i}</td><td style="text-align:right;color:var(--txt3)">${sy+i}</td><td class="r"><input type="number" value="${row.val}" step="1000" data-i="${i}" data-k="${kind}" class="txi" style="text-align:right${neg?';color:var(--red-tx);font-weight:600':''}"></td><td><input type="text" value="${row.desc||''}" placeholder="popis…" data-i="${i}" data-k="${kind}" class="txd"></td>`;
     tb.appendChild(tr);
   }
-  tb.querySelectorAll('.txi').forEach(inp=>inp.addEventListener('input',e=>{ txData[+e.target.dataset.i].val=num(e.target.value); recalc(); }));
-  tb.querySelectorAll('.dsc').forEach(inp=>inp.addEventListener('input',e=>{ txData[+e.target.dataset.i].desc=e.target.value; }));
+  tb.querySelectorAll('.txi').forEach(inp=>inp.addEventListener('input',e=>{
+    const k=e.target.dataset.k,ii=+e.target.dataset.i;
+    (k==='in'?txIn:txOut)[ii].val=num(e.target.value);
+    const v=num(e.target.value);
+    const neg=k==='out'&&v>0||k==='in'&&v<0;
+    e.target.style.color=neg?'var(--red-tx)':'';
+    e.target.style.fontWeight=neg?'600':'';
+    recalc();
+  }));
+  tb.querySelectorAll('.txd').forEach(inp=>inp.addEventListener('input',e=>{
+    const k=e.target.dataset.k,ii=+e.target.dataset.i;
+    (k==='in'?txIn:txOut)[ii].desc=e.target.value;
+  }));
 }
-
-document.getElementById('fill-btn').addEventListener('click',()=>{
-  const from=parseInt(document.getElementById('fill-from').value)||1;
-  const to  =parseInt(document.getElementById('fill-to').value)||1;
-  const val =parseFloat(document.getElementById('fill-val').value)||0;
-  for(let y=Math.max(1,from); y<=Math.min(to,MAX_YR); y++) txData[y].val=val;
-  renderTxTable(); recalc();
-});
 
 // KPIs
 function renderKPIs(rows){
@@ -980,38 +885,38 @@ function renderKPIs(rows){
   document.getElementById('kpi-final').textContent=fmt(last.portfolio||0);
 }
 
-// MILESTONES — dynamic based on horizon
+// MILESTONES
 function renderMilestones(rows){
-  const el=document.getElementById('main-milestones');
-  el.innerHTML='';
+  const el=document.getElementById('main-milestones');el.innerHTML='';
   const hor=getHorizon();
+  const step=hor<=20?5:10;
   const marks=[];
-  const step=hor<=20?5:hor<=40?10:hor<=60?10:10;
-  for(let y=step;y<=hor;y+=step) marks.push(y);
-  if(marks.length>4) marks.splice(0,marks.length-4);
-  el.style.gridTemplateColumns=`repeat(${marks.length},1fr)`;
+  for(let y=step;y<=hor;y+=step)marks.push(y);
+  while(marks.length>4)marks.shift();
+  el.style.gridTemplateColumns=`repeat(${Math.max(1,marks.length)},1fr)`;
   marks.forEach(yr=>{
-    const r=rows.find(r=>r.yr===yr); if(!r) return;
-    const d=document.createElement('div'); d.className='ms';
+    const r=rows.find(r=>r.yr===yr);if(!r)return;
+    const d=document.createElement('div');d.className='ms';
     d.innerHTML=`<div class="ms-yr">Rok ${yr}</div><div class="ms-val">${fmt(r.portfolio)}</div><div class="ms-gain">+${fmt(Math.max(0,r.cumRet))} výnosy</div>`;
     el.appendChild(d);
   });
 }
 
-// CHART
+// CHART — X axis shows calendar years
 function renderChart(rows){
-  const canvas=document.getElementById('main-chart'); if(!canvas) return;
+  const canvas=document.getElementById('main-chart');if(!canvas)return;
   if(chartInst){chartInst.destroy();}
+  const labels=rows.map(r=>r.calYr);
   chartInst=new Chart(canvas,{
     type:'bar',
-    data:{labels:rows.map(r=>r.yr),datasets:[
+    data:{labels,datasets:[
       {label:'Vložená částka',data:rows.map(r=>Math.round(r.cumInv)),backgroundColor:'#5DADE2',stack:'s'},
       {label:'Výnosy',data:rows.map(r=>Math.round(Math.max(0,r.cumRet))),backgroundColor:'#4ECDA0',stack:'s'},
     ]},
     options:{responsive:true,maintainAspectRatio:false,
       scales:{
-        x:{stacked:true,grid:{display:false},ticks:{font:{size:11},maxTicksLimit:12,color:'#6b7280'}},
-        y:{stacked:true,grid:{color:'#edf0f4'},ticks:{font:{size:11},color:'#6b7280',callback:v=>{const m=Math.round(v/1000)/1000;return m>=1?m.toFixed(1)+' M':Math.round(v/1000)+'k';}}},
+        x:{stacked:true,grid:{display:false},ticks:{font:{size:11},maxTicksLimit:12,color:'#6b7280',callback:(v,i,ticks)=>{const yr=rows[i]?.calYr;const hor=getHorizon();const step=hor<=20?5:hor<=40?5:10;return yr&&(yr-getStartYear())%step===0?yr:null;}}},
+        y:{stacked:true,grid:{color:'#edf0f4'},ticks:{font:{size:11},color:'#6b7280',callback:v=>{const m=v/1000000;return m>=1?(m.toFixed(1)+' M'):Math.round(v/1000)+'k';}}},
       },
       plugins:{legend:{display:false},tooltip:{callbacks:{
         title:([i])=>`Rok ${i.label}`,
@@ -1024,15 +929,14 @@ function renderChart(rows){
 
 // SIM TABLE
 function renderSimTable(rows){
-  const tb=document.getElementById('sim-body'); tb.innerHTML='';
+  const tb=document.getElementById('sim-body');tb.innerHTML='';
   const hor=getHorizon();
-  const step=hor<=20?2:hor<=40?5:10;
+  const step=hor<=20?2:5;
   const ms=new Set();
-  for(let y=0;y<=hor;y+=step) ms.add(y);
-  ms.add(hor);
+  for(let y=0;y<=hor;y+=step)ms.add(y);ms.add(hor);
   rows.forEach(r=>{
     const tr=document.createElement('tr');
-    if(ms.has(r.yr)) tr.className='milestone';
+    if(ms.has(r.yr))tr.className='milestone';
     tr.innerHTML=`<td>${r.yr}</td><td style="text-align:right">${r.calYr}</td><td style="text-align:right">${fmtPct(r.rate)}</td><td style="text-align:right">${r.monthly!==0?fmt(r.monthly):'—'}</td><td style="text-align:right" class="${r.tx>0?'pos':r.tx<0?'neg':''}">${r.tx!==0?fmt(r.tx):'—'}</td><td style="text-align:right" class="${r.gain>0?'pos':r.gain<0?'neg':''}">${r.yr>0?fmt(r.gain):'—'}</td><td style="text-align:right">${fmt(r.cumInv)}</td><td style="text-align:right;font-weight:600">${fmt(r.portfolio)}</td>`;
     tb.appendChild(tr);
   });
@@ -1041,13 +945,13 @@ function renderSimTable(rows){
 // RECALC
 function recalc(){
   const rows=simulate();
-  renderKPIs(rows); renderMilestones(rows); renderChart(rows); renderSimTable(rows);
+  renderKPIs(rows);renderMilestones(rows);renderChart(rows);renderSimTable(rows);
   saveState();
 }
 
 // SAVE / LOAD
 function getState(){
-  return{startAmount:document.getElementById('startAmount').value,startYear:document.getElementById('startYear').value,horizon:document.getElementById('horizon').value,phases,depSegs,txData,txRules,txMode};
+  return{startAmount:document.getElementById('startAmount').value,startYear:document.getElementById('startYear').value,horizon:document.getElementById('horizon').value,phases,depIn,depOut,txIn,txOut,rulesIn,rulesOut,modeIn,modeOut};
 }
 function applyState(s){
   document.getElementById('startAmount').value=s.startAmount||0;
@@ -1056,30 +960,29 @@ function applyState(s){
   document.getElementById('horizon').value=h;
   document.getElementById('horizon-slider').value=h;
   document.getElementById('horizon-val').textContent=h;
-  if(s.phases&&s.phases.length) phases=s.phases;
-  if(s.depSegs) depSegs=s.depSegs;
-  if(s.txData) txData=s.txData;
-  if(s.txRules) txRules=s.txRules;
-  if(s.txMode){
-    txMode=s.txMode;
-    if(txMode==='manual'){
-      document.getElementById('tx-toggle-manual').click();
-    }
-  }
-  renderPhases(); renderTL(); renderTxTable(); renderRulesList(); recalc();
+  if(s.phases&&s.phases.length)phases=s.phases;
+  if(s.depIn)depIn=s.depIn;
+  if(s.depOut)depOut=s.depOut;
+  if(s.txIn)txIn=s.txIn;
+  if(s.txOut)txOut=s.txOut;
+  if(s.rulesIn)rulesIn=s.rulesIn;
+  if(s.rulesOut)rulesOut=s.rulesOut;
+  if(s.modeIn&&s.modeIn==='manual'){document.getElementById('toggle-in').querySelectorAll('.toggle-opt').forEach(b=>{b.classList.toggle('sel',b.dataset.mode==='manual');});modeIn='manual';document.getElementById('txin-repeat').style.display='none';document.getElementById('txin-manual').style.display='';}
+  if(s.modeOut&&s.modeOut==='manual'){document.getElementById('toggle-out').querySelectorAll('.toggle-opt').forEach(b=>{b.classList.toggle('sel',b.dataset.mode==='manual');});modeOut='manual';document.getElementById('txout-repeat').style.display='none';document.getElementById('txout-manual').style.display='';}
+  renderPhases();renderTL('in');renderTL('out');renderRules('in');renderRules('out');renderTxTable('in');renderTxTable('out');recalc();
 }
-function saveState(){try{localStorage.setItem('inv-calc',JSON.stringify(getState()));}catch(e){}}
+function saveState(){try{localStorage.setItem('inv-calc-v2',JSON.stringify(getState()));}catch(e){}}
 
 document.getElementById('btn-save').addEventListener('click',()=>{
   const a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([JSON.stringify(getState(),null,2)],{type:'application/json'}));
-  a.download='kalkulacka-nastaveni.json'; a.click();
+  a.download='kalkulacka-nastaveni.json';a.click();
 });
 document.getElementById('btn-load').addEventListener('change',e=>{
-  const f=e.target.files[0]; if(!f) return;
+  const f=e.target.files[0];if(!f)return;
   const r=new FileReader();
   r.onload=ev=>{try{applyState(JSON.parse(ev.target.result));}catch{alert('Soubor není platný.');}};
-  r.readAsText(f); e.target.value='';
+  r.readAsText(f);e.target.value='';
 });
 
 // MODAL
@@ -1087,45 +990,44 @@ const modal=document.getElementById('help-modal');
 document.getElementById('btn-help').addEventListener('click',()=>modal.classList.add('open'));
 document.getElementById('modal-close').addEventListener('click',()=>modal.classList.remove('open'));
 document.getElementById('modal-ok').addEventListener('click',()=>modal.classList.remove('open'));
-modal.addEventListener('click',e=>{ if(e.target===modal) modal.classList.remove('open'); });
+modal.addEventListener('click',e=>{if(e.target===modal)modal.classList.remove('open');});
 
 // HORIZON SLIDER
 document.getElementById('horizon-slider').addEventListener('input',e=>{
   const v=e.target.value;
   document.getElementById('horizon').value=v;
   document.getElementById('horizon-val').textContent=v;
-  renderTL(); renderTxTable(); recalc();
+  renderTL('in');renderTL('out');renderTxTable('in');renderTxTable('out');recalc();
 });
 
-// INPUT LISTENERS
-['startAmount','startYear'].forEach(id=>{
-  document.getElementById(id).addEventListener('input',()=>{ renderTxTable(); recalc(); });
-});
+// BASIC INPUTS
+['startAmount','startYear'].forEach(id=>document.getElementById(id).addEventListener('input',()=>{renderTxTable('in');renderTxTable('out');renderTL('in');renderTL('out');recalc();}));
 
 // COMPARE BARS
 function drawBars(id,data,c1,c2){
-  const el=document.getElementById(id); if(!el) return;
+  const el=document.getElementById(id);if(!el)return;
   const max=Math.max(...data.map(d=>d[0]+d[1]));
   el.style.cssText='display:flex;align-items:flex-end;gap:3px;width:100%;height:80px';
   data.forEach(([inv,ret])=>{
     const w=document.createElement('div');
     w.style.cssText='flex:1;display:flex;flex-direction:column;align-items:stretch;justify-content:flex-end;height:100%';
-    const hi=Math.round((inv/max)*100), hr=Math.round((ret/max)*100);
+    const hi=Math.round((inv/max)*100),hr=Math.round((ret/max)*100);
     w.innerHTML=`<div style="height:${hr}%;background:${c2};border-radius:2px 2px 0 0;min-height:${ret>0?2:0}px"></div><div style="height:${hi}%;background:${c1};border-radius:${hr>0?'0':'2px 2px'} 0 0;min-height:2px"></div>`;
     el.appendChild(w);
   });
 }
 
 // INIT
-bindEditorLive();
+bindEditorLive('in');
+bindEditorLive('out');
 drawBars('bad-bars',[[15,0],[18,1],[22,3],[27,6],[32,10],[37,14],[42,19],[47,24],[50,28],[51,29],[51,29]],'#5DADE2','rgba(93,173,226,.3)');
 drawBars('good-bars',[[50,29],[47,32],[44,35],[41,38],[39,41],[38,44],[37,47],[37,50],[37,54]],'#5DADE2','#4ECDA0');
 
 try{
-  const saved=localStorage.getItem('inv-calc');
-  if(saved){ applyState(JSON.parse(saved)); }
-  else { renderPhases(); renderTL(); renderRulesList(); renderTxTable(); recalc(); }
-}catch(e){ renderPhases(); renderTL(); renderRulesList(); renderTxTable(); recalc(); }
+  const saved=localStorage.getItem('inv-calc-v2');
+  if(saved){applyState(JSON.parse(saved));}
+  else{renderPhases();renderTL('in');renderTL('out');renderRules('in');renderRules('out');renderTxTable('in');renderTxTable('out');recalc();}
+}catch(e){renderPhases();renderTL('in');renderTL('out');renderRules('in');renderRules('out');renderTxTable('in');renderTxTable('out');recalc();}
 </script>
 </body>
 </html>
