@@ -485,43 +485,54 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
     </div>
   </div>
 
-  <!-- Kolik potřebuji investovat? -->
+  <!-- Jaký měsíční příjem si mohu dovolit? -->
   <div class="card">
-    <div class="card-hdr"><div class="card-dot" style="background:#a78bfa"></div><div class="card-title">Kolik potřebuji investovat?</div></div>
+    <div class="card-hdr"><div class="card-dot" style="background:#a78bfa"></div><div class="card-title">Jaký měsíční příjem si mohu dovolit?</div></div>
     <div class="card-body">
-      <p style="font-size:13px;color:var(--txt2);margin-bottom:16px;line-height:1.6">Zadejte požadovaný měsíční příjem v důchodu a kalkulačka zobrazí, jak daleko jste od tohoto cíle. <strong>Příjem nezahrnuje státní důchod</strong> — jde pouze o výnosy z vašeho investičního portfolia.</p>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:16px" id="target-grid">
+      <p style="font-size:13px;color:var(--txt2);margin-bottom:16px;line-height:1.6">Výpočet vychází z <strong>vrcholu vašeho portfolia</strong> — momentu kdy je největší. Od té chvíle si z něj lze čerpat měsíční rentu tak, aby portfolio vydrželo až do konce vašeho investičního horizontu.</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px" id="target-grid">
         <div class="inp-group" style="margin-bottom:0">
-          <label class="inp-label">Cílový měsíční příjem v důchodu</label>
-          <div class="inp-wrap"><input type="number" id="target-income" placeholder="např. 30 000" step="1000" min="0"><span class="inp-unit">Kč/m</span></div>
-        </div>
-        <div class="inp-group" style="margin-bottom:0">
-          <label class="inp-label">Věk odchodu do důchodu</label>
-          <div class="inp-wrap"><input type="number" id="target-retire-age" value="67" min="50" max="80"><span class="inp-unit">let</span></div>
-        </div>
-        <div class="inp-group" style="margin-bottom:0">
-          <label class="inp-label">Výnos portfolia v důchodu</label>
+          <label class="inp-label">Výnos portfolia při čerpání</label>
           <div class="inp-wrap"><input type="number" id="target-rate" value="3" step="0.5" min="0" max="20"><span class="inp-unit">% p.a.</span></div>
+          <div class="hint" style="margin-top:4px">Konzervativní zhodnocení portfolia v době čerpání</div>
+        </div>
+        <div class="inp-group" style="margin-bottom:0">
+          <label class="inp-label">Chci odkázat blízkým</label>
+          <div class="inp-wrap"><input type="number" id="target-legacy" value="0" step="100000" min="0"><span class="inp-unit">Kč</span></div>
+          <div class="hint" style="margin-top:4px">Tato částka se odečte z vrcholu portfolia před výpočtem renty</div>
         </div>
       </div>
-      <div id="target-result" style="display:none;padding:14px;border-radius:8px;background:var(--bg);border:1px solid var(--border)">
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
-          <div>
-            <div style="font-size:11px;color:var(--txt3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px">Portfolio potřebné v důchodu</div>
-            <div style="font-size:18px;font-weight:600;font-family:var(--mono);color:var(--txt)" id="tr-needed">—</div>
+      <!-- Result — shown always once we have simulation data -->
+      <div id="target-result" style="display:none">
+        <!-- Big number highlight -->
+        <div style="background:linear-gradient(135deg,#1a2332 0%,#243447 100%);border-radius:10px;padding:20px 24px;margin-bottom:14px;display:flex;align-items:center;gap:24px;flex-wrap:wrap">
+          <div style="flex:1;min-width:180px">
+            <div style="font-size:11px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">Měsíční renta</div>
+            <div style="font-size:32px;font-weight:600;font-family:var(--mono);color:var(--teal);line-height:1" id="tr-monthly">—</div>
+            <div style="font-size:12px;color:rgba(255,255,255,.4);margin-top:4px" id="tr-monthly-sub">měsíčně po dobu čerpání</div>
           </div>
-          <div>
-            <div style="font-size:11px;color:var(--txt3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px">Odhadnuté portfolio v důchodu</div>
-            <div style="font-size:18px;font-weight:600;font-family:var(--mono)" id="tr-projected">—</div>
-          </div>
-          <div>
-            <div style="font-size:11px;color:var(--txt3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px">Rozdíl</div>
-            <div style="font-size:18px;font-weight:600;font-family:var(--mono)" id="tr-diff">—</div>
+          <div style="display:flex;flex-direction:column;gap:10px;flex:2;min-width:220px">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+              <span style="font-size:12px;color:rgba(255,255,255,.5)">Vrchol portfolia</span>
+              <span style="font-size:14px;font-weight:600;font-family:var(--mono);color:#fff" id="tr-peak">—</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:12px" id="tr-legacy-row" style="display:none">
+              <span style="font-size:12px;color:rgba(255,255,255,.5)">Odkaz blízkým</span>
+              <span style="font-size:14px;font-weight:600;font-family:var(--mono);color:rgba(255,255,255,.6)" id="tr-legacy-val">—</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+              <span style="font-size:12px;color:rgba(255,255,255,.5)">Kapitál k čerpání</span>
+              <span style="font-size:14px;font-weight:600;font-family:var(--mono);color:var(--blue)" id="tr-capital">—</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+              <span style="font-size:12px;color:rgba(255,255,255,.5)" id="tr-period-label">Doba čerpání</span>
+              <span style="font-size:14px;font-weight:600;font-family:var(--mono);color:rgba(255,255,255,.7)" id="tr-period">—</span>
+            </div>
           </div>
         </div>
-        <div id="tr-message" style="margin-top:12px;font-size:13px;line-height:1.6;color:var(--txt2)"></div>
+        <div id="tr-message" style="font-size:13px;line-height:1.65;color:var(--txt2);padding:12px 14px;background:var(--bg);border-radius:8px;border:1px solid var(--border)"></div>
       </div>
-      <div class="hint" style="margin-top:8px">Výpočet předpokládá, že v důchodu čerpáte pouze výnosy portfolia (portfolio samotné se nesnižuje). Věk odchodu do důchodu je vztažen k roku narození zadanému výše.</div>
+      <div class="hint" style="margin-top:10px">Výpočet předpokládá rovnoměrné měsíční čerpání (anuita). Portfolio klesá na nulu v posledním roce horizontu. Nezahrnuje státní důchod.</div>
     </div>
   </div>
 
@@ -1165,82 +1176,71 @@ document.getElementById('mode-real').addEventListener('click',()=>{
 });
 document.getElementById('inflation-rate').addEventListener('input',()=>recalc());
 
-// TARGET INCOME CALCULATOR
+// MONTHLY DRAWDOWN CALCULATOR
+// Find peak portfolio value in simulation, subtract legacy, compute annuity to horizon end.
 function renderTargetIncome(rows){
-  const income=num(document.getElementById('target-income').value,0);
-  if(!income){document.getElementById('target-result').style.display='none';return;}
-  const retireAge=num(document.getElementById('target-retire-age').value,67);
   const retireRate=num(document.getElementById('target-rate').value,3)/100;
-  const by=getBirthYear();
+  const legacy=num(document.getElementById('target-legacy').value,0);
   const sy=getStartYear();
   const hor=getHorizon();
 
-  // Find the withdrawal-start year — i.e. when net monthly flow first turns negative
-  // (depOut kicks in or depIn stops). If birthYear set, also consider retirement age.
-  // Use whichever comes first that makes sense.
-  let withdrawalStartYr=null;
+  // Find peak row (highest portfolio value)
+  let peakRow=rows[0]||{yr:0,portfolio:0};
+  rows.forEach(r=>{if(r.portfolio>peakRow.portfolio)peakRow=r;});
 
-  // Option A: retirement age from birthYear
-  if(by){
-    const ageYr=(by+retireAge)-sy;
-    if(ageYr>=1&&ageYr<=hor)withdrawalStartYr=ageYr;
+  const peakPortfolio=peakRow.portfolio;
+  const peakYr=peakRow.yr;
+  const capital=Math.max(0,peakPortfolio-legacy);
+  const yearsDrawdown=hor-peakYr;
+
+  if(peakPortfolio<=0||yearsDrawdown<=0){
+    document.getElementById('target-result').style.display='none';
+    return;
   }
 
-  // Option B: first year where net monthly cash flow goes negative
-  if(withdrawalStartYr===null){
-    for(let yr=1;yr<=hor;yr++){
-      if(getMonthlyNet(yr)<0){withdrawalStartYr=yr;break;}
-    }
+  // Annuity formula: PMT = C * r_m / (1 - (1+r_m)^(-n))
+  // where r_m = monthly rate, n = total months
+  let monthlyPmt=0;
+  const n=yearsDrawdown*12;
+  if(retireRate>0){
+    const rm=Math.pow(1+retireRate,1/12)-1;
+    monthlyPmt=capital*rm/(1-Math.pow(1+rm,-n));
+  } else {
+    // 0% rate — simple division
+    monthlyPmt=capital/n;
   }
 
-  // Option C: year of peak portfolio value (accumulation → drawdown transition)
-  if(withdrawalStartYr===null){
-    let peakVal=0,peakYr=0;
-    rows.forEach(r=>{if(r.portfolio>peakVal){peakVal=r.portfolio;peakYr=r.yr;}});
-    withdrawalStartYr=peakYr||hor;
-  }
-
-  // Clamp to horizon
-  withdrawalStartYr=Math.min(withdrawalStartYr,hor);
-
-  // Portfolio needed at withdrawal start (perpetuity: P = annual_income / rate)
-  const annualIncome=income*12;
-  const needed=retireRate>0?annualIncome/retireRate:0;
-
-  // Projected portfolio at withdrawal start from simulation
-  const refRow=rows.find(r=>r.yr===withdrawalStartYr)||rows[rows.length-1];
-  const projected=refRow?refRow.portfolio:0;
-  const diff=projected-needed;
-
-  // Label for the reference year
-  const refYr=sy+withdrawalStartYr;
-  const ageLabel=by?` (věk ${by+withdrawalStartYr-sy} let)`:'';
+  // Build display
+  const peakCalYr=sy+peakYr;
+  const by=getBirthYear();
+  const ageAtPeak=by?(by+peakYr-sy):null;
+  const ageAtEnd=by?(by+hor-sy):null;
 
   document.getElementById('target-result').style.display='';
-  document.getElementById('tr-needed').textContent=fmt(needed);
-  const projEl=document.getElementById('tr-projected');
-  projEl.textContent=fmt(projected);
-  projEl.style.color=projected>=needed?'var(--grn-tx)':'var(--red-tx)';
-  const diffEl=document.getElementById('tr-diff');
-  diffEl.textContent=(diff>=0?'+':'')+fmt(diff);
-  diffEl.style.color=diff>=0?'var(--grn-tx)':'var(--red-tx)';
+  document.getElementById('tr-monthly').textContent=fmt(monthlyPmt);
+  document.getElementById('tr-monthly-sub').textContent=
+    `měsíčně od ${peakCalYr}${ageAtPeak?' ('+ageAtPeak+' let)':''} do ${sy+hor}${ageAtEnd?' ('+ageAtEnd+' let)':''}`;
+  document.getElementById('tr-peak').textContent=fmt(peakPortfolio);
+  document.getElementById('tr-capital').textContent=fmt(capital);
+  document.getElementById('tr-period').textContent=yearsDrawdown+' let ('+n+' měsíců)';
 
-  // Update label to show reference year
-  document.querySelector('#target-result [style*="Odhadnuté"]').textContent=
-    `Portfolio v roce ${refYr}${ageLabel}`;
-
-  const msg=document.getElementById('tr-message');
-  if(diff>=0){
-    const surplus=Math.round(projected*retireRate/12);
-    msg.innerHTML=`✓ <strong>Cíl je dosažitelný.</strong> V roce ${refYr}${ageLabel} bude portfolio generovat přibližně <strong>${fmt(surplus)} měsíčně</strong> — o ${fmt(surplus-income)} více, než požadujete.`;
-    msg.style.color='var(--grn-tx)';
+  // Legacy row
+  const legacyRow=document.getElementById('tr-legacy-row');
+  if(legacy>0){
+    legacyRow.style.display='flex';
+    document.getElementById('tr-legacy-val').textContent='− '+fmt(legacy);
   } else {
-    const shortfall=Math.abs(diff);
-    const yearsLeft=withdrawalStartYr;
-    const extraMonthly=yearsLeft>0?Math.round(shortfall/(yearsLeft*12*1.5)):shortfall;
-    msg.innerHTML=`✗ <strong>Cíl zatím není dosažitelný.</strong> Do roku ${refYr}${ageLabel} chybí přibližně <strong>${fmt(shortfall)}</strong>. Zvažte zvýšení měsíčních vkladů (orientačně +${fmt(extraMonthly)}/měs.), prodloužení akumulační fáze nebo vyšší výnos portfolia.`;
-    msg.style.color='var(--red-tx)';
+    legacyRow.style.display='none';
   }
+
+  // Message
+  const msg=document.getElementById('tr-message');
+  const totalDrawn=monthlyPmt*n;
+  const ratio=capital>0?totalDrawn/capital:0;
+  msg.innerHTML=`Za dobu čerpání vyberete celkem <strong>${fmt(totalDrawn)}</strong> — tedy <strong>${(ratio*100).toFixed(0)} %</strong> dostupného kapitálu pokryje výnosy z portfolia (${retireRate*100} % p.a.). `
+    +(ageAtPeak?`Čerpání začíná ve věku <strong>${ageAtPeak} let</strong> a portfolio pokryje rentu až do věku <strong>${ageAtEnd} let</strong>. `:'' )
+    +`Portfolio klesá na nulu v posledním roce horizontu.`;
+  msg.style.color='var(--txt2)';
 }
 function renderMilestones(rows){
   const el=document.getElementById('main-milestones');el.innerHTML='';
@@ -1402,7 +1402,7 @@ document.getElementById('birthYear').addEventListener('input',()=>{
   renderDepTL('in');renderDepTL('out');renderPhaseTL();
   recalc();
 });
-['target-income','target-retire-age','target-rate'].forEach(id=>{
+['target-rate','target-legacy'].forEach(id=>{
   document.getElementById(id).addEventListener('input',()=>recalc());
 });
 
