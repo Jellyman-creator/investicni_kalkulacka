@@ -889,7 +889,28 @@ document.getElementById('ph-track').addEventListener('click',e=>{
 });
 document.getElementById('phe-del').addEventListener('click',()=>{
   if(selPh===null)return;
-  phases.splice(selPh,1);selPh=null;
+  if(phases.length<=1){alert('Musí zůstat alespoň jedna fáze.');return;}
+  const idx=selPh;
+  const deleted=phases[idx];
+  const gapFrom=deleted.from;
+  const gapTo=deleted.to;
+  const gapLen=gapTo-gapFrom+1;
+  phases.splice(idx,1);
+  sortArr(phases);
+  // Distribute the freed space: give half to left neighbour, half to right
+  const leftIdx=phases.findIndex(p=>p.to===gapFrom-1);
+  const rightIdx=phases.findIndex(p=>p.from===gapTo+1);
+  if(leftIdx>=0&&rightIdx>=0){
+    const mid=gapFrom+Math.floor(gapLen/2)-1;
+    phases[leftIdx].to=mid;
+    phases[rightIdx].from=mid+1;
+  } else if(leftIdx>=0){
+    phases[leftIdx].to=gapTo;
+  } else if(rightIdx>=0){
+    phases[rightIdx].from=gapFrom;
+  }
+  ensureFullCoverage();
+  selPh=null;
   document.getElementById('ph-editor').classList.remove('open');
   renderPhaseTL();recalc();
 });
