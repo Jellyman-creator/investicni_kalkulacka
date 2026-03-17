@@ -338,7 +338,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
           </div>
         </div>
       </div>
-      <button id="btn-reset" style="width:100%;margin-top:10px;padding:12px;font-size:14px;font-family:var(--font);font-weight:600;border:1px solid var(--border2);border-radius:7px;background:var(--surface);color:var(--txt2);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .15s">
+      <button type="button" id="btn-reset" style="width:100%;margin-top:10px;padding:12px;font-size:14px;font-family:var(--font);font-weight:600;border:1px solid var(--border2);border-radius:7px;background:var(--surface);color:var(--txt2);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .15s">
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1 7a6 6 0 1 0 1.5-3.9"/><path d="M1 2.5V7h4.5"/></svg>
         Vynulovat hodnoty
       </button>
@@ -370,8 +370,8 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
     <div class="card-body">
       <!-- Two action buttons -->
       <div style="display:flex;gap:10px;margin-bottom:16px">
-        <button id="dep-btn-in" style="flex:1;padding:10px 16px;font-size:14px;font-weight:600;font-family:var(--font);border:2px solid #4ECDA0;border-radius:8px;background:var(--grn-lt);color:var(--grn-tx);cursor:pointer;transition:all .15s">+ Přidat vklad</button>
-        <button id="dep-btn-out" style="flex:1;padding:10px 16px;font-size:14px;font-weight:600;font-family:var(--font);border:2px solid #F87171;border-radius:8px;background:var(--red-lt);color:var(--red-tx);cursor:pointer;transition:all .15s">− Přidat výběr</button>
+        <button type="button" id="dep-btn-in" style="flex:1;padding:10px 16px;font-size:14px;font-weight:600;font-family:var(--font);border:2px solid #4ECDA0;border-radius:8px;background:var(--grn-lt);color:var(--grn-tx);cursor:pointer;transition:all .15s">+ Přidat vklad</button>
+        <button type="button" id="dep-btn-out" style="flex:1;padding:10px 16px;font-size:14px;font-weight:600;font-family:var(--font);border:2px solid #F87171;border-radius:8px;background:var(--red-lt);color:var(--red-tx);cursor:pointer;transition:all .15s">− Přidat výběr</button>
       </div>
       <!-- Timeline axis + track -->
       <div class="tl-axis-wrap"><div class="tl-axis" id="tl-axis-in"></div></div>
@@ -411,8 +411,8 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
     <div class="card-body">
       <!-- Two action buttons -->
       <div style="display:flex;gap:10px;margin-bottom:16px">
-        <button id="tx-btn-in" style="flex:1;padding:10px 16px;font-size:14px;font-weight:600;font-family:var(--font);border:2px solid #4ECDA0;border-radius:8px;background:var(--grn-lt);color:var(--grn-tx);cursor:pointer;transition:all .15s">+ Přidat vklad</button>
-        <button id="tx-btn-out" style="flex:1;padding:10px 16px;font-size:14px;font-weight:600;font-family:var(--font);border:2px solid #F87171;border-radius:8px;background:var(--red-lt);color:var(--red-tx);cursor:pointer;transition:all .15s">− Přidat výběr</button>
+        <button type="button" id="tx-btn-in" style="flex:1;padding:10px 16px;font-size:14px;font-weight:600;font-family:var(--font);border:2px solid #4ECDA0;border-radius:8px;background:var(--grn-lt);color:var(--grn-tx);cursor:pointer;transition:all .15s">+ Přidat vklad</button>
+        <button type="button" id="tx-btn-out" style="flex:1;padding:10px 16px;font-size:14px;font-weight:600;font-family:var(--font);border:2px solid #F87171;border-radius:8px;background:var(--red-lt);color:var(--red-tx);cursor:pointer;transition:all .15s">− Přidat výběr</button>
       </div>
       <!-- Mode toggle -->
       <div class="toggle-bar" id="toggle-in">
@@ -431,7 +431,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
             <div class="rb-field"><label>Do roku</label><input type="number" id="rbin-to" value="10" min="1" max="70" style="width:76px"></div>
             <div class="rb-field"><label>Každých N let</label><select id="rbin-every"><option value="1">každý rok</option><option value="2">každé 2 roky</option><option value="3">každé 3 roky</option><option value="5" selected>každých 5 let</option><option value="10">každých 10 let</option></select></div>
             <div class="rb-field" style="flex:1;min-width:160px"><label id="rb-desc-label">Popis</label><input type="text" id="rbin-desc" class="wide" placeholder="např. prodej nemovitosti atp."></div>
-            <button class="btn primary" id="rbin-add" style="align-self:flex-end">Přidat</button>
+            <button type="button" class="btn primary" id="rbin-add" style="align-self:flex-end">Přidat</button>
           </div>
         </div>
         <div class="rules-list" id="rules-in"></div>
@@ -1722,7 +1722,7 @@ resetBtn.addEventListener('mouseout',()=>{resetBtn.style.background='var(--surfa
 
 // RESET
 document.getElementById('btn-reset').addEventListener('click',()=>{
-  if(!confirm('Opravdu chcete vynulovat všechny hodnoty?'))return;
+  // confirm() is blocked on GitHub Pages — skip it
   document.getElementById('startAmount').value='';
   document.getElementById('birthYear').value='';
   document.getElementById('startAmount').placeholder='např. 1 000 000';
