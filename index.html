@@ -98,9 +98,11 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
 .tl-badge.dep{background:var(--grn-lt);color:var(--grn-tx)}
 .tl-badge.with{background:var(--red-lt);color:var(--red-tx)}
 .tl-badge.phase{background:#e8f0fe;color:#1a3c8f}
-.tl-axis-wrap{position:relative;height:16px;margin-bottom:4px}
+.tl-axis-wrap{position:relative;height:30px;margin-bottom:4px}
 .tl-axis{position:absolute;inset:0;font-size:10px;color:var(--txt3);font-weight:500}
 .tl-axis span{position:absolute;transform:translateX(-50%)}
+.tl-axis .ax-yr{top:0;color:var(--txt3)}
+.tl-axis .ax-age{top:13px;color:var(--blue);font-weight:600;font-size:10px}
 .tl-track{position:relative;height:46px;border-radius:7px;background:var(--bg);border:1px solid var(--border);cursor:crosshair;user-select:none;touch-action:pan-y}
 .tl-track.phase-track{height:52px}
 .tl-empty-msg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--txt3);pointer-events:none;gap:6px}
@@ -322,10 +324,19 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
           </div>
         </div>
       </div>
-      <button id="btn-reset" style="width:100%;margin-top:8px;padding:10px;font-size:13px;font-family:var(--font);font-weight:500;border:1px solid var(--border);border-radius:7px;background:none;color:var(--txt3);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:all .15s">
-        <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 7a6 6 0 1 0 1.5-3.9"/><path d="M1 2.5V7h4.5"/></svg>
+      <button id="btn-reset" style="width:100%;margin-top:10px;padding:12px;font-size:14px;font-family:var(--font);font-weight:600;border:1px solid var(--border2);border-radius:7px;background:var(--surface);color:var(--txt2);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .15s">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1 7a6 6 0 1 0 1.5-3.9"/><path d="M1 2.5V7h4.5"/></svg>
         Vynulovat hodnoty
       </button>
+      <div class="card" style="margin-top:10px">
+        <div class="card-hdr"><div class="card-dot" style="background:var(--txt3)"></div><div class="card-title">Rok narození</div></div>
+        <div class="card-body">
+          <div class="inp-group" style="margin-bottom:8px">
+            <div class="inp-wrap"><input type="number" id="birthYear" placeholder="např. 1985" min="1920" max="2020" style="width:100%;padding:10px 13px;font-size:14px;font-family:var(--mono);border:1px solid var(--border);border-radius:7px;background:var(--bg);color:var(--txt);outline:none;transition:border .15s"></div>
+          </div>
+          <p style="font-size:11px;color:var(--txt3);line-height:1.55">Slouží pouze pro zobrazení vašeho věku na časových osách. Údaj se nikam neukládá a neopouští váš prohlížeč.</p>
+        </div>
+      </div>
     </div>
     <div>
       <div class="card">
@@ -622,16 +633,30 @@ function noOverlap(arr,idx,side){
   }
 }
 
+function getBirthYear(){return parseInt(document.getElementById('birthYear')?.value)||null;}
+
 function renderAxis(axisElId,hor){
   const el=document.getElementById(axisElId);
   el.innerHTML='';
   const sy=getStartYear();
+  const by=getBirthYear();
   const step=hor<=15?2:hor<=30?5:hor<=50?5:10;
   for(let y=step;y<=hor;y+=step){
-    const s=document.createElement('span');
-    s.textContent=sy+y;
-    s.style.left=((y/hor)*100)+'%';
-    el.appendChild(s);
+    const pct=(y/hor)*100;
+    // year label
+    const yr=document.createElement('span');
+    yr.className='ax-yr';
+    yr.textContent=sy+y;
+    yr.style.left=pct+'%';
+    el.appendChild(yr);
+    // age label
+    if(by){
+      const age=document.createElement('span');
+      age.className='ax-age';
+      age.textContent=(sy+y-by)+' let';
+      age.style.left=pct+'%';
+      el.appendChild(age);
+    }
   }
 }
 
@@ -1205,6 +1230,9 @@ document.getElementById('horizon-slider').addEventListener('input',e=>{
   renderDepTL('in');renderDepTL('out');renderPhaseTL();
   renderTxTable('in');renderTxTable('out');recalc();
 }));
+document.getElementById('birthYear').addEventListener('input',()=>{
+  renderDepTL('in');renderDepTL('out');renderPhaseTL();
+});
 
 function drawBars(id,data,c1,c2){
   const el=document.getElementById(id);if(!el)return;
@@ -1218,6 +1246,11 @@ function drawBars(id,data,c1,c2){
     el.appendChild(w);
   });
 }
+
+// Reset button hover
+const resetBtn=document.getElementById('btn-reset');
+resetBtn.addEventListener('mouseover',()=>{resetBtn.style.background='var(--bg)';resetBtn.style.borderColor='var(--border2)';resetBtn.style.color='var(--txt)';});
+resetBtn.addEventListener('mouseout',()=>{resetBtn.style.background='var(--surface)';resetBtn.style.borderColor='var(--border2)';resetBtn.style.color='var(--txt2)';});
 
 // RESET
 document.getElementById('btn-reset').addEventListener('click',()=>{
