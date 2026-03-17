@@ -348,7 +348,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
           <div class="inp-group" style="margin-bottom:8px">
             <div class="inp-wrap"><input type="number" id="birthYear" placeholder="např. 1985" min="1920" max="2020" style="width:100%;padding:10px 13px;font-size:14px;font-family:var(--mono);border:1px solid var(--border);border-radius:7px;background:var(--bg);color:var(--txt);outline:none;transition:border .15s"></div>
           </div>
-          <p style="font-size:11px;color:var(--txt3);line-height:1.55">Slouží pouze pro zobrazení vašeho věku na časových osách. Údaj se nikam neukládá a neopouští váš prohlížeč.</p>
+          <p style="font-size:11px;color:var(--txt3);line-height:1.55">Slouží pro zobrazení věku na časových osách a výpočet renty. <strong>Údaj nikdy neopustí vaše zařízení</strong> — ukládá se pouze lokálně v prohlížeči.</p>
         </div>
       </div>
     </div>
@@ -1327,30 +1327,29 @@ function renderTargetIncome(rows){
 
   // Apply slider offset (only if birthYear is set)
   let refYr=Math.max(1,Math.min(hor, baseRefYr+trSliderOffset));
+  const refCalYr=sy+refYr;  // define early so slider labels can use it
 
   // Update slider UI — always visible
   const sliderWrap=document.getElementById('tr-slider-wrap');
   sliderWrap.style.display='';
   const slider=document.getElementById('tr-retire-slider');
-  // Slider range: baseRefYr ±15 years, clamped to 1–hor
   const sliderMinYr=Math.max(1, baseRefYr-15);
   const sliderMaxYr=Math.min(hor, baseRefYr+15);
   slider.min=sliderMinYr; slider.max=sliderMaxYr;
   slider.value=refYr;
-  // Labels
   if(by){
     document.getElementById('tr-slider-min').textContent=((sy+sliderMinYr)-by)+' let';
     document.getElementById('tr-slider-max').textContent=((sy+sliderMaxYr)-by)+' let';
-    const currentAge=(sy+refYr)-by;
+    const currentAge=refCalYr-by;
     const diff=trSliderOffset;
     document.getElementById('tr-slider-label').textContent=
-      'rok '+(sy+refYr)+', '+currentAge+' let'+(diff===0?' (základní)':diff>0?' (+'+diff+' let)':' ('+diff+' let)');
+      'rok '+refCalYr+', '+currentAge+' let'+(diff===0?' (základní)':diff>0?' (+'+diff+' let)':' ('+diff+' let)');
   } else {
     document.getElementById('tr-slider-min').textContent='rok '+(sy+sliderMinYr);
     document.getElementById('tr-slider-max').textContent='rok '+(sy+sliderMaxYr);
     const diff=trSliderOffset;
     document.getElementById('tr-slider-label').textContent=
-      'rok '+(sy+refYr)+(diff===0?' (základní)':diff>0?' (+'+diff+' let)':' ('+diff+' let)');
+      'rok '+refCalYr+(diff===0?' (základní)':diff>0?' (+'+diff+' let)':' ('+diff+' let)');
   }
 
   const refRow=rows.find(r=>r.yr===refYr)||rows[rows.length-1];
@@ -1359,7 +1358,7 @@ function renderTargetIncome(rows){
   const yearsDrawdown=hor-refYr;
 
   if(refPortfolio<=0||yearsDrawdown<=0){
-    document.getElementById('target-result').style.display='';  // show so slider works
+    document.getElementById('target-result').style.display='';
     document.getElementById('tr-monthly').textContent='—';
     document.getElementById('tr-monthly-sub').textContent='Zadejte počáteční investici nebo vklady';
     document.getElementById('tr-peak').textContent='—';
@@ -1379,8 +1378,7 @@ function renderTargetIncome(rows){
     monthlyPmt=capital*rm/(1-Math.pow(1+rm,-n));
   } else {monthlyPmt=n>0?capital/n:0;}
 
-  const refCalYr=sy+refYr;
-  const ageAtRef=by?((sy+refYr)-by):null;
+  const ageAtRef=by?(refCalYr-by):null;
   const ageAtEnd=by?((sy+hor)-by):null;
 
   // Update intro text dynamically
@@ -1491,11 +1489,12 @@ function recalc(){
 
 // SAVE / LOAD
 function getState(){
-  return{startAmount:document.getElementById('startAmount').value,startYear:document.getElementById('startYear').value,horizon:document.getElementById('horizon').value,depIn,depOut,txIn,txOut,rulesIn,rulesOut,phases,modeIn,modeOut};
+  return{startAmount:document.getElementById('startAmount').value,startYear:document.getElementById('startYear').value,horizon:document.getElementById('horizon').value,birthYear:document.getElementById('birthYear').value||'',depIn,depOut,txIn,txOut,rulesIn,rulesOut,phases,modeIn,modeOut};
 }
 function applyState(s){
   document.getElementById('startAmount').value=s.startAmount||'';
   document.getElementById('startYear').value=s.startYear||new Date().getFullYear();
+  if(s.birthYear)document.getElementById('birthYear').value=s.birthYear;
   const h=parseInt(s.horizon)||40;
   document.getElementById('horizon').value=h;
   document.getElementById('horizon-slider').value=h;
@@ -1518,7 +1517,7 @@ function applyState(s){
   });
   renderDepTL('in');renderDepTL('out');renderPhaseTL();renderRulesUnified();renderTxTable('in');renderTxTable('out');recalc();
 }
-function saveState(){try{localStorage.setItem('inv-calc-v6',JSON.stringify(getState()));}catch(e){}}
+function saveState(){try{localStorage.setItem('inv-calc-v7',JSON.stringify(getState()));}catch(e){}}
 
 document.getElementById('btn-save').addEventListener('click',()=>{
   const a=document.createElement('a');
@@ -1640,7 +1639,7 @@ document.getElementById('btn-reset').addEventListener('click',()=>{
   document.getElementById('target-result').style.display='none';
   renderDepTL('in');renderPhaseTL();
   renderRulesUnified();renderTxTable('in');recalc();
-  localStorage.removeItem('inv-calc-v6');
+  localStorage.removeItem('inv-calc-v7');
 });
 
 
@@ -1664,7 +1663,7 @@ function initDefaultPhases(){
 document.getElementById('startYear').value = new Date().getFullYear();
 
 try{
-  const saved=localStorage.getItem('inv-calc-v6');
+  const saved=localStorage.getItem('inv-calc-v7');
   if(saved){
     applyState(JSON.parse(saved));
     // Safety: if phases ended up empty, reinitialize
