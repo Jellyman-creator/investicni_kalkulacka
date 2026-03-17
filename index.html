@@ -506,6 +506,10 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
               <span style="font-size:14px;font-weight:600;font-family:var(--mono);color:var(--blue)" id="tr-capital">—</span>
             </div>
             <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+              <span style="font-size:12px;color:rgba(255,255,255,.5)">Rok zahájení čerpání</span>
+              <span style="font-size:14px;font-weight:600;font-family:var(--mono);color:rgba(255,255,255,.7)" id="tr-retire-yr-val">—</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:12px" id="tr-retire-age-row">
               <span style="font-size:12px;color:rgba(255,255,255,.5)">Věk při zahájení čerpání</span>
               <span style="font-size:14px;font-weight:600;font-family:var(--mono);color:rgba(255,255,255,.7)" id="tr-retire-age-val">—</span>
             </div>
@@ -1340,7 +1344,7 @@ function renderTargetIncome(rows){
     const currentAge=by+refYr-sy;
     const diff=trSliderOffset;
     document.getElementById('tr-slider-label').textContent=
-      currentAge+' let'+(diff===0?' (základní)':diff>0?' (+'+diff+' let)':' ('+diff+' let)');
+      'rok '+(sy+refYr)+', '+currentAge+' let'+(diff===0?' (základní)':diff>0?' (+'+diff+' let)':' ('+diff+' let)');
   } else {
     document.getElementById('tr-slider-min').textContent='rok '+(sy+sliderMinYr);
     document.getElementById('tr-slider-max').textContent='rok '+(sy+sliderMaxYr);
@@ -1361,6 +1365,7 @@ function renderTargetIncome(rows){
     document.getElementById('tr-peak').textContent='—';
     document.getElementById('tr-capital').textContent='—';
     document.getElementById('tr-period').textContent='—';
+    document.getElementById('tr-retire-yr-val').textContent='—';
     document.getElementById('tr-retire-age-val').textContent='—';
     document.getElementById('tr-message').innerHTML='';
     document.getElementById('tr-legacy-row').style.display='none';
@@ -1394,8 +1399,14 @@ function renderTargetIncome(rows){
   document.getElementById('tr-peak-label').textContent=usedWithdrawal?'Portfolio při zahájení výběrů':'Vrchol portfolia';
   document.getElementById('tr-capital').textContent=fmt(capital);
   document.getElementById('tr-period').textContent=yearsDrawdown+' let';
-  document.getElementById('tr-retire-age-val').textContent=
-    ageAtRef?(ageAtRef+' let'):'rok '+refCalYr;
+  document.getElementById('tr-retire-yr-val').textContent='rok '+refCalYr;
+  const ageRow=document.getElementById('tr-retire-age-row');
+  if(ageAtRef){
+    ageRow.style.display='flex';
+    document.getElementById('tr-retire-age-val').textContent=ageAtRef+' let';
+  } else {
+    ageRow.style.display='none';
+  }
 
   const legacyRow=document.getElementById('tr-legacy-row');
   if(legacy>0){legacyRow.style.display='flex';document.getElementById('tr-legacy-val').textContent='− '+fmt(legacy);}
