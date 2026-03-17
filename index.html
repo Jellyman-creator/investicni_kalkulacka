@@ -364,94 +364,66 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
     </div>
   </div>
 
-  <!-- Pravidelné vklady -->
+  <!-- Pravidelné vklady/výběry — merged -->
   <div class="card">
-    <div class="card-hdr"><div class="card-dot" style="background:#f59e0b"></div><div class="card-title">Pravidelné vklady</div></div>
+    <div class="card-hdr"><div class="card-dot" style="background:#f59e0b"></div><div class="card-title">Pravidelné vklady/výběry</div></div>
     <div class="card-body">
-      <p class="hint" style="margin-bottom:14px">Klikni na segment pro editaci · Táhni okraje pro změnu délky · Překrývání vkladů a výběrů je povoleno</p>
+      <p class="hint" style="margin-bottom:14px">Klikni na segment pro editaci · Táhni okraje pro změnu délky · Každé období je buď vklad nebo výběr</p>
+      <!-- Vklady row -->
       <div class="tl-section">
         <div class="tl-section-label"><span class="tl-badge dep">Vklady</span> měsíční investice do portfolia</div>
         <div class="tl-axis-wrap"><div class="tl-axis" id="tl-axis-in"></div></div>
         <div class="tl-track" id="tl-track-in" data-kind="in"><div class="tl-empty-msg">Klikni na osu pro přidání prvního období</div></div>
-        <button class="btn-add-seg" data-kind="in">+ přidat období vkladů</button>
+        <button class="btn-add-seg" data-kind="in">+ přidat období</button>
         <div class="tl-editor" id="tl-editor-in">
+          <!-- type toggle -->
+          <div style="width:100%;display:flex;gap:6px;margin-bottom:4px">
+            <button class="toggle-opt sel" id="tei-type-dep" style="padding:5px 12px;font-size:12px">Vklad +</button>
+            <button class="toggle-opt" id="tei-type-out" style="padding:5px 12px;font-size:12px">Výběr −</button>
+          </div>
           <div class="tl-ef"><label>Od roku</label><input type="number" id="tei-from" min="1" max="70"></div>
           <div class="tl-ef"><label>Do roku</label><input type="number" id="tei-to" min="1" max="70"></div>
-          <div class="tl-ef" style="flex:2"><label>Měsíční vklad (Kč)</label><input type="number" id="tei-val" step="500" min="0"></div>
+          <div class="tl-ef" style="flex:2"><label id="tei-val-label">Měsíční vklad (Kč)</label><input type="number" id="tei-val" step="500" min="0"></div>
           <button class="btn danger" id="tei-del">Smazat</button>
           <button class="btn" id="tei-cancel">Zavřít</button>
         </div>
       </div>
-      <div class="tl-section">
-        <div class="tl-section-label"><span class="tl-badge with">Výběry</span> měsíční čerpání (např. renta v důchodu)</div>
-        <div class="tl-axis-wrap"><div class="tl-axis" id="tl-axis-out"></div></div>
-        <div class="tl-track" id="tl-track-out" data-kind="out"><div class="tl-empty-msg">Klikni na osu pro přidání prvního období výběrů</div></div>
-        <button class="btn-add-seg" data-kind="out">+ přidat období výběrů</button>
-        <div class="tl-editor" id="tl-editor-out">
-          <div class="tl-ef"><label>Od roku</label><input type="number" id="teo-from" min="1" max="70"></div>
-          <div class="tl-ef"><label>Do roku</label><input type="number" id="teo-to" min="1" max="70"></div>
-          <div class="tl-ef" style="flex:2"><label>Měsíční výběr (Kč, kladně)</label><input type="number" id="teo-val" step="500" min="0"></div>
-          <button class="btn danger" id="teo-del">Smazat</button>
-          <button class="btn" id="teo-cancel">Zavřít</button>
-        </div>
-      </div>
-      <div class="hint">Vklady a výběry se sečtou. Záporný výsledek = čisté čerpání z portfolia.</div>
+      <div class="hint">Vklady a výběry se sečtou po měsících. Výběry jsou automaticky záporné.</div>
     </div>
   </div>
 
-  <!-- Jednorázové VKLADY -->
+  <!-- Jednorázové vklady/výběry — merged -->
   <div class="card">
-    <div class="card-hdr"><div class="card-dot" style="background:var(--teal)"></div><div class="card-title">Jednorázové vklady<span class="card-sub">— prodej nemovitosti, dědictví, mimořádný příjem</span></div></div>
+    <div class="card-hdr"><div class="card-dot" style="background:var(--teal)"></div><div class="card-title">Jednorázové vklady/výběry</div></div>
     <div class="card-body">
+      <!-- Type toggle -->
+      <div style="display:flex;gap:0;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:3px;width:fit-content;margin-bottom:14px">
+        <button class="toggle-opt sel" id="tx-type-in" style="padding:7px 16px;font-size:13px">Vklad +</button>
+        <button class="toggle-opt" id="tx-type-out" style="padding:7px 16px;font-size:13px">Výběr −</button>
+      </div>
       <div class="toggle-bar" id="toggle-in">
         <button class="toggle-opt sel" data-mode="repeat">Opakovaně</button>
         <button class="toggle-opt" data-mode="manual">Rok po roku</button>
       </div>
+      <!-- Repeat view -->
       <div id="txin-repeat">
         <div class="rule-builder">
           <div class="rb-row">
-            <div class="rb-field"><label>Částka (Kč)</label><input type="number" id="rbin-val" placeholder="např. 50 000" step="1000" min="0"></div>
+            <div class="rb-field"><label id="rb-val-label">Částka (Kč)</label><input type="number" id="rbin-val" placeholder="např. 50 000" step="1000" min="0"></div>
             <div class="rb-field"><label>Od roku</label><input type="number" id="rbin-from" value="1" min="1" max="70" style="width:76px"></div>
             <div class="rb-field"><label>Do roku</label><input type="number" id="rbin-to" value="10" min="1" max="70" style="width:76px"></div>
             <div class="rb-field"><label>Každých N let</label><select id="rbin-every"><option value="1">každý rok</option><option value="2">každé 2 roky</option><option value="3">každé 3 roky</option><option value="5" selected>každých 5 let</option><option value="10">každých 10 let</option></select></div>
-            <div class="rb-field" style="flex:1;min-width:180px"><label>Popis</label><input type="text" id="rbin-desc" class="wide" placeholder="např. prodej nemovitosti, dědictví atp."></div>
+            <div class="rb-field" style="flex:1;min-width:180px"><label id="rb-desc-label">Popis</label><input type="text" id="rbin-desc" class="wide" placeholder="např. prodej nemovitosti, dědictví atp."></div>
             <button class="btn primary" id="rbin-add" style="align-self:flex-end">Přidat</button>
           </div>
         </div>
         <div class="rules-list" id="rules-in"></div>
       </div>
+      <!-- Manual view -->
       <div id="txin-manual" style="display:none">
-        <div class="tx-scroll" style="max-height:220px"><table class="tx-table"><thead><tr><th style="width:55px;text-align:center">Rok</th><th style="width:70px">Rok</th><th class="r">Vklad (Kč)</th><th>Popis</th></tr></thead><tbody id="tbody-in"></tbody></table></div>
+        <div class="tx-scroll" style="max-height:220px"><table class="tx-table"><thead><tr><th style="width:55px;text-align:center">Rok</th><th style="width:70px">Rok</th><th class="r">Částka (Kč)</th><th>Popis</th></tr></thead><tbody id="tbody-in"></tbody></table></div>
       </div>
-      <div class="hint" style="margin-top:8px">Kladná hodnota = jednorázový vklad / reinvestice</div>
-    </div>
-  </div>
-
-  <!-- Jednorázové VÝBĚRY -->
-  <div class="card">
-    <div class="card-hdr"><div class="card-dot" style="background:var(--red-tx)"></div><div class="card-title">Jednorázové výběry<span class="card-sub">— koupě auta, rekonstrukce bytu, velké výdaje</span></div></div>
-    <div class="card-body">
-      <div class="toggle-bar" id="toggle-out">
-        <button class="toggle-opt sel" data-mode="repeat">Opakovaně</button>
-        <button class="toggle-opt" data-mode="manual">Rok po roku</button>
-      </div>
-      <div id="txout-repeat">
-        <div class="rule-builder">
-          <div class="rb-row">
-            <div class="rb-field"><label>Částka (Kč)</label><input type="number" id="rbout-val" placeholder="např. 700 000" step="10000" min="0"></div>
-            <div class="rb-field"><label>Od roku</label><input type="number" id="rbout-from" value="1" min="1" max="70" style="width:76px"></div>
-            <div class="rb-field"><label>Do roku</label><input type="number" id="rbout-to" value="10" min="1" max="70" style="width:76px"></div>
-            <div class="rb-field"><label>Každých N let</label><select id="rbout-every"><option value="1">každý rok</option><option value="2">každé 2 roky</option><option value="3">každé 3 roky</option><option value="5" selected>každých 5 let</option><option value="10">každých 10 let</option></select></div>
-            <div class="rb-field" style="flex:1;min-width:180px"><label>Popis</label><input type="text" id="rbout-desc" class="wide" placeholder="např. koupě auta, rekonstrukce bytu atp."></div>
-            <button class="btn primary" id="rbout-add" style="align-self:flex-end">Přidat</button>
-          </div>
-        </div>
-        <div class="rules-list" id="rules-out"></div>
-      </div>
-      <div id="txout-manual" style="display:none">
-        <div class="tx-scroll" style="max-height:220px"><table class="tx-table"><thead><tr><th style="width:55px;text-align:center">Rok</th><th style="width:70px">Rok</th><th class="r">Výběr (Kč)</th><th>Popis</th></tr></thead><tbody id="tbody-out"></tbody></table></div>
-      </div>
-      <div class="hint" style="margin-top:8px">Zadejte kladnou hodnotu — výběr se automaticky odečte od portfolia</div>
+      <div class="hint" id="tx-hint" style="margin-top:8px">Kladná hodnota = vklad. Záporná = výběr, odečítá se z portfolia.</div>
     </div>
   </div>
 
@@ -485,9 +457,9 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
     </div>
   </div>
 
-  <!-- Jaký měsíční příjem si mohu dovolit? -->
+  <!-- Jakou měsíční rentu si mohu dovolit? -->
   <div class="card">
-    <div class="card-hdr"><div class="card-dot" style="background:#a78bfa"></div><div class="card-title">Jaký měsíční příjem si mohu dovolit?</div></div>
+    <div class="card-hdr"><div class="card-dot" style="background:#a78bfa"></div><div class="card-title">Jakou měsíční rentu si mohu dovolit?</div></div>
     <div class="card-body">
       <p id="tr-intro" style="font-size:13px;color:var(--txt2);margin-bottom:16px;line-height:1.6">Výpočet vychází z hodnoty portfolia <strong>v momentě, kdy začínáte pravidelně čerpat</strong> — tedy od prvního výběru nastaveného na časové ose. Odtud si lze čerpat měsíční rentu tak, aby portfolio vydrželo až do konce investičního horizontu.</p>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px" id="target-grid">
@@ -501,20 +473,6 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
           <div class="inp-wrap"><input type="number" id="target-legacy" value="0" step="100000" min="0"><span class="inp-unit">Kč</span></div>
           <div class="hint" style="margin-top:4px">Tato částka se odečte z portfolia před výpočtem renty</div>
         </div>
-      </div>
-
-      <!-- Pension age slider — shown when birthYear is set -->
-      <div id="tr-slider-wrap" style="display:none;margin-bottom:16px;padding:14px;background:var(--bg);border-radius:8px;border:1px solid var(--border)">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-          <label style="font-size:12px;font-weight:600;color:var(--txt2)">Chci do penze dříve / později</label>
-          <span style="font-size:13px;font-weight:600;font-family:var(--mono);color:var(--blue)" id="tr-slider-label">—</span>
-        </div>
-        <div class="slider-wrap" style="margin-top:0">
-          <span style="font-size:11px;color:var(--txt3);white-space:nowrap" id="tr-slider-min">—</span>
-          <input type="range" id="tr-retire-slider" min="40" max="80" value="67" style="flex:1">
-          <span style="font-size:11px;color:var(--txt3);white-space:nowrap" id="tr-slider-max">—</span>
-        </div>
-        <div class="hint" style="margin-top:6px">Posunutím měníte rok zahájení čerpání — renta se přepočítá automaticky. Toto nastavení nemění vaše vklady ani výběry na časové ose.</div>
       </div>
 
       <!-- Result -->
@@ -548,6 +506,21 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
             </div>
           </div>
         </div>
+
+        <!-- Slider BELOW the blue box -->
+        <div id="tr-slider-wrap" style="margin-bottom:14px;padding:14px;background:var(--bg);border-radius:8px;border:1px solid var(--border)">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+            <label style="font-size:12px;font-weight:600;color:var(--txt2)">Chci do penze dříve / později</label>
+            <span style="font-size:13px;font-weight:600;font-family:var(--mono);color:var(--blue)" id="tr-slider-label">—</span>
+          </div>
+          <div class="slider-wrap" style="margin-top:0">
+            <span style="font-size:11px;color:var(--txt3);white-space:nowrap" id="tr-slider-min">—</span>
+            <input type="range" id="tr-retire-slider" min="1" max="70" value="20" style="flex:1">
+            <span style="font-size:11px;color:var(--txt3);white-space:nowrap" id="tr-slider-max">—</span>
+          </div>
+          <div class="hint" style="margin-top:6px">Posunutím měníte rok zahájení čerpání — renta se přepočítá automaticky. Toto nastavení nemění vaše vklady ani výběry na časové ose.</div>
+        </div>
+
         <div id="tr-message" style="font-size:13px;line-height:1.65;color:var(--txt2);padding:12px 14px;background:var(--bg);border-radius:8px;border:1px solid var(--border)"></div>
       </div>
       <div class="hint" style="margin-top:10px">Výpočet předpokládá rovnoměrné měsíční čerpání (anuita). Portfolio klesá na nulu v posledním roce horizontu. Nezahrnuje státní důchod.</div>
@@ -595,7 +568,16 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
 </section>
 <footer class="footer"><span>Výpočty jsou orientační. Nezohledňují inflaci, daně ani poplatky správce fondu.</span><span>Nástroj je zdarma a bez registrace</span></footer>
 
-<script>
+<!-- Hidden elements for JS compatibility (depOut track merged into depIn visually) -->
+<div style="display:none">
+  <div id="tl-track-out"><div class="tl-empty-msg"></div></div>
+  <div class="tl-axis" id="tl-axis-out"></div>
+  <div id="tl-editor-out">
+    <input type="number" id="teo-from"><input type="number" id="teo-to"><input type="number" id="teo-val">
+    <button id="teo-del"></button><button id="teo-cancel"></button>
+  </div>
+</div>
+
 const MAX_YR=70;
 const fmt=n=>new Intl.NumberFormat('cs-CZ',{style:'currency',currency:'CZK',maximumFractionDigits:0}).format(Math.round(n||0));
 const fmtPct=n=>((n||0)*100).toFixed(1)+' %';
@@ -1103,7 +1085,102 @@ document.getElementById('phe-cancel').addEventListener('click',()=>{
   selPh=null;document.getElementById('ph-editor').classList.remove('open');renderPhaseTL();
 });
 
-// TX RULES
+// Hidden depOut track/editor — kept for JS compatibility, the single visual track handles both
+// TYPE TOGGLE for regular deposits editor
+let depEditorType='in'; // 'in' or 'out'
+document.getElementById('tei-type-dep').addEventListener('click',()=>{
+  depEditorType='in';
+  document.getElementById('tei-type-dep').classList.add('sel');
+  document.getElementById('tei-type-out').classList.remove('sel');
+  document.getElementById('tei-val-label').textContent='Měsíční vklad (Kč)';
+  // If editing a segment, move it to depIn
+  if(selIn!==null&&depIn[selIn]){/* already in depIn */}
+  if(selOut!==null&&depOut[selOut]){
+    const seg=depOut.splice(selOut,1)[0];
+    depIn.push(seg);sortArr(depIn);
+    selIn=depIn.length-1;selOut=null;
+    renderDepTL('in');renderDepTL('out');recalc();
+  }
+});
+document.getElementById('tei-type-out').addEventListener('click',()=>{
+  depEditorType='out';
+  document.getElementById('tei-type-out').classList.add('sel');
+  document.getElementById('tei-type-dep').classList.remove('sel');
+  document.getElementById('tei-val-label').textContent='Měsíční výběr (Kč)';
+  // If editing a segment in depIn, move it to depOut
+  if(selIn!==null&&depIn[selIn]){
+    const seg=depIn.splice(selIn,1)[0];
+    depOut.push(seg);sortArr(depOut);
+    selOut=depOut.length-1;selIn=null;
+    renderDepTL('in');renderDepTL('out');recalc();
+  }
+});
+
+// When opening dep editor, set type toggle to match which array the segment is in
+const origOpenDepEditor=openDepEditor;
+// Patch: after openDepEditor, sync type toggle
+const _origOpen=openDepEditor;
+function openDepEditorWithType(kind,idx){
+  _origOpen(kind,idx);
+  depEditorType=kind;
+  document.getElementById('tei-type-dep').classList.toggle('sel',kind==='in');
+  document.getElementById('tei-type-out').classList.toggle('sel',kind==='out');
+  document.getElementById('tei-val-label').textContent=kind==='in'?'Měsíční vklad (Kč)':'Měsíční výběr (Kč)';
+}
+
+// ONE-OFF type toggle
+let txKind='in'; // current active kind for one-off
+document.getElementById('tx-type-in').addEventListener('click',()=>{
+  txKind='in';
+  document.getElementById('tx-type-in').classList.add('sel');
+  document.getElementById('tx-type-out').classList.remove('sel');
+  document.getElementById('rb-val-label').textContent='Částka (Kč)';
+  document.getElementById('rb-desc-label').textContent='Popis';
+  document.getElementById('rbin-val').placeholder='např. 50 000';
+  document.getElementById('rbin-desc').placeholder='např. prodej nemovitosti, dědictví atp.';
+  document.getElementById('tx-hint').textContent='Kladná hodnota = vklad. Přičte se k portfoliu.';
+  // Show rules for current kind
+  renderRulesUnified();
+});
+document.getElementById('tx-type-out').addEventListener('click',()=>{
+  txKind='out';
+  document.getElementById('tx-type-out').classList.add('sel');
+  document.getElementById('tx-type-in').classList.remove('sel');
+  document.getElementById('rb-val-label').textContent='Částka (Kč)';
+  document.getElementById('rb-desc-label').textContent='Popis';
+  document.getElementById('rbin-val').placeholder='např. 700 000';
+  document.getElementById('rbin-desc').placeholder='např. koupě auta, rekonstrukce bytu atp.';
+  document.getElementById('tx-hint').textContent='Zadejte kladnou hodnotu — výběr se automaticky odečte od portfolia.';
+  renderRulesUnified();
+});
+
+// Redirect rbin-add to use txKind
+document.getElementById('rbin-add').removeEventListener('click',()=>addRule('in'));
+document.getElementById('rbin-add').addEventListener('click',()=>addRule(txKind));
+
+// Show rules for both kinds combined
+const origRenderRules=renderRules;
+function renderRulesUnified(){
+  const list=document.getElementById('rules-in');
+  const arrIn=rulesIn;const arrOut=rulesOut;
+  list.innerHTML='';
+  const both=[...arrIn.map((r,i)=>({...r,kind:'in',i})),...arrOut.map((r,i)=>({...r,kind:'out',i}))];
+  both.sort((a,b)=>a.from-b.from);
+  if(!both.length){list.innerHTML='<div style="font-size:13px;color:var(--txt3);padding:4px 0">Zatím žádné položky.</div>';return;}
+  both.forEach(r=>{
+    const sign=r.kind==='out'?'−':'+';
+    const ev=r.every===1?'každý rok':`každých ${r.every} let`;
+    const tag=document.createElement('div');tag.className='rule-tag'+(r.kind==='out'?' neg':'');
+    tag.innerHTML=`<div class="rule-tag-text"><strong>${sign}${new Intl.NumberFormat('cs-CZ',{maximumFractionDigits:0}).format(r.val)} Kč</strong> — ${ev}, roky ${r.from}–${r.to}${r.desc?' · '+r.desc:''}</div><button class="rule-del" data-kind="${r.kind}" data-i="${r.i}">×</button>`;
+    list.appendChild(tag);
+  });
+  list.querySelectorAll('.rule-del').forEach(b=>b.addEventListener('click',()=>{
+    if(b.dataset.kind==='in')rulesIn.splice(+b.dataset.i,1);else rulesOut.splice(+b.dataset.i,1);
+    applyRules();renderRulesUnified();renderTxTable('in');renderTxTable('out');recalc();
+  }));
+}
+
+
 function applyRules(){
   txIn.forEach(r=>{r.val=0;r.desc='';});
   txOut.forEach(r=>{r.val=0;r.desc='';});
@@ -1137,21 +1214,19 @@ function addRule(kind){
   document.getElementById(pfx+'-desc').value='';
 }
 document.getElementById('rbin-add').addEventListener('click',()=>addRule('in'));
-document.getElementById('rbout-add').addEventListener('click',()=>addRule('out'));
+// rbout-add merged into rbin-add via txKind
 
-// TOGGLE
-['in','out'].forEach(kind=>{
+// TOGGLE — only 'in' toggle exists now (one-off merged card)
+['in'].forEach(kind=>{
   document.getElementById('toggle-'+kind).querySelectorAll('.toggle-opt').forEach(btn=>{
     btn.addEventListener('click',()=>{
       document.getElementById('toggle-'+kind).querySelectorAll('.toggle-opt').forEach(b=>b.classList.remove('sel'));
       btn.classList.add('sel');
       const mode=btn.dataset.mode;
-      if(kind==='in')modeIn=mode;else modeOut=mode;
-      document.getElementById('txin-repeat').style.display=kind==='in'&&mode==='repeat'?'':'none';
-      document.getElementById('txin-manual').style.display=kind==='in'&&mode==='manual'?'':'none';
-      document.getElementById('txout-repeat').style.display=kind==='out'&&mode==='repeat'?'':'none';
-      document.getElementById('txout-manual').style.display=kind==='out'&&mode==='manual'?'':'none';
-      if(mode==='manual')renderTxTable(kind);
+      if(kind==='in')modeIn=mode;
+      document.getElementById('txin-repeat').style.display=mode==='repeat'?'':'none';
+      document.getElementById('txin-manual').style.display=mode==='manual'?'':'none';
+      if(mode==='manual'){renderTxTable('in');renderTxTable('out');}
     });
   });
 });
@@ -1410,10 +1485,10 @@ function applyState(s){
     if(mode==='manual'){
       document.getElementById('toggle-'+kind).querySelectorAll('.toggle-opt').forEach(b=>b.classList.toggle('sel',b.dataset.mode==='manual'));
       if(kind==='in'){modeIn='manual';document.getElementById('txin-repeat').style.display='none';document.getElementById('txin-manual').style.display='';}
-      else{modeOut='manual';document.getElementById('txout-repeat').style.display='none';document.getElementById('txout-manual').style.display='';}
+      else{modeOut='manual';}// txout-manual no longer separate element
     }
   });
-  renderDepTL('in');renderDepTL('out');renderPhaseTL();renderRules('in');renderRules('out');renderTxTable('in');renderTxTable('out');recalc();
+  renderDepTL('in');renderDepTL('out');renderPhaseTL();renderRulesUnified();renderTxTable('in');renderTxTable('out');recalc();
 }
 function saveState(){try{localStorage.setItem('inv-calc-v4',JSON.stringify(getState()));}catch(e){}}
 
@@ -1535,7 +1610,7 @@ document.getElementById('btn-reset').addEventListener('click',()=>{
   document.getElementById('tl-editor-out').classList.remove('open');
   document.getElementById('ph-editor').classList.remove('open');
   renderDepTL('in');renderDepTL('out');renderPhaseTL();
-  renderRules('in');renderRules('out');renderTxTable('in');renderTxTable('out');recalc();
+  renderRulesUnified();renderTxTable('in');renderTxTable('out');recalc();
   localStorage.removeItem('inv-calc-v4');
 });
 
@@ -1563,13 +1638,13 @@ try{
     document.getElementById('startYear').value=new Date().getFullYear();
     prevHorizon=getHorizon();initDefaultPhases();
     renderDepTL('in');renderDepTL('out');renderPhaseTL();
-    renderRules('in');renderRules('out');renderTxTable('in');renderTxTable('out');recalc();
+    renderRulesUnified();renderTxTable('in');renderTxTable('out');recalc();
   }
 }catch(e){
   document.getElementById('startYear').value=new Date().getFullYear();
   prevHorizon=getHorizon();initDefaultPhases();
   renderDepTL('in');renderDepTL('out');renderPhaseTL();
-  renderRules('in');renderRules('out');renderTxTable('in');renderTxTable('out');recalc();
+  renderRulesUnified();renderTxTable('in');renderTxTable('out');recalc();
 }
 </script>
 </body>
