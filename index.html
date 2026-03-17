@@ -654,44 +654,30 @@ function startDepDrag(e,kind,idx,side){
   document.addEventListener('touchmove',move,{passive:false});document.addEventListener('touchend',up);
 }
 
-// PHASE drag — dragging a handle moves the BOUNDARY between two adjacent phases.
-// Left handle of phase[i]  = right boundary of phase[i-1].
-// Right handle of phase[i] = left boundary of phase[i+1].
-// This guarantees no gaps and no overlaps at all times.
+// PHASE drag — moves the boundary between two adjacent phases.
+// Captures direct object references at drag start so sort can't break it.
 function startPhaseDrag(e,idx,side){
   if(e.cancelable)e.preventDefault();
+  sortArr(phases);
   const rect=document.getElementById('ph-track').getBoundingClientRect();
-  drag={kind:'ph',idx,side,rect};
+  // Capture the two phases that share this boundary
+  const phA = side==='r' ? phases[idx]   : phases[idx-1]; // left phase
+  const phB = side==='r' ? phases[idx+1] : phases[idx];   // right phase
+  if(!phA||!phB)return;
+  const MIN=1;
+  drag={kind:'ph',rect};
   const move=ev=>{
     const cx=ev.touches?ev.touches[0].clientX:ev.clientX;
     const hor=getHorizon();
-    sortArr(phases);
-    // re-find idx after sort (phases may have been reordered)
-    const ph=phases[drag.idx];
-    if(!ph)return;
-    const MIN_LEN=1; // minimum years per phase
-    if(drag.side==='r'){
-      // moving right boundary: affects this phase and the next
-      const next=phases[drag.idx+1];
-      if(!next)return; // last phase — can't drag right (it's pinned to horizon end)
-      const rawYr=Math.round((cx-rect.left)/rect.width*hor);
-      const minBound=ph.from+MIN_LEN-1;
-      const maxBound=next.to-MIN_LEN;
-      const yr=Math.max(minBound,Math.min(maxBound,rawYr));
-      ph.to=yr;
-      next.from=yr+1;
-    } else {
-      // moving left boundary: affects previous phase and this one
-      const prev=phases[drag.idx-1];
-      if(!prev)return; // first phase — can't drag left (pinned to 1)
-      const rawYr=Math.round((cx-rect.left)/rect.width*hor)+1;
-      const minBound=prev.from+MIN_LEN;
-      const maxBound=ph.to-MIN_LEN+1;
-      const yr=Math.max(minBound,Math.min(maxBound,rawYr));
-      prev.to=yr-1;
-      ph.from=yr;
-    }
-    syncPhEditor(drag.idx);renderPhaseTL();recalc();
+    const rawYr=Math.round((cx-rect.left)/rect.width*hor);
+    const minBound=phA.from+MIN-1;
+    const maxBound=phB.to-MIN;
+    const yr=Math.max(minBound,Math.min(maxBound,rawYr));
+    phA.to=yr;
+    phB.from=yr+1;
+    // sync editor if one of these is selected
+    if(selPh!==null)syncPhEditor(selPh);
+    renderPhaseTL();recalc();
   };
   const up=()=>{
     drag=null;
