@@ -1291,9 +1291,15 @@ function addRule(kind){
   const to=parseInt(document.getElementById('rbin-to').value)||from;
   const every=parseInt(document.getElementById('rbin-every').value)||1;
   const desc=document.getElementById('rbin-desc').value.trim();
-  if(!val){alert('Zadejte částku.');return;}
+  const valInp=document.getElementById('rbin-val');
+  if(!val){
+    valInp.style.borderColor='var(--red-tx)';
+    valInp.placeholder='⚠ Zadejte částku';
+    valInp.focus();
+    setTimeout(()=>{valInp.style.borderColor='';valInp.placeholder=txKind==='out'?'např. 700 000':'např. 50 000';},2000);
+    return;
+  }
   if(editingRule){
-    // Save edit
     const arr=editingRule.kind==='in'?rulesIn:rulesOut;
     arr[editingRule.idx]={...arr[editingRule.idx],val,from:Math.max(1,from),to:Math.min(Math.max(from,to),MAX_YR),every,desc};
     editingRule=null;
