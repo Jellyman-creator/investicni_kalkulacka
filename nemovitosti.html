@@ -224,9 +224,9 @@ function np(ov={}){
   pid++;
   return{id:pid,name:'Nemovitost '+pid,color:COLORS[(pid-1)%COLORS.length],
     price:'',yr:new Date().getFullYear(),by:'',growth:5,hor:20,
-    mortg:false,eq:'',mr:5,my:25,ry:5,rr:4,
+    mortg:false,eq:'',mr:5,my:25,refixes:[],
     rent:true,rm:'',rg:3,oc:92,
-    cm:'',
+    cm:'',cg:2,
     renovs:[],...ov};
 }
 
@@ -242,29 +242,57 @@ function sim(p){
   const price=nv(p.price,0),gr=p.growth/100,hor=p.hor;
   const loan=p.mortg?Math.max(0,price-nv(p.eq,0)):0;
   const rg=p.rg/100,oc=p.oc/100;
-  const mc=nv(p.cm,0);
+  const mc=nv(p.cm,0),cg=(p.cg||0)/100;
   let bal=loan,annP=[],annI=[];
   if(loan>0){
     let rate=p.mr/100,pay=pmt(loan,rate,p.my);
     const tot=p.my*12,pd=[];
+    // Build rate schedule from refixes (sorted by calendar year)
+    const refixes=(p.refixes||[]).slice().sort((a,b)=>a.yr-b.yr);
     for(let m=0;m<tot;m++){
-      if(m>0&&m%(p.ry*12)===0&&bal>0){rate=p.rr/100;pay=pmt(bal,rate,(tot-m)/12);}
+      const calYr=p.yr+Math.floor(m/12);
+      // Check if any refix applies at this month's year
+      for(const rx of refixes){
+        if(calYr===rx.yr&&m%12===0&&bal>0){
+          rate=rx.rate/100;
+          pay=pmt(bal,rate,(tot-m)/12);
+        }
+      }
       const int=bal*rate/12,prin=Math.min(pay-int,bal);
       bal=Math.max(0,bal-prin);pd[m]={pay,int,prin};
     }
     for(let y=0;y<hor;y++){let yp=0,yi=0;for(let m=y*12;m<Math.min((y+1)*12,tot);m++){if(pd[m]){yp+=pd[m].pay;yi+=pd[m].int;}}annP[y]=yp;annI[y]=yi;}
   } else {for(let y=0;y<hor;y++){annP[y]=0;annI[y]=0;}}
+
+  // Track year-end mortgage balance
+  const annBal=Array(hor+1).fill(0);
+  if(loan>0){
+    let b2=loan,rate2=p.mr/100;
+    const refixes2=(p.refixes||[]).slice().sort((a,b)=>a.yr-b.yr);
+    let pay2=pmt(b2,rate2,p.my);
+    const tot2=p.my*12;
+    for(let m=0;m<tot2;m++){
+      const cy2=p.yr+Math.floor(m/12);
+      for(const rx of refixes2){if(cy2===rx.yr&&m%12===0&&b2>0){rate2=rx.rate/100;pay2=pmt(b2,rate2,(tot2-m)/12);}}
+      const int2=b2*rate2/12,prin2=Math.min(pay2-int2,b2);
+      b2=Math.max(0,b2-prin2);
+      const yr2=Math.ceil((m+1)/12);
+      if(yr2<=hor)annBal[yr2]=b2;
+    }
+  }
   const rows=[];let cCF=0,cR=0,cC=0,cM=0,cRv=0,be=null;
   for(let y=0;y<=hor;y++){
     const val=price*Math.pow(1+gr,y);
     const rent=y===0?0:nv(p.rm,0)*Math.pow(1+rg,y-1)*12*(p.rent?oc:0);
-    const cost=y===0?0:mc*12;
+    const cost=y===0?0:mc*Math.pow(1+cg,y-1)*12;
     const mp=y===0?0:(annP[y-1]||0);
-    const rv=p.renovs.filter(r=>r.year===y).reduce((s,r)=>s+r.amount,0);
+    // Renovations use calendar year
+    const calYr=p.yr+y;
+    const rv=p.renovs.filter(r=>r.year===calYr).reduce((s,r)=>s+r.amount,0);
     const cf=rent-cost-mp-rv;
     if(y>0){cR+=rent;cC+=cost;cM+=mp;cRv+=rv;cCF+=cf;}
     if(be===null&&y>0&&cCF+(val-price)>=0)be=y;
-    rows.push({y,cy:p.yr+y,val,rent,cost,mp,rv,cf,cCF,cR,cC,cM,cRv});
+    rows.push({y,cy:p.yr+y,val,rent,cost,mp,rv,cf,cCF,cR,cC,cM,cRv,debt:annBal[y]||0});
   }
   return{rows,be,ti:annI.reduce((s,v)=>s+v,0),price,loan};
 }
@@ -362,9 +390,18 @@ function renderL(p){
       <div style="margin-left:auto"><div class="tbar" style="width:auto"><button type="button" class="topt${p.mortg?' sel':''}" id="myes">Ano</button><button type="button" class="topt${!p.mortg?' sel':''}" id="mno">Ne</button></div></div>
     </div>
     <div class="card-body" id="mwrap" style="${p.mortg?'':'display:none'}">
-      <div class="i2"><div class="ig"><label class="il">Vlastní zdroje</label><div class="iw"><input type="number" id="peq" value="${p.eq}" placeholder="900 000" min="0" step="50000"><span class="iu">Kč</span></div></div><div class="ig"><label class="il">Sazba</label><div class="iw"><input type="number" id="pmr" value="${p.mr}" step="0.1" min="0" max="20"><span class="iu">%</span></div></div></div>
-      <div class="i2"><div class="ig"><label class="il">Splatnost (let)</label><div class="iw"><input type="number" id="pmy" value="${p.my}" min="1" max="40" style="padding-right:10px"></div></div><div class="ig"><label class="il">Refixace po</label><div class="iw"><input type="number" id="pry" value="${p.ry}" min="1" max="20"><span class="iu">l</span></div></div></div>
-      <div class="ig" style="margin-bottom:0"><label class="il">Sazba po refixaci</label><div class="iw"><input type="number" id="prr" value="${p.rr}" step="0.1" min="0" max="20"><span class="iu">%</span></div></div>
+      <div class="i2"><div class="ig"><label class="il">Vlastní zdroje</label><div class="iw"><input type="number" id="peq" value="${p.eq}" placeholder="900 000" min="0" step="50000"><span class="iu">Kč</span></div></div><div class="ig"><label class="il">Počáteční sazba</label><div class="iw"><input type="number" id="pmr" value="${p.mr}" step="0.1" min="0" max="20"><span class="iu">%</span></div></div></div>
+      <div class="ig" style="margin-bottom:10px"><label class="il">Splatnost (let)</label><div class="iw"><input type="number" id="pmy" value="${p.my}" min="1" max="40" style="padding-right:10px"></div></div>
+      <div style="font-size:11px;font-weight:600;color:var(--txt2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Refixace</div>
+      <div id="refix-list" style="display:flex;flex-direction:column;gap:5px;margin-bottom:6px"></div>
+      <button type="button" class="addbtn" id="refix-add" style="margin-top:0;padding:5px 10px;font-size:11px">+ Přidat refixaci</button>
+      <div class="rnform" id="refix-form">
+        <div class="rnrow">
+          <div class="rff" style="min-width:80px"><label>Rok refixace</label><input type="number" id="rfx-yr" placeholder="${p.yr+5}" min="${p.yr}" max="${p.yr+p.hor}" style="width:80px"></div>
+          <div class="rff" style="min-width:70px"><label>Nová sazba</label><input type="number" id="rfx-rate" placeholder="4.5" step="0.1" min="0" max="20" style="width:75px"></div>
+          <button type="button" class="btn primary" id="rfx-ok" style="align-self:flex-end">Přidat</button>
+        </div>
+      </div>
     </div>
   </div>
   <div class="card">
@@ -372,14 +409,17 @@ function renderL(p){
       <div style="margin-left:auto"><div class="tbar" style="width:auto"><button type="button" class="topt${p.rent?' sel':''}" id="ryes">Pronajímám</button><button type="button" class="topt${!p.rent?' sel':''}" id="rno">Vlastní</button></div></div>
     </div>
     <div class="card-body" id="rwrap" style="${p.rent?'':'display:none'}">
-      <div class="i2"><div class="ig"><label class="il">Měsíční nájem</label><div class="iw"><input type="number" id="prm" value="${p.rm}" placeholder="18 000" min="0" step="500"><span class="iu">Kč</span></div></div><div class="ig"><label class="il">Roční růst</label><div class="iw"><input type="number" id="prg" value="${p.rg}" step="0.5" min="0" max="20"><span class="iu">%</span></div></div></div>
+      <div class="i2"><div class="ig"><label class="il">Měsíční nájem</label><div class="iw"><input type="number" id="prm" value="${p.rm}" placeholder="18 000" min="0" step="500"><span class="iu">Kč</span></div></div><div class="ig"><label class="il">Roční růst nájmu</label><div class="iw"><input type="number" id="prg" value="${p.rg}" step="0.5" min="0" max="20"><span class="iu">%</span></div></div></div>
       <div class="ig" style="margin-bottom:0"><label class="il">Obsazenost</label><div class="sw"><input type="range" id="poc" min="50" max="100" value="${p.oc}"><div class="sv"><span id="poc-v">${p.oc}</span> <span>%</span></div></div></div>
     </div>
   </div>
   <div class="card">
     <div class="card-hdr"><div class="card-dot" style="background:var(--red-tx)"></div><div class="card-title">Provozní náklady / měsíc</div></div>
     <div class="card-body">
-      <div class="ig" style="margin-bottom:0"><label class="il">Celkové měsíční náklady</label><div class="iw"><input type="number" id="pcm" value="${p.cm}" placeholder="např. 3 000" min="0" step="100"><span class="iu">Kč</span></div></div>
+      <div class="i2">
+        <div class="ig" style="margin-bottom:0"><label class="il">Celkové měsíční náklady</label><div class="iw"><input type="number" id="pcm" value="${p.cm}" placeholder="např. 3 000" min="0" step="100"><span class="iu">Kč</span></div></div>
+        <div class="ig" style="margin-bottom:0"><label class="il">Roční růst nákladů</label><div class="iw"><input type="number" id="pcg" value="${p.cg}" step="0.5" min="0" max="20"><span class="iu">%</span></div></div>
+      </div>
       <div class="hint">Správa, pojištění, fond oprav, daň — vše dohromady</div>
     </div>
   </div>
@@ -390,9 +430,9 @@ function renderL(p){
       <button type="button" class="addbtn" id="rnadd">+ Přidat investici</button>
       <div class="rnform" id="rnform">
         <div class="rnrow">
-          <div class="rff" style="flex:2;min-width:90px"><label>Popis</label><input type="text" id="rfdesc" placeholder="kuchyň..."></div>
-          <div class="rff" style="min-width:60px"><label>Rok</label><input type="number" id="rfyr" value="1" min="0" max="50" style="width:64px"></div>
+          <div class="rff" style="min-width:70px"><label>Rok</label><input type="number" id="rfyr" value="${p.yr}" min="1900" max="2100" style="width:78px"></div>
           <div class="rff" style="min-width:80px"><label>Částka</label><input type="number" id="rfamt" placeholder="250 000" step="10000" style="width:95px"></div>
+          <div class="rff" style="flex:1;min-width:80px"><label>Popis (volitelný)</label><input type="text" id="rfdesc" placeholder="kuchyň..."></div>
           <button type="button" class="btn primary" id="rfok" style="align-self:flex-end">Přidat</button>
         </div>
       </div>
@@ -419,7 +459,30 @@ function wireL(p){
   ni('pnm','name');ni('pp','price');ni('pyr','yr');ni('pby','by');
   ni('peq','eq');ni('pmr','mr');ni('pmy','my');ni('pry','ry');ni('prr','rr');
   ni('prm','rm');ni('prg','rg');
-  ni('pcm','cm');
+  ni('pcm','cm');ni('pcg','cg');
+
+function renderRefixes(p){
+  const l=ge('refix-list');if(!l)return;l.innerHTML='';
+  if(!p.refixes||!p.refixes.length){l.innerHTML='<div style="font-size:11px;color:var(--txt3)">Žádné refixace.</div>';return;}
+  p.refixes.slice().sort((a,b)=>a.yr-b.yr).forEach((rx,i)=>{
+    const d=document.createElement('div');d.className='rntag';
+    d.innerHTML=`<div class="rntxt"><strong>${rx.yr}</strong> → <strong>${rx.rate} %</strong></div><button type="button" class="rndel" data-i="${i}">×</button>`;
+    d.querySelector('.rndel').addEventListener('click',()=>{p.refixes.splice(i,1);renderRefixes(p);recalc(p);});
+    l.appendChild(d);
+  });
+}
+
+  ge('refix-add')?.addEventListener('click',()=>ge('refix-form').classList.toggle('open'));
+  ge('rfx-ok')?.addEventListener('click',()=>{
+    const yr=parseInt(ge('rfx-yr').value)||0;
+    const rate=parseFloat(ge('rfx-rate').value)||0;
+    if(!yr||!rate)return;
+    if(!p.refixes)p.refixes=[];
+    p.refixes.push({yr,rate});
+    ge('rfx-yr').value='';ge('rfx-rate').value='';
+    renderRefixes(p);recalc(p);
+  });
+  renderRefixes(p);
   ge('pnm')?.addEventListener('input',e=>{p.name=e.target.value||'Nemovitost';renderTabs();});
   document.querySelectorAll('.cp').forEach(el=>el.addEventListener('click',()=>{p.color=el.dataset.c;document.querySelectorAll('.cp').forEach(e=>e.classList.toggle('sel',e===el));renderTabs();recalc(p);}));
   const tog=(yId,nId,key,wId)=>{
@@ -431,7 +494,8 @@ function wireL(p){
   ge('rfok')?.addEventListener('click',()=>{
     const amt=Math.abs(parseFloat(ge('rfamt').value)||0);
     if(!amt){ge('rfamt').style.borderColor='var(--red-tx)';setTimeout(()=>ge('rfamt').style.borderColor='',2000);return;}
-    p.renovs.push({year:parseInt(ge('rfyr').value)||1,amount:amt,desc:ge('rfdesc').value.trim()});
+    const yr=parseInt(ge('rfyr').value)||p.yr;
+    p.renovs.push({year:yr,amount:amt,desc:ge('rfdesc').value.trim()});
     ge('rfamt').value='';ge('rfdesc').value='';renderRenovs(p);recalc(p);
   });
 }
@@ -508,8 +572,17 @@ function renderChart(p,rows,mode){
   const step=p.hor<=15?2:p.hor<=25?5:10;
   let ds,leg;
   if(mode==='val'){
-    ds=[{label:'Hodnota',data:rows.map(r=>Math.round(r.val)),backgroundColor:p.color+'cc',stack:'v'}];
-    leg=`<div class="li"><div class="ld" style="background:${p.color}"></div><span>Hodnota nemovitosti</span></div>`;
+    const hasDebt=rows.some(r=>r.debt>0);
+    if(hasDebt){
+      ds=[
+        {label:'Vlastní hodnota (equity)',data:rows.map(r=>Math.round(Math.max(0,r.val-r.debt))),backgroundColor:p.color+'cc',stack:'v'},
+        {label:'Zůstatek hypotéky',data:rows.map(r=>-Math.round(r.debt)),backgroundColor:'#f8717155',borderColor:'#f87171',borderWidth:1,stack:'d'},
+      ];
+      leg=`<div class="li"><div class="ld" style="background:${p.color}"></div><span>Vlastní hodnota</span></div><div class="li"><div class="ld" style="background:#f87171;opacity:.7"></div><span>Zůstatek hypotéky</span></div>`;
+    } else {
+      ds=[{label:'Hodnota',data:rows.map(r=>Math.round(r.val)),backgroundColor:p.color+'cc',stack:'v'}];
+      leg=`<div class="li"><div class="ld" style="background:${p.color}"></div><span>Hodnota nemovitosti</span></div>`;
+    }
   } else {
     ds=[{label:'Kum.CF',data:rows.map(r=>Math.round(r.cCF)),backgroundColor:rows.map(r=>r.cCF>=0?'#4ECDA0aa':'#f87171aa'),stack:'c'},
         {label:'Roční CF',data:rows.map(r=>Math.round(r.cf)),type:'line',borderColor:'#4A9EE0',pointRadius:1,fill:false,tension:.3,borderWidth:2}];
