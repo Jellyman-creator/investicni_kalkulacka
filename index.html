@@ -17,8 +17,8 @@
   --radius:10px;--font:'DM Sans',sans-serif;--mono:'DM Mono',monospace;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth}
-body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15px;line-height:1.6}
+html{scroll-behavior:smooth;overflow-x:hidden}
+body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15px;line-height:1.6;overflow-x:hidden}
 
 .topbar{background:var(--navy);height:56px;display:flex;align-items:center;padding:0 24px;justify-content:space-between;position:sticky;top:0;z-index:100}
 .logo{display:flex;align-items:center;gap:10px;text-decoration:none}
@@ -101,7 +101,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
 .tl-axis-wrap{position:relative;height:36px;margin-bottom:4px}
 .tl-axis{position:absolute;inset:0;font-size:10px;color:var(--txt3);font-weight:500}
 .tl-axis span{position:absolute;transform:translateX(-50%)}
-.tl-axis .ax-yr{top:0;color:var(--txt3)}
+.tl-axis .ax-yr{top:0;color:var(--txt3);white-space:nowrap}
 .tl-axis .ax-age{top:14px;color:var(--blue);font-weight:600;font-size:10px;white-space:nowrap}
 .tl-track{position:relative;height:80px;border-radius:7px;background:var(--bg);border:1px solid var(--border);cursor:crosshair;user-select:none;touch-action:pan-y}
 .tl-track.phase-track{height:52px}
@@ -113,9 +113,9 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
 .tl-seg-sub{pointer-events:none;font-size:10px;font-weight:500;opacity:.75;line-height:1}
 .tl-seg-input{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:calc(100% - 18px);max-width:130px;text-align:center;font-size:12px;font-family:var(--mono);font-weight:600;background:rgba(255,255,255,.95);border:1px solid rgba(0,0,0,.18);border-radius:4px;padding:3px 5px;outline:none;display:none;z-index:3;touch-action:none}
 .tl-seg-input.visible{display:block}
-.tl-handle{position:absolute;top:0;bottom:0;width:12px;cursor:ew-resize;z-index:2;display:flex;align-items:center;justify-content:center;touch-action:none}
-.tl-handle::after{content:'';width:3px;height:16px;background:rgba(0,0,0,.22);border-radius:2px}
-.tl-handle.l{left:0}.tl-handle.r{right:0}
+.tl-handle{position:absolute;top:4px;bottom:4px;width:6px;cursor:ew-resize;z-index:2;touch-action:none;border-radius:3px;background:rgba(0,0,0,.18);opacity:0;transition:opacity .15s}
+.tl-seg:hover .tl-handle,.tl-seg.sel .tl-handle{opacity:1}
+.tl-handle.l{left:2px}.tl-handle.r{right:2px}
 
 /* PHASE EDITOR */
 .tl-editor{padding:14px;background:var(--bg);border-radius:8px;margin-top:8px;display:none;flex-wrap:wrap;gap:10px;align-items:flex-start;border:1px solid var(--border)}
@@ -153,6 +153,8 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
 .rb-field select{padding:8px 10px;font-size:13px;font-family:var(--font);border:1px solid var(--border);border-radius:6px;background:#fff;color:var(--txt);outline:none;min-width:140px}
 .rb-field input:focus,.rb-field select:focus{border-color:var(--blue)}
 .rules-list{display:flex;flex-direction:column;gap:6px;margin-top:4px}
+.rb-from-to{display:flex;gap:8px}
+.rb-from-to .rb-field{flex:1;min-width:0}
 .rule-tag{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--surface);border:1px solid var(--border);border-radius:6px;font-size:13px;color:var(--txt2)}
 .rule-tag-text{flex:1}
 .rule-tag strong{color:var(--txt);font-weight:600}
@@ -242,26 +244,95 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
   .top-grid{grid-template-columns:1fr 1fr}
   .kpi-strip{grid-template-columns:repeat(4,1fr)}
 }
-@media(max-width:720px){
+@media(max-width:768px){
+  html,body{overflow-x:hidden}
+  /* Layout */
+  .page{padding:8px}
+  .top-grid{grid-template-columns:1fr!important;gap:8px}
+  .hero{padding:14px 12px 0}
+  .hero-eyebrow{font-size:11px;margin-bottom:6px}
+  .hero-title{font-size:17px;margin-bottom:8px}
+  .hero-body{display:none}
+  .hero-cta{font-size:12px;padding:7px 14px}
+  .why-section{padding:18px 12px}
+  .topbar{padding:0 10px;height:48px}
+  .logo-sub{display:none}
+  .logo-name{font-size:13px}
+  .topbar-actions .tb-btn span{display:none}
+  .topbar-actions .tb-btn{padding:7px 8px}
+
+  /* KPI: 2×2 */
   .kpi-strip{grid-template-columns:1fr 1fr}
-  .kpi{padding:12px 12px}
+  .kpi{padding:9px 10px}
   .kpi-val{font-size:14px}
   .kpi-label{font-size:9px}
-  .top-grid{grid-template-columns:1fr!important}
-  .insights-row{grid-template-columns:1fr}
-  .compare-grid{grid-template-columns:1fr}
-  .milestones-row{grid-template-columns:1fr 1fr}
-  .page{padding:12px}
-  .hero{padding:24px 14px 0}
-  .why-section{padding:24px 14px}
-  .topbar{padding:0 12px}
-  .topbar-actions .tb-btn span{display:none}
-  .rb-row{flex-direction:column;align-items:stretch}
-  .rb-field input,.rb-field select,.rb-field input.wide{width:100%}
+
+  /* Cards tighter */
+  .card-body{padding:10px}
+  .card-hdr{padding:8px 12px}
+  .card-title{font-size:11px}
+  .card{margin-bottom:10px}
+  .inp-group{margin-bottom:10px}
+
+  /* Toggles full-width */
+  .toggle-bar{width:100%}
+  .toggle-opt{flex:1;text-align:center;padding:7px 4px;font-size:12px}
+
+  /* Rule builder on mobile: wrap but keep rows as rows */
+  .rb-row{flex-wrap:wrap;gap:8px}
+  .rb-field{flex:none;min-width:0}
+  .rb-field input,.rb-field select{font-size:16px}
+  .rb-field input.wide,.rb-field:not(.rb-from-to .rb-field){width:100%}
+
+  /* Renta single col */
   #target-grid{grid-template-columns:1fr!important}
-  .phase-presets{flex-direction:column}
+
+  /* Phase presets wrap */
+  .phase-presets{flex-wrap:wrap;gap:5px}
+  .phase-preset-btn{flex:1;min-width:80px;text-align:center;font-size:12px;padding:6px 6px}
+
+  /* Handles always visible + bigger on touch */
+  .tl-handle{opacity:.8!important;width:8px;top:6px;bottom:6px}
+
+  /* Keep every+desc+add in one line */
+  #tx-rule-form > div:last-child{flex-wrap:nowrap}
+  #tx-rule-form > div:last-child .rb-field{flex:1;min-width:0}
+  #tx-rule-form > div:last-child .rb-field select{min-width:0;width:100%}
+  /* Renta grid stays 2 columns on mobile */
+  #target-grid{grid-template-columns:1fr 1fr!important}
+
+  /* Chart shorter */
+  .chart-wrap{height:190px}
+  .milestones-row{grid-template-columns:1fr 1fr}
+  .ms{padding:8px 8px}
+  .ms-val{font-size:12px}
+  .legend{gap:8px;font-size:11px;margin-bottom:8px}
+
+  /* TL editor */
+  .tl-editor{gap:8px}
+  .tl-ef{min-width:60px}
+
+  /* Compare/insights */
+  .compare-grid{grid-template-columns:1fr}
+  .insights-row{grid-template-columns:1fr}
+
+  /* Sim table */
+  .sim-table{font-size:11px;min-width:400px}
+
+  /* Action buttons */
+  #dep-btn-in,#dep-btn-out,#tx-btn-in,#tx-btn-out{font-size:13px;padding:9px 8px}
+
+  /* Result dark box */
+  #target-result>div:first-child{flex-direction:column;gap:12px}
+
+  /* Slider */
+  .slider-wrap{gap:6px}
+  .slider-val{font-size:14px;min-width:36px}
 }
-@media(max-width:400px){.logo-sub{display:none}.kpi-val{font-size:13px}}
+@media(max-width:380px){
+  .kpi-val{font-size:12px}
+  .logo-mark{width:26px;height:26px}
+}
 </style>
 </head>
 <body>
@@ -297,9 +368,11 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
 <!-- HERO -->
 <section class="hero">
   <div class="hero-eyebrow">Jiný pohled na investování</div>
-  <div class="hero-title">Vaše portfolio nepřestane vydělávat,<br><strong>když přestanete pracovat</strong></div>
+  <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:14px">
+    <div class="hero-title" style="margin-bottom:0;flex:1;min-width:220px">Vaše portfolio nepřestane vydělávat,<br><strong>když přestanete pracovat</strong></div>
+    <a class="hero-cta" href="#proc" style="flex-shrink:0">Proč je to jinak?</a>
+  </div>
   <div class="hero-body">Většina kalkulaček skončí v den odchodu do důchodu. Tato počítá dál.</div>
-  <a class="hero-cta" href="#proc">Proč je to jinak?</a>
   <div class="kpi-strip">
     <div class="kpi"><div class="kpi-label">Portfolio dnes</div><div class="kpi-val blue" id="kpi-now">0 Kč</div></div>
     <div class="kpi"><div class="kpi-label">Celkem vloženo</div><div class="kpi-val" id="kpi-invested">0 Kč</div></div>
@@ -329,28 +402,27 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
       <div class="card">
         <div class="card-hdr"><div class="card-dot" style="background:var(--blue)"></div><div class="card-title">Základní parametry</div></div>
         <div class="card-body">
-          <div class="inp-group"><label class="inp-label">Počáteční investice</label><div class="inp-wrap"><input type="number" id="startAmount" placeholder="např. 1 000 000" min="0" step="10000"><span class="inp-unit">Kč</span></div></div>
-          <div class="inp-group"><label class="inp-label">Rok zahájení</label><div class="inp-wrap"><input type="number" id="startYear" min="2000" max="2100"></div></div>
-          <div class="inp-group">
-            <label class="inp-label">Investiční horizont</label>
-            <div class="slider-wrap"><input type="range" id="horizon-slider" min="1" max="70" value="40"><div class="slider-val"><span id="horizon-val">40</span> <span>let</span></div></div>
-            <input type="hidden" id="horizon" value="40">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+            <div class="inp-group" style="margin-bottom:0"><label class="inp-label">Počáteční investice</label><div class="inp-wrap"><input type="number" id="startAmount" placeholder="např. 1 000 000" min="0" step="10000"><span class="inp-unit">Kč</span></div></div>
+            <div class="inp-group" style="margin-bottom:0"><label class="inp-label">Rok zahájení</label><div class="inp-wrap"><input type="number" id="startYear" min="2000" max="2100"></div></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:0">
+            <div class="inp-group" style="margin-bottom:0">
+              <label class="inp-label">Investiční horizont</label>
+              <div class="slider-wrap"><input type="range" id="horizon-slider" min="1" max="70" value="40"><div class="slider-val"><span id="horizon-val">40</span> <span>let</span></div></div>
+              <input type="hidden" id="horizon" value="40">
+            </div>
+            <div class="inp-group" style="margin-bottom:0">
+              <label class="inp-label">Rok narození</label>
+              <div class="inp-wrap"><input type="number" id="birthYear" placeholder="např. 1985" min="1920" max="2020"></div>
+            </div>
           </div>
         </div>
       </div>
-      <button type="button" id="btn-reset" style="width:100%;margin-top:10px;padding:12px;font-size:14px;font-family:var(--font);font-weight:600;border:1px solid var(--border2);border-radius:7px;background:var(--surface);color:var(--txt2);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .15s">
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1 7a6 6 0 1 0 1.5-3.9"/><path d="M1 2.5V7h4.5"/></svg>
+      <button type="button" id="btn-reset" style="width:100%;margin-top:10px;padding:10px;font-size:13px;font-family:var(--font);font-weight:600;border:1px solid var(--border2);border-radius:7px;background:var(--surface);color:var(--txt2);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .15s">
+        <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1 7a6 6 0 1 0 1.5-3.9"/><path d="M1 2.5V7h4.5"/></svg>
         Vynulovat hodnoty
       </button>
-      <div class="card" style="margin-top:10px">
-        <div class="card-hdr"><div class="card-dot" style="background:var(--txt3)"></div><div class="card-title">Rok narození</div></div>
-        <div class="card-body">
-          <div class="inp-group" style="margin-bottom:8px">
-            <div class="inp-wrap"><input type="number" id="birthYear" placeholder="např. 1985" min="1920" max="2020" style="width:100%;padding:10px 13px;font-size:14px;font-family:var(--mono);border:1px solid var(--border);border-radius:7px;background:var(--bg);color:var(--txt);outline:none;transition:border .15s"></div>
-          </div>
-          <p style="font-size:11px;color:var(--txt3);line-height:1.55">Slouží pro zobrazení věku na časových osách a výpočet renty. <strong>Údaj nikdy neopustí vaše zařízení</strong> — ukládá se pouze lokálně v prohlížeči.</p>
-        </div>
-      </div>
     </div>
     <div>
       <div class="card">
@@ -385,21 +457,29 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
         </div>
       </div>
       <!-- Editor panel — shown when a segment is selected -->
-      <div id="tl-editor-in" class="tl-editor">
-        <div id="dep-editor-type-badge" style="font-size:12px;font-weight:700;padding:4px 10px;border-radius:5px;background:var(--grn-lt);color:var(--grn-tx);border:1px solid var(--grn-bd);align-self:flex-end">Vklad +</div>
-        <div class="tl-ef">
-          <label>Od roku</label>
-          <input type="number" id="tei-from" min="1" max="70">
-          <div id="tei-from-hint" style="font-size:11px;color:var(--blue);margin-top:3px;font-weight:500"></div>
+      <div id="tl-editor-in" class="tl-editor" style="flex-direction:column;gap:8px">
+        <!-- Badge headline -->
+        <div id="dep-editor-type-badge" style="font-size:12px;font-weight:700;padding:4px 10px;border-radius:5px;background:var(--grn-lt);color:var(--grn-tx);border:1px solid var(--grn-bd);align-self:flex-start">Vklad +</div>
+        <!-- From / To / Amount in one row -->
+        <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap">
+          <div class="rb-from-to" style="flex:none">
+            <div class="tl-ef">
+              <label>Od roku</label>
+              <input type="number" id="tei-from" min="1" max="70" style="width:72px">
+              <div id="tei-from-hint" style="font-size:10px;color:var(--blue);margin-top:2px;font-weight:500;white-space:nowrap"></div>
+            </div>
+            <div class="tl-ef">
+              <label>Do roku</label>
+              <input type="number" id="tei-to" min="1" max="70" style="width:72px">
+              <div id="tei-to-hint" style="font-size:10px;color:var(--blue);margin-top:2px;font-weight:500;white-space:nowrap"></div>
+            </div>
+          </div>
+          <div class="tl-ef" style="flex:1;min-width:130px"><label id="tei-val-label" style="white-space:nowrap">Měsíční vklad (Kč)</label><input type="number" id="tei-val" step="500" min="0" placeholder="0" style="width:100%"></div>
+          <div style="display:flex;gap:6px;align-self:flex-end">
+            <button class="btn danger" id="tei-del">Smazat</button>
+            <button class="btn" id="tei-cancel">Zavřít</button>
+          </div>
         </div>
-        <div class="tl-ef">
-          <label>Do roku</label>
-          <input type="number" id="tei-to" min="1" max="70">
-          <div id="tei-to-hint" style="font-size:11px;color:var(--blue);margin-top:3px;font-weight:500"></div>
-        </div>
-        <div class="tl-ef" style="flex:2"><label id="tei-val-label">Měsíční vklad (Kč)</label><input type="number" id="tei-val" step="500" min="0" placeholder="0"></div>
-        <button class="btn danger" id="tei-del">Smazat</button>
-        <button class="btn" id="tei-cancel">Zavřít</button>
       </div>
       <div class="hint" style="margin-top:8px">Vklady (zelené) a výběry (červené) nesmí ve stejném období překrývat. Klikni na segment pro editaci, táhni okraje pro změnu délky.</div>
     </div>
@@ -422,16 +502,20 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
       <!-- Repeat view -->
       <div id="txin-repeat">
         <div class="rule-builder" id="tx-rule-form">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
-            <div id="tx-form-badge" style="font-size:12px;font-weight:700;padding:4px 12px;border-radius:6px;background:var(--grn-lt);color:var(--grn-tx);border:1px solid var(--grn-bd)">Vklad +</div>
+          <!-- Row 1: type badge + amount + from/to -->
+          <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;margin-bottom:8px">
+            <div id="tx-form-badge" style="font-size:12px;font-weight:700;padding:6px 12px;border-radius:6px;background:var(--grn-lt);color:var(--grn-tx);border:1px solid var(--grn-bd);white-space:nowrap;align-self:flex-end;margin-bottom:1px">Vklad +</div>
+            <div class="rb-field" style="flex:2;min-width:100px"><label>Částka (Kč)</label><input type="number" id="rbin-val" placeholder="např. 50 000" step="1000" min="0" style="width:100%"></div>
+            <div class="rb-from-to" style="flex:1.5">
+              <div class="rb-field"><label>Od roku</label><input type="number" id="rbin-from" value="1" min="1" max="70" style="width:100%"></div>
+              <div class="rb-field"><label>Do roku</label><input type="number" id="rbin-to" value="10" min="1" max="70" style="width:100%"></div>
+            </div>
           </div>
-          <div class="rb-row">
-            <div class="rb-field"><label>Částka (Kč)</label><input type="number" id="rbin-val" placeholder="např. 50 000" step="1000" min="0"></div>
-            <div class="rb-field"><label>Od roku</label><input type="number" id="rbin-from" value="1" min="1" max="70" style="width:76px"></div>
-            <div class="rb-field"><label>Do roku</label><input type="number" id="rbin-to" value="10" min="1" max="70" style="width:76px"></div>
-            <div class="rb-field"><label>Každých N let</label><select id="rbin-every"><option value="1">každý rok</option><option value="2">každé 2 roky</option><option value="3">každé 3 roky</option><option value="5" selected>každých 5 let</option><option value="10">každých 10 let</option></select></div>
-            <div class="rb-field" style="flex:1;min-width:160px"><label id="rb-desc-label">Popis</label><input type="text" id="rbin-desc" class="wide" placeholder="např. prodej nemovitosti atp."></div>
-            <button type="button" class="btn primary" id="rbin-add" style="align-self:flex-end">Přidat</button>
+          <!-- Row 2: every + desc + add -->
+          <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap">
+            <div class="rb-field" style="flex:0 0 auto"><label>Každých X let</label><select id="rbin-every" style="min-width:130px"><option value="1">každý rok</option><option value="2">každé 2 roky</option><option value="3">každé 3 roky</option><option value="5" selected>každých 5 let</option><option value="10">každých 10 let</option></select></div>
+            <div class="rb-field" style="flex:1;min-width:120px"><label id="rb-desc-label">Popis</label><input type="text" id="rbin-desc" class="wide" placeholder="např. prodej nemovitosti atp." style="width:100%"></div>
+            <button type="button" class="btn primary" id="rbin-add" style="align-self:flex-end;white-space:nowrap">Přidat</button>
           </div>
         </div>
         <div class="rules-list" id="rules-in"></div>
@@ -499,7 +583,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
             <label class="inp-label" style="color:#4c1d95">V kolika letech chcete jít do penze?</label>
             <div class="inp-wrap"><input type="number" id="tr-retire-age-input" value="67" min="40" max="80" step="1"><span class="inp-unit">let</span></div>
           </div>
-          <div style="font-size:12px;color:#6d28d9;line-height:1.55;flex:2;min-width:180px">Na časové ose nemáte nastavené žádné pravidelné výběry. Zadejte věk odchodu do penze — kalkulačka podle něj určí, od kdy a jak dlouho budete čerpat. Jakmile přidáte výběry na časové ose, toto pole se skryje a použije se jejich nastavení.</div>
+          <div style="font-size:12px;color:#6d28d9;line-height:1.55;flex:2;min-width:180px">Zadejte věk odchodu do penze — kalkulačka podle něj určí, od kdy a jak dlouho můžete čerpat.</div>
         </div>
       </div>
 
@@ -741,7 +825,7 @@ function simulate(){
     rows.push({yr,calYr:startYr+yr,rate,monthly,annDep,tx,gain,
       cumInit,cumReg,cumGain,
       initPart,regPart,gainPart,
-      portfolio});
+      portfolio,depleted:portfolio<0});
   }
   return rows;
 }
@@ -1177,9 +1261,14 @@ document.getElementById('phe-cancel').addEventListener('click',()=>{
 let txKind='in'; // current active kind for one-off
 function setTxKind(kind){
   txKind=kind;
-  // Reset editing mode when switching type
   editingRule=null;
   document.getElementById('rbin-add').textContent='Přidat';
+  // Auto-set Od roku to follow last existing rule
+  const allRules=[...rulesIn,...rulesOut];
+  const nextFrom=allRules.length>0?Math.max(...allRules.map(r=>r.to))+1:1;
+  const hor=getHorizon();
+  document.getElementById('rbin-from').value=Math.min(nextFrom,hor);
+  document.getElementById('rbin-to').value=Math.min(nextFrom+9,hor);
   const badge=document.getElementById('tx-form-badge');
   if(badge){
     if(kind==='in'){
@@ -1246,10 +1335,10 @@ function renderRulesUnified(){
     if(isEditing)tag.style.cssText+='outline:2px solid var(--blue);outline-offset:1px;';
     tag.innerHTML=`<div class="rule-tag-text"><strong>${sign}${new Intl.NumberFormat('cs-CZ',{maximumFractionDigits:0}).format(r.val)} Kč</strong> — ${ev}, roky ${r.from}–${r.to}${r.desc?' · '+r.desc:''}</div>
       <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--txt3);flex-shrink:0;cursor:pointer"><path d="M9.5 2.5l2 2L4 12H2v-2L9.5 2.5z"/></svg>
-      <button class="rule-del" data-kind="${r.kind}" data-i="${r.i}" title="Smazat">×</button>`;
-    // Click on tag body → edit
+      <button type="button" class="rule-del" data-kind="${r.kind}" data-i="${r.i}" title="Smazat">×</button>`;
+    // Click on tag text or pencil → edit
     tag.querySelector('.rule-tag-text').addEventListener('click',()=>fillRuleForm(r.kind,r.i));
-    tag.querySelector('span').addEventListener('click',()=>fillRuleForm(r.kind,r.i));
+    tag.querySelector('svg').addEventListener('click',()=>fillRuleForm(r.kind,r.i));
     // Click × → delete
     tag.querySelector('.rule-del').addEventListener('click',e=>{
       e.stopPropagation();
@@ -1528,7 +1617,7 @@ function renderTargetIncome(rows){
 // Slider listener — offset from base ref year
 document.getElementById('tr-retire-slider').addEventListener('input',e=>{
   const selectedYr=parseInt(e.target.value);
-  const baseRefYr=getWithdrawalStartYr()||0;
+  const baseRefYr=getWithdrawalStartYr()??getRetireAgeRefYr();
   trSliderOffset=selectedYr-baseRefYr;
   const rows=simulate();
   renderTargetIncome(rows);
@@ -1587,11 +1676,61 @@ function renderSimTable(rows){
   });
 }
 
+function renderDepletionWarning(rows){
+  const depleted=rows.filter(r=>r.depleted);
+  const firstDepleted=depleted[0];
+  const msg=firstDepleted
+    ?`⚠ Výběry překračují hodnotu portfolia od roku ${firstDepleted.calYr} (rok ${firstDepleted.yr})`
+    :null;
+
+  // Helper: show/hide warning in a container
+  function setWarn(id, text){
+    let el=document.getElementById(id);
+    if(!el){
+      el=document.createElement('div');
+      el.id=id;
+      el.style.cssText='display:flex;align-items:center;gap:8px;padding:10px 14px;background:#fff1f1;border:1px solid #fca5a5;border-radius:7px;font-size:13px;font-weight:600;color:#b91c1c;margin-top:10px';
+    }
+    if(text){
+      el.textContent=text;
+      el.style.display='flex';
+    } else {
+      el.style.display='none';
+    }
+    return el;
+  }
+
+  // Regular deposits/withdrawals card
+  const depCard=document.getElementById('tl-track-in')?.closest('.card');
+  if(depCard){
+    let w=depCard.querySelector('#warn-dep');
+    if(!w){w=setWarn('warn-dep',msg);depCard.querySelector('.card-body').appendChild(w);}
+    else setWarn('warn-dep',msg);
+  }
+
+  // One-off card
+  const txCard=document.getElementById('rules-in')?.closest('.card');
+  if(txCard){
+    let w=txCard.querySelector('#warn-tx');
+    if(!w){w=setWarn('warn-tx',msg);txCard.querySelector('.card-body').appendChild(w);}
+    else setWarn('warn-tx',msg);
+  }
+
+  // Chart area
+  const chartCard=document.getElementById('main-chart')?.closest('.card');
+  if(chartCard){
+    let w=chartCard.querySelector('#warn-chart');
+    if(!w){w=setWarn('warn-chart',msg);chartCard.querySelector('.card-body').prepend(w);}
+    else setWarn('warn-chart',msg);
+  }
+}
+
 function recalc(){
   updateRetireAgeField();
   const rows=simulate();
   renderKPIs(rows);renderMilestones(rows);renderChart(rows);renderSimTable(rows);
   renderTargetIncome(rows);
+  renderDepletionWarning(rows);
   saveState();
 }
 
@@ -1697,7 +1836,10 @@ document.getElementById('birthYear').addEventListener('input',()=>{
   updateDepEditorHints();
   recalc();
 });
-document.getElementById('tr-retire-age-input').addEventListener('input',()=>recalc());
+document.getElementById('tr-retire-age-input').addEventListener('input',()=>{
+  trSliderOffset=0; // reset slider offset when age field is edited directly
+  recalc();
+});
 ['target-rate','target-legacy'].forEach(id=>{
   document.getElementById(id).addEventListener('input',()=>recalc());
 });
