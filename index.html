@@ -404,7 +404,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
         <div class="card-body">
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
             <div class="inp-group" style="margin-bottom:0"><label class="inp-label">Počáteční investice</label><div class="inp-wrap"><input type="number" id="startAmount" placeholder="např. 1 000 000" min="0" step="10000"><span class="inp-unit">Kč</span></div></div>
-            <div class="inp-group" style="margin-bottom:0"><label class="inp-label">Rok zahájení</label><div class="inp-wrap"><input type="number" id="startYear" min="2000" max="2100"></div></div>
+            <div class="inp-group" style="margin-bottom:0"><label class="inp-label">Rok zahájení</label><div class="inp-wrap"><input type="number" id="startYear" min="2000" max="2100" style="padding-right:13px"></div></div>
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:0">
             <div class="inp-group" style="margin-bottom:0">
@@ -414,7 +414,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
             </div>
             <div class="inp-group" style="margin-bottom:0">
               <label class="inp-label">Rok narození</label>
-              <div class="inp-wrap"><input type="number" id="birthYear" placeholder="např. 1985" min="1920" max="2020"></div>
+              <div class="inp-wrap"><input type="number" id="birthYear" placeholder="např. 1985" min="1920" max="2020" style="padding-right:13px"></div>
             </div>
           </div>
         </div>
@@ -441,47 +441,53 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
     <div class="card-hdr"><div class="card-dot" style="background:#f59e0b"></div><div class="card-title">Pravidelné vklady/výběry</div></div>
     <div class="card-body">
       <!-- Two action buttons -->
-      <div style="display:flex;gap:10px;margin-bottom:16px">
-        <button type="button" id="dep-btn-in" style="flex:1;padding:10px 16px;font-size:14px;font-weight:600;font-family:var(--font);border:2px solid #4ECDA0;border-radius:8px;background:var(--grn-lt);color:var(--grn-tx);cursor:pointer;transition:all .15s">+ Přidat vklad</button>
-        <button type="button" id="dep-btn-out" style="flex:1;padding:10px 16px;font-size:14px;font-weight:600;font-family:var(--font);border:2px solid #F87171;border-radius:8px;background:var(--red-lt);color:var(--red-tx);cursor:pointer;transition:all .15s">− Přidat výběr</button>
+      <div style="display:flex;gap:10px;margin-bottom:10px">
+        <button type="button" id="dep-btn-in" style="flex:1;padding:9px 14px;font-size:13px;font-weight:600;font-family:var(--font);border:2px solid #4ECDA0;border-radius:8px;background:var(--grn-lt);color:var(--grn-tx);cursor:pointer">+ Přidat vklad</button>
+        <button type="button" id="dep-btn-out" style="flex:1;padding:9px 14px;font-size:13px;font-weight:600;font-family:var(--font);border:2px solid #F87171;border-radius:8px;background:var(--red-lt);color:var(--red-tx);cursor:pointer">− Přidat výběr</button>
       </div>
-      <!-- Timeline axis + track -->
+      <!-- Single shared axis -->
       <div class="tl-axis-wrap"><div class="tl-axis" id="tl-axis-in"></div></div>
-      <div id="tl-track-in" style="position:relative;height:80px;border-radius:7px;background:var(--bg);border:1px solid var(--border);overflow:hidden;user-select:none;touch-action:pan-y">
-        <!-- Permanent row divider -->
-        <div style="position:absolute;left:0;right:0;top:40px;height:1px;background:var(--border2);pointer-events:none;z-index:1"></div>
-        <div style="position:absolute;left:6px;top:10px;font-size:9px;font-weight:700;color:var(--grn-tx);opacity:.5;pointer-events:none;text-transform:uppercase;letter-spacing:.05em">vklady +</div>
-        <div style="position:absolute;left:6px;top:53px;font-size:9px;font-weight:700;color:var(--red-tx);opacity:.5;pointer-events:none;text-transform:uppercase;letter-spacing:.05em">výběry −</div>
-        <div class="tl-empty-msg" id="dep-empty-msg" style="pointer-events:none;flex-direction:column;gap:3px">
-          <span style="font-size:12px;color:var(--txt3)">Kliknutím na tlačítka výše přidejte vklady nebo výběry</span>
+      <!-- Main track (deposits + withdrawals together when no overlap) -->
+      <div id="tl-track-in" style="position:relative;height:44px;border-radius:7px;background:var(--bg);border:1px solid var(--border);overflow:hidden;user-select:none;touch-action:pan-y">
+        <div class="tl-empty-msg" id="dep-empty-in" style="pointer-events:none">
+          <span style="font-size:11px;color:var(--txt3)">Kliknutím na tlačítka výše přidejte vklady nebo výběry</span>
+        </div>
+      </div>
+      <!-- Second track for withdrawals — shown only when overlap exists -->
+      <div id="dep-out-track-wrap" style="display:none;margin-top:4px">
+        <div style="font-size:9px;font-weight:700;color:var(--red-tx);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px;opacity:.7">Výběry (překryv)</div>
+        <div id="tl-track-out" style="position:relative;height:44px;border-radius:7px;background:var(--bg);border:1px solid var(--red-bd);overflow:hidden;user-select:none;touch-action:pan-y">
+          <div class="tl-empty-msg" id="dep-empty-out" style="pointer-events:none;display:none"></div>
         </div>
       </div>
       <!-- Editor panel — shown when a segment is selected -->
-      <div id="tl-editor-in" class="tl-editor" style="flex-direction:column;gap:8px">
-        <!-- Badge headline -->
-        <div id="dep-editor-type-badge" style="font-size:12px;font-weight:700;padding:4px 10px;border-radius:5px;background:var(--grn-lt);color:var(--grn-tx);border:1px solid var(--grn-bd);align-self:flex-start">Vklad +</div>
-        <!-- From / To / Amount in one row -->
-        <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap">
-          <div class="rb-from-to" style="flex:none">
-            <div class="tl-ef">
-              <label>Od roku</label>
-              <input type="number" id="tei-from" min="1" max="70" style="width:72px">
-              <div id="tei-from-hint" style="font-size:10px;color:var(--blue);margin-top:2px;font-weight:500;white-space:nowrap"></div>
-            </div>
-            <div class="tl-ef">
-              <label>Do roku</label>
-              <input type="number" id="tei-to" min="1" max="70" style="width:72px">
-              <div id="tei-to-hint" style="font-size:10px;color:var(--blue);margin-top:2px;font-weight:500;white-space:nowrap"></div>
-            </div>
-          </div>
-          <div class="tl-ef" style="flex:1;min-width:130px"><label id="tei-val-label" style="white-space:nowrap">Měsíční vklad (Kč)</label><input type="number" id="tei-val" step="500" min="0" placeholder="0" style="width:100%"></div>
-          <div style="display:flex;gap:6px;align-self:flex-end">
+      <div id="tl-editor-in" class="tl-editor" style="flex-direction:column;gap:8px;margin-top:8px">
+        <!-- Row 1: Badge + buttons (right after track) -->
+        <div style="display:flex;align-items:center;gap:8px;justify-content:space-between">
+          <div id="dep-editor-type-badge" style="font-size:12px;font-weight:700;padding:4px 10px;border-radius:5px;background:var(--grn-lt);color:var(--grn-tx);border:1px solid var(--grn-bd)">Vklad +</div>
+          <div style="display:flex;gap:6px">
             <button class="btn danger" id="tei-del">Smazat</button>
             <button class="btn" id="tei-cancel">Zavřít</button>
           </div>
         </div>
+        <!-- Row 2: Od roku / Do roku / Amount — all on same horizontal baseline -->
+        <div style="display:flex;gap:8px;align-items:flex-start">
+          <div class="tl-ef" style="flex:0 0 80px">
+            <label>Od roku</label>
+            <input type="number" id="tei-from" min="1" max="70" style="width:100%">
+            <div id="tei-from-hint" style="font-size:10px;color:var(--blue);margin-top:2px;font-weight:500;white-space:nowrap;min-height:14px"></div>
+          </div>
+          <div class="tl-ef" style="flex:0 0 80px">
+            <label>Do roku</label>
+            <input type="number" id="tei-to" min="1" max="70" style="width:100%">
+            <div id="tei-to-hint" style="font-size:10px;color:var(--blue);margin-top:2px;font-weight:500;white-space:nowrap;min-height:14px"></div>
+          </div>
+          <div class="tl-ef" style="flex:1;min-width:120px">
+            <label id="tei-val-label" style="white-space:nowrap">Měsíční vklad (Kč)</label>
+            <input type="number" id="tei-val" step="500" min="0" placeholder="např. 5 000" style="width:100%">
+          </div>
+        </div>
       </div>
-      <div class="hint" style="margin-top:8px">Vklady (zelené) a výběry (červené) nesmí ve stejném období překrývat. Klikni na segment pro editaci, táhni okraje pro změnu délky.</div>
     </div>
   </div>
 
@@ -571,7 +577,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
         </div>
         <div class="inp-group" style="margin-bottom:0">
           <label class="inp-label">Chci odkázat blízkým</label>
-          <div class="inp-wrap"><input type="number" id="target-legacy" value="0" step="100000" min="0"><span class="inp-unit">Kč</span></div>
+          <div class="inp-wrap"><input type="number" id="target-legacy" placeholder="0" step="100000" min="0"><span class="inp-unit">Kč</span></div>
           <div class="hint" style="margin-top:4px">Tato částka se odečte z portfolia před výpočtem renty</div>
         </div>
       </div>
@@ -668,7 +674,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
     <div class="insights-row">
       <div class="insight"><div class="insight-num">3 %</div><div class="insight-label">stačí po odchodu do důchodu</div><div class="insight-sub">I konzervativní zhodnocení pokryje značnou část spotřeby z celoživotního portfolia.</div></div>
       <div class="insight"><div class="insight-num teal">70 let</div><div class="insight-label">celý životní horizont v jednom grafu</div><div class="insight-sub">Produktivní léta, přechod na konzervu, důchod — vše v jediné simulaci.</div></div>
-      <div class="insight"><div class="insight-num">Rok po roce</div><div class="insight-label">přesné zadání vkladů i výběrů</div><div class="insight-sub">Každý rok jinak — vklady, investice, výběry na dovolenou nebo rekonstrukci.</div></div>
+      <div class="insight"><div class="insight-num">rok po roce</div><div class="insight-label">přesné zadání vkladů i výběrů</div><div class="insight-sub">Každý rok jinak — vklady, investice, výběry na dovolenou nebo rekonstrukci.</div></div>
     </div>
     <div class="divider"></div>
     <div class="section-h" style="font-size:16px;margin-bottom:14px">Co tato kalkulačka umí, co ostatní neumí</div>
@@ -682,9 +688,8 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
 </section>
 <footer class="footer"><span>Výpočty jsou orientační. Nezohledňují inflaci, daně ani poplatky správce fondu.</span><span>Nástroj je zdarma a bez registrace</span></footer>
 
-<!-- Hidden elements for JS compatibility (depOut track merged into depIn visually) -->
+<!-- Hidden elements for JS compatibility -->
 <div style="display:none">
-  <div id="tl-track-out"><div class="tl-empty-msg"></div></div>
   <div class="tl-axis" id="tl-axis-out"></div>
   <div id="tl-editor-out">
     <input type="number" id="teo-from"><input type="number" id="teo-to"><input type="number" id="teo-val">
@@ -834,13 +839,38 @@ function simulate(){
 function sortArr(arr){arr.sort((a,b)=>a.from-b.from);}
 function noOverlap(arr,idx,side){
   sortArr(arr);
+  const hor=getHorizon();
   if(side==='r'){
-    for(let i=idx+1;i<arr.length;i++){
-      if(arr[i].from<=arr[i-1].to){const sh=arr[i-1].to-arr[i].from+1;arr[i].from+=sh;arr[i].to+=sh;}
-      if(arr[i].to>MAX_YR){arr[i].to=MAX_YR;arr[i].from=Math.min(arr[i].from,MAX_YR);}
+    for(let i=1;i<arr.length;i++){
+      if(arr[i].from<=arr[i-1].to){
+        arr[i].from=arr[i-1].to+1;
+        arr[i].to=Math.max(arr[i].from,arr[i].to);
+      }
+      if(arr[i].from>hor){arr[i].from=hor;arr[i].to=hor;}
+      arr[i].to=Math.min(arr[i].to,hor);
     }
   } else {
-    for(let i=idx-1;i>=0;i--){if(arr[i].to>=arr[i+1].from)arr[i].to=arr[i+1].from-1;if(arr[i].to<arr[i].from)arr[i].to=arr[i].from;}
+    for(let i=arr.length-2;i>=0;i--){
+      if(arr[i].to>=arr[i+1].from){
+        arr[i].to=arr[i+1].from-1;
+        arr[i].from=Math.min(arr[i].from,arr[i].to);
+      }
+      if(arr[i].to<1)arr[i].to=1;
+      arr[i].from=Math.max(1,arr[i].from);
+    }
+  }
+}
+
+// Full re-sort and anti-overlap pass for entire array
+function fixOverlaps(arr){
+  const hor=getHorizon();
+  sortArr(arr);
+  for(let i=1;i<arr.length;i++){
+    if(arr[i].from<=arr[i-1].to){
+      arr[i].from=arr[i-1].to+1;
+    }
+    arr[i].from=Math.max(1,Math.min(hor,arr[i].from));
+    arr[i].to=Math.max(arr[i].from,Math.min(hor,arr[i].to));
   }
 }
 
@@ -874,31 +904,60 @@ function renderAxis(axisElId,hor){
 // DEP drag (deposits/withdrawals — independent segments, can have gaps)
 function startDepDrag(e,kind,idx,side){
   if(e.cancelable)e.preventDefault();
-  // Both kinds render on tl-track-in
-  const rect=document.getElementById('tl-track-in').getBoundingClientRect();
   const arr=kind==='in'?depIn:depOut;
-  // Capture direct object reference to avoid index drift
   const seg=arr[idx];
+  const overlap=hasDepOverlap();
+  const trackId=(overlap&&kind==='out')?'tl-track-out':'tl-track-in';
+  const rect=document.getElementById(trackId).getBoundingClientRect();
+  const hor=getHorizon();
+  // Save original for snap-back
+  const origFrom=seg.from, origTo=seg.to;
+
   const move=ev=>{
     const cx=ev.touches?ev.touches[0].clientX:ev.clientX;
-    const hor=getHorizon();
-    const yr=Math.max(1,Math.min(hor,Math.round((cx-rect.left)/rect.width*hor)+1));
-    if(side==='l'){seg.from=Math.min(yr,seg.to-1);}
-    else{seg.to=Math.max(yr,seg.from+1);}
-    // Clamp to horizon
-    seg.from=Math.max(1,Math.min(hor,seg.from));
-    seg.to=Math.max(seg.from,Math.min(hor,seg.to));
-    // Sync editor if this segment is open
+    const yr=Math.round((cx-rect.left)/rect.width*hor)+1;
+    sortArr(arr);
+    const ni=arr.indexOf(seg);
+    if(ni<0)return;
+    if(side==='l'){
+      // Clamp: can't go before horizon start, can't overlap previous segment, min width 1
+      const minFrom=ni>0?arr[ni-1].to+1:1;
+      seg.from=Math.max(minFrom,Math.min(yr,seg.to-1));
+    } else if(side==='r'){
+      // Clamp: can't exceed horizon, can't overlap next segment, min width 1
+      const maxTo=ni<arr.length-1?arr[ni+1].from-1:hor;
+      seg.to=Math.max(seg.from+1,Math.min(maxTo,yr));
+    } else {
+      // Body drag — clamp within horizon, don't push neighbours
+      const span=origTo-origFrom;
+      const newFrom=Math.round((cx-rect.left)/rect.width*hor)-(Math.floor(span/2));
+      // Find free range for body drag
+      const minFrom=ni>0?arr[ni-1].to+1:1;
+      const maxFrom=ni<arr.length-1?arr[ni+1].from-1-span:hor-span;
+      seg.from=Math.max(minFrom,Math.min(Math.max(1,maxFrom),newFrom));
+      seg.to=seg.from+span;
+    }
+    // Sync editor
     const ed=document.getElementById('tl-editor-in');
     if(ed.dataset.kind===kind&&parseInt(ed.dataset.idx)===idx){
       document.getElementById('tei-from').value=seg.from;
       document.getElementById('tei-to').value=seg.to;
+      updateDepEditorHints();
     }
-    renderDepTL('in');recalc();
+    renderDepTL('in');renderDepTL('out');recalc();
   };
-  const up=()=>{
+
+  const up=ev=>{
     document.removeEventListener('mousemove',move);document.removeEventListener('mouseup',up);
     document.removeEventListener('touchmove',move);document.removeEventListener('touchend',up);
+    // Snap back if dragged outside track
+    const cx=ev.changedTouches?ev.changedTouches[0].clientX:ev.clientX;
+    const cy=ev.changedTouches?ev.changedTouches[0].clientY:ev.clientY;
+    const inTrack=cx>=rect.left&&cx<=rect.right&&cy>=rect.top-40&&cy<=rect.bottom+40;
+    if(!inTrack&&side==='move'){
+      seg.from=origFrom;seg.to=origTo;
+      renderDepTL('in');renderDepTL('out');recalc();
+    }
   };
   document.addEventListener('mousemove',move);document.addEventListener('mouseup',up);
   document.addEventListener('touchmove',move,{passive:false});document.addEventListener('touchend',up);
@@ -939,34 +998,64 @@ function startPhaseDrag(e,idx,side){
 }
 
 // DEP TL
+function hasDepOverlap(){
+  for(const a of depIn) for(const b of depOut)
+    if(a.from<=b.to&&b.from<=a.to) return true;
+  return false;
+}
+
 function renderDepTL(kind){
-  if(kind==='out')return;
-  const trackEl=document.getElementById('tl-track-in');
-  if(!trackEl)return;
+  // Always render both kinds — decide which track to use
+  const overlap=hasDepOverlap();
+  const outWrap=document.getElementById('dep-out-track-wrap');
+  if(outWrap) outWrap.style.display=overlap?'':'none';
+
+  // When no overlap: draw everything on tl-track-in
+  // When overlap: draw depIn on tl-track-in, depOut on tl-track-out
   const hor=getHorizon();
   renderAxis('tl-axis-in',hor);
-  // Remove only .tl-seg elements, keep the permanent structure
-  trackEl.querySelectorAll('.tl-seg').forEach(s=>s.remove());
-  const emptyMsg=document.getElementById('dep-empty-msg');
-  if(emptyMsg)emptyMsg.style.display=(depIn.length+depOut.length)?'none':'flex';
+
+  const trackIn=document.getElementById('tl-track-in');
+  const trackOut=document.getElementById('tl-track-out');
+  if(!trackIn)return;
+
+  // Clear segments from both tracks
+  [trackIn,trackOut].forEach(t=>{if(t)t.querySelectorAll('.tl-seg').forEach(s=>s.remove());});
+
+  const emptyIn=document.getElementById('dep-empty-in');
+  const emptyOut=document.getElementById('dep-empty-out');
+  const total=depIn.length+depOut.length;
+  if(emptyIn)emptyIn.style.display=total?'none':'flex';
+
   sortArr(depIn);sortArr(depOut);
 
   function makeSeg(seg,i,k){
     const isIn=k==='in';
+    // Choose track: if overlap, in→trackIn, out→trackOut. If no overlap, both→trackIn
+    const track=overlap&&!isIn?trackOut:trackIn;
+    if(!track)return;
     const left=((seg.from-1)/hor)*100;
     const width=Math.max(((seg.to-seg.from+1)/hor)*100,.5);
     const sel=(isIn?selIn:selOut)===i;
     const el=document.createElement('div');
     el.className='tl-seg'+(sel?' sel':'');
-    el.style.cssText=`position:absolute;left:${left}%;width:${width}%;border-radius:5px;`
+    el.style.cssText=`position:absolute;left:${left}%;width:${width}%;top:2px;bottom:2px;height:auto;border-radius:5px;`
       +`display:flex;align-items:center;justify-content:center;`
       +`font-size:13px;font-weight:700;cursor:pointer;overflow:hidden;white-space:nowrap;touch-action:none;`
-      +(isIn?`top:2px;height:36px;background:#d1f5e8;color:#0A5940;border:2px solid #4ECDA0;`
-             :`top:43px;height:35px;background:#fde8e8;color:#8B2500;border:2px solid #F87171;`);
+      +(isIn?`background:#d1f5e8;color:#0A5940;border:2px solid #4ECDA0;`
+             :`background:#fde8e8;color:#8B2500;border:2px solid #F87171;`);
     const lbl=document.createElement('span');
     lbl.style.cssText='pointer-events:none;padding:0 8px;overflow:hidden;text-overflow:ellipsis;';
     lbl.textContent=(isIn?'+':'−')+fmtV(seg.val);
     el.appendChild(lbl);
+    // Body drag — triggered by mousedown/touchstart on segment body (not handle)
+    const startBodyDrag=ev=>{
+      if(ev.target.classList.contains('tl-handle'))return;
+      ev.stopPropagation();
+      startDepDrag(ev,k,i,'move');
+    };
+    el.addEventListener('mousedown',startBodyDrag);
+    el.addEventListener('touchstart',startBodyDrag,{passive:false});
     el.addEventListener('click',e=>{e.stopPropagation();openDepEditor(k,i);});
     ['l','r'].forEach(s=>{
       const h=document.createElement('div');h.className='tl-handle '+s;
@@ -974,12 +1063,19 @@ function renderDepTL(kind){
       h.addEventListener('touchstart',ev=>{ev.stopPropagation();startDepDrag(ev,k,i,s);},{passive:false});
       el.appendChild(h);
     });
-    trackEl.appendChild(el);
+    track.appendChild(el);
   }
+
   depIn.forEach((seg,i)=>makeSeg(seg,i,'in'));
   depOut.forEach((seg,i)=>makeSeg(seg,i,'out'));
 }
-function fmtV(v){return v===0?'0 Kč/m':new Intl.NumberFormat('cs-CZ',{maximumFractionDigits:0}).format(v)+' Kč/m';}
+function fmtV(v){
+  if(v===0) return '0';
+  const abs=Math.abs(v);
+  if(abs>=1000000) return (v/1000000).toFixed(1).replace('.0','')+' M/m';
+  if(abs>=10000) return Math.round(v/1000)+'k/m';
+  return new Intl.NumberFormat('cs-CZ',{maximumFractionDigits:0}).format(v)+' Kč/m';
+}
 
 function openDepEditor(kind,idx){
   if(kind==='in')selIn=idx;else selOut=idx;
@@ -998,7 +1094,7 @@ function openDepEditor(kind,idx){
   if(valLabel)valLabel.textContent=kind==='in'?'Měsíční vklad (Kč)':'Měsíční výběr (Kč)';
   document.getElementById('tl-editor-in').classList.add('open');
   syncDepEditorUnified(kind,idx);
-  renderDepTL('in');
+  renderDepTL('in');renderDepTL('out');
 }
 function updateDepEditorHints(){
   const sy=getStartYear();
@@ -1019,7 +1115,7 @@ function syncDepEditorUnified(kind,idx){
   const s=arr[idx];
   document.getElementById('tei-from').value=s.from;
   document.getElementById('tei-to').value=s.to;
-  document.getElementById('tei-val').value=s.val;
+  document.getElementById('tei-val').value=s.val||'';
   document.getElementById('tl-editor-in').dataset.kind=kind;
   document.getElementById('tl-editor-in').dataset.idx=idx;
   updateDepEditorHints();
@@ -1038,9 +1134,9 @@ function bindDepLive(){
       const t=Math.max(f,Math.min(hor,parseInt(document.getElementById('tei-to').value)||f));
       const v=Math.abs(parseFloat(document.getElementById('tei-val').value)||0);
       arr[idx]={...arr[idx],from:f,to:t,val:v};
-      noOverlap(arr,idx,'r');noOverlap(arr,idx,'l');
+      fixOverlaps(arr);
       updateDepEditorHints();
-      renderDepTL('in');recalc();
+      renderDepTL('in');renderDepTL('out');recalc();
     });
   });
 }
@@ -1049,26 +1145,22 @@ function addDepSeg(kind){
   const arr=kind==='in'?depIn:depOut;
   const hor=getHorizon();
   sortArr(arr);
+
+  // Find first free slot in own array (don't care about other array overlap)
   let start=1;
   if(kind==='out'&&depIn.length>0){
-    // Start withdrawal after the last deposit
     sortArr(depIn);
     start=depIn[depIn.length-1].to+1;
   }
   for(const s of arr){if(start>=s.from&&start<=s.to)start=s.to+1;}
   start=Math.min(start,hor);
+
   const newSeg={from:start,to:Math.min(start+9,hor),val:0};
   arr.push(newSeg);
-  sortArr(arr);
-  const ni=arr.findIndex(s=>s.from===newSeg.from&&s.to===newSeg.to);
-  noOverlap(arr,ni,'r');
+  const ni=arr.length-1;
   openDepEditor(kind,ni);
-  renderDepTL('in');
-  // Focus on value input after short delay
-  setTimeout(()=>{
-    const inp=document.getElementById('tei-val');
-    if(inp){inp.focus();inp.select();}
-  },50);
+  renderDepTL('in');renderDepTL('out');
+  setTimeout(()=>{const inp=document.getElementById('tei-val');if(inp){inp.focus();inp.select();}},50);
 }
 
 // Button listeners
@@ -1084,12 +1176,12 @@ document.getElementById('tei-del').addEventListener('click',()=>{
   if(!isNaN(idx))arr.splice(idx,1);
   if(kind==='in')selIn=null;else selOut=null;
   ed.classList.remove('open');
-  renderDepTL('in');recalc();
+  renderDepTL('in');renderDepTL('out');recalc();
 });
 document.getElementById('tei-cancel').addEventListener('click',()=>{
   selIn=null;selOut=null;
   document.getElementById('tl-editor-in').classList.remove('open');
-  renderDepTL('in');
+  renderDepTL('in');renderDepTL('out');
 });
 
 
@@ -1764,7 +1856,7 @@ function applyState(s){
   });
   renderDepTL('in');renderDepTL('out');renderPhaseTL();renderRulesUnified();renderTxTable('in');renderTxTable('out');recalc();
 }
-function saveState(){try{localStorage.setItem('inv-calc-v8',JSON.stringify(getState()));}catch(e){}}
+function saveState(){try{localStorage.setItem('inv-calc-v9',JSON.stringify(getState()));}catch(e){}}
 
 document.getElementById('btn-save').addEventListener('click',()=>{
   const a=document.createElement('a');
@@ -1890,9 +1982,9 @@ document.getElementById('btn-reset').addEventListener('click',()=>{
   document.getElementById('tl-editor-in').classList.remove('open');
   document.getElementById('ph-editor').classList.remove('open');
   document.getElementById('target-result').style.display='none';
-  renderDepTL('in');renderPhaseTL();
+  renderDepTL('in');renderDepTL('out');renderPhaseTL();
   renderRulesUnified();renderTxTable('in');recalc();
-  localStorage.removeItem('inv-calc-v8');
+  localStorage.removeItem('inv-calc-v9');
 });
 
 
@@ -1916,7 +2008,7 @@ function initDefaultPhases(){
 document.getElementById('startYear').value = new Date().getFullYear();
 
 try{
-  const saved=localStorage.getItem('inv-calc-v8');
+  const saved=localStorage.getItem('inv-calc-v9');
   if(saved){
     applyState(JSON.parse(saved));
     // Safety: if phases ended up empty, reinitialize
