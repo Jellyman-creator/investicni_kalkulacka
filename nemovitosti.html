@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Kalkulačka nemovitostí</title>
+<meta name="theme-color" content="#1a2332">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Nemovitosti">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root{
+  --navy:#1a2332;--blue:#4A9EE0;--teal:#4ECDA0;--amber:#f59e0b;--violet:#a78bfa;
+  --red-lt:#fff5f5;--red-bd:#fde8e8;--red-tx:#8B2500;
+  --grn-lt:#f0fdf8;--grn-bd:#d1f5e8;--grn-tx:#0A5940;
+  --bg:#f4f6f9;--surface:#fff;--border:#dde1e7;--border2:#c4c9d4;
+  --txt:#111827;--txt2:#374151;--txt3:#6b7280;
+  --radius:10px;--font:'DM Sans',sans-serif;--mono:'DM Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;max-width:100%}
+html{scroll-behavior:smooth;overflow-x:hidden;width:100%}
+body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15px;line-height:1.6;overflow-x:hidden}
+.topbar{background:var(--navy);height:52px;display:flex;align-items:center;padding:0 20px;justify-content:space-between;position:sticky;top:0;z-index:100}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.logo-mark{width:28px;height:28px;background:var(--amber);border-radius:6px;display:flex;align-items:center;justify-content:center}
+.logo-name{font-size:14px;font-weight:600;color:#fff}
+.logo-sub{font-size:10px;color:rgba(255,255,255,.4)}
+.tb-btn{display:flex;align-items:center;gap:5px;padding:6px 10px;font-size:12px;font-family:var(--font);font-weight:500;border-radius:6px;cursor:pointer;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08);color:rgba(255,255,255,.85);transition:all .15s;white-space:nowrap}
+.tb-btn svg{width:13px;height:13px;flex-shrink:0}
+.topbar-actions{display:flex;gap:5px}
+/* TABS */
+.tabs-bar{background:var(--navy);border-top:1px solid rgba(255,255,255,.06);padding:0 16px;display:flex;align-items:flex-end;gap:2px;overflow-x:auto;scrollbar-width:none}
+.tabs-bar::-webkit-scrollbar{display:none}
+.p-tab{display:flex;align-items:center;gap:5px;padding:7px 12px;font-size:12px;font-weight:500;font-family:var(--font);border:none;background:rgba(255,255,255,.05);color:rgba(255,255,255,.5);cursor:pointer;border-radius:7px 7px 0 0;transition:all .15s;white-space:nowrap;flex-shrink:0}
+.p-tab:hover{background:rgba(255,255,255,.1);color:rgba(255,255,255,.8)}
+.p-tab.active{background:var(--bg);color:var(--txt);font-weight:600}
+.p-tab.sum-tab{color:var(--amber)}.p-tab.sum-tab.active{color:var(--navy)}
+.tab-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.tab-x{width:15px;height:15px;border-radius:50%;border:none;background:rgba(255,255,255,.15);color:rgba(255,255,255,.6);cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;line-height:1}
+.p-tab.active .tab-x{background:var(--border);color:var(--txt3)}
+.tab-x:hover{background:var(--red-bd)!important;color:var(--red-tx)!important}
+.tab-add{padding:6px 12px;font-size:12px;font-weight:700;font-family:var(--font);border:1px solid rgba(78,205,160,.5);background:rgba(78,205,160,.12);color:var(--teal);cursor:pointer;border-radius:7px 7px 0 0;white-space:nowrap;flex-shrink:0;transition:all .15s;display:flex;align-items:center;gap:5px}
+.tab-add:hover{background:rgba(78,205,160,.25);border-color:var(--teal);color:#fff}
+/* STRIP */
+.hero-strip{background:var(--navy);padding:0;border-top:1px solid rgba(255,255,255,.06)}
+.kpi-strip{display:grid;grid-template-columns:repeat(5,1fr);border-top:1px solid rgba(255,255,255,.08)}
+.kpi{padding:11px 12px;border-right:1px solid rgba(255,255,255,.08);min-width:0;overflow:hidden}
+.kpi:last-child{border-right:none}
+.kpi-label{font-size:9px;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.kpi-val{font-size:14px;font-weight:600;color:#fff;font-family:var(--mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kpi-val.amber{color:var(--amber)}.kpi-val.teal{color:var(--teal)}.kpi-val.blue{color:var(--blue)}.kpi-val.red{color:#f87171}
+/* LAYOUT */
+.page{padding:14px;max-width:1100px;margin:0 auto}
+.two-col{display:grid;grid-template-columns:330px 1fr;gap:14px;align-items:start}
+/* CARDS */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:12px}
+.card:last-child{margin-bottom:0}
+.card-hdr{padding:9px 13px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.card-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.card-title{font-size:11px;font-weight:600;color:var(--txt2);text-transform:uppercase;letter-spacing:.05em}
+.card-body{padding:13px}
+/* INPUTS */
+.ig{margin-bottom:11px}.ig:last-child{margin-bottom:0}
+.il{font-size:11px;color:var(--txt2);margin-bottom:3px;font-weight:600;display:block}
+.iw{position:relative}
+.iw input[type=number]{width:100%;padding:8px 44px 8px 10px;font-size:13px;font-family:var(--mono);border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--txt);outline:none;transition:border .15s;-webkit-appearance:none}
+.iw input:focus{border-color:var(--blue);background:#fff}
+.iu{position:absolute;right:9px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--txt3);pointer-events:none;font-weight:500}
+.i2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:11px}
+.i2 .ig{margin-bottom:0}
+.hint{font-size:11px;color:var(--txt3);line-height:1.5;margin-top:3px}
+/* SLIDER */
+.sw{display:flex;align-items:center;gap:10px;margin-top:4px}
+.sw input[type=range]{flex:1;height:4px;accent-color:var(--amber);cursor:pointer;min-width:0}
+.sv{font-size:13px;font-weight:600;font-family:var(--mono);min-width:42px;text-align:right;white-space:nowrap}
+.sv span{font-size:11px;font-weight:400;color:var(--txt3)}
+/* TOGGLE */
+.tbar{display:flex;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:2px}
+.topt{flex:1;padding:5px 8px;font-size:12px;font-weight:500;font-family:var(--font);border:none;background:none;color:var(--txt3);cursor:pointer;border-radius:4px;transition:all .15s;text-align:center;white-space:nowrap}
+.topt.sel{background:var(--surface);color:var(--txt);box-shadow:0 1px 3px rgba(0,0,0,.1)}
+/* CHART */
+.cw{position:relative;width:100%;height:250px}
+.pcw{position:relative;width:100%;height:260px}
+.legend{display:flex;gap:10px;font-size:12px;color:var(--txt2);margin-bottom:8px;flex-wrap:wrap}
+.li{display:flex;align-items:center;gap:5px}
+.ld{width:9px;height:9px;border-radius:2px;flex-shrink:0}
+/* MILESTONES */
+.mrow{display:grid;border-top:1px solid var(--border)}
+.ms{padding:8px 9px;border-right:1px solid var(--border);text-align:center;min-width:0}
+.ms:last-child{border-right:none}
+.ms-yr{font-size:9px;color:var(--txt3);margin-bottom:1px;text-transform:uppercase;font-weight:500}
+.ms-val{font-size:12px;font-weight:600;color:var(--txt);font-family:var(--mono);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ms-sub{font-size:10px;margin-top:1px}
+/* RESULTS */
+.rdark{background:linear-gradient(135deg,#1a2332 0%,#243447 100%);border-radius:9px;padding:14px 16px;margin-bottom:10px;display:flex;align-items:flex-start;gap:14px;flex-wrap:wrap}
+.rbig{flex:1;min-width:130px}
+.rlbl{font-size:10px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px}
+.rnum{font-size:24px;font-weight:600;font-family:var(--mono);color:var(--teal);line-height:1}
+.rsub{font-size:11px;color:rgba(255,255,255,.4);margin-top:2px}
+.rrows{display:flex;flex-direction:column;gap:5px;flex:2;min-width:170px}
+.rrow{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.rrl{font-size:11px;color:rgba(255,255,255,.5)}
+.rrv{font-size:12px;font-weight:600;font-family:var(--mono);color:#fff}
+.rrv.amber{color:var(--amber)}.rrv.red{color:#f87171}.rrv.teal{color:var(--teal)}
+/* BREAK EVEN */
+.bebar{position:relative;height:18px;background:var(--bg);border-radius:9px;border:1px solid var(--border);overflow:hidden;margin:7px 0}
+.befill{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,var(--amber),var(--teal));border-radius:9px;transition:width .4s}
+.belbl{position:absolute;right:7px;top:50%;transform:translateY(-50%);font-size:9px;font-weight:700;color:var(--navy)}
+/* TABLE */
+.cft{width:100%;border-collapse:collapse;font-size:11px;min-width:400px}
+.cft th{position:sticky;top:0;background:var(--bg);padding:6px 7px;text-align:right;font-weight:600;font-size:10px;color:var(--txt3);border-bottom:1px solid var(--border);white-space:nowrap;text-transform:uppercase;z-index:1}
+.cft th:first-child{text-align:left}
+.cft td{padding:4px 7px;text-align:right;border-bottom:1px solid #edf0f4;font-variant-numeric:tabular-nums;font-family:var(--mono)}
+.cft td:first-child{text-align:left;font-family:var(--font);color:var(--txt3)}
+.cft tr.hlm td{background:#f4f6f9;font-weight:600}
+.cft tr:hover td{background:#f9fafb}
+.pos{color:var(--grn-tx);font-weight:600}.neg{color:var(--red-tx);font-weight:600}
+.cfsc{overflow-x:auto;overflow-y:auto;max-height:200px}
+/* RENOV */
+.rnlist{display:flex;flex-direction:column;gap:5px;margin-top:6px}
+.rntag{display:flex;align-items:center;gap:7px;padding:6px 9px;background:var(--surface);border:1px solid var(--border);border-radius:6px;font-size:12px}
+.rntxt{flex:1;color:var(--txt2)}
+.rntxt strong{color:var(--txt);font-weight:600}
+.rndel{width:18px;height:18px;border-radius:50%;border:1px solid var(--border);background:none;cursor:pointer;font-size:12px;color:var(--txt3);display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
+.rndel:hover{border-color:var(--red-bd);color:var(--red-tx);background:var(--red-lt)}
+.rnform{background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:10px;margin-top:6px;display:none}
+.rnform.open{display:block}
+.rnrow{display:flex;gap:7px;flex-wrap:wrap;align-items:flex-end}
+.rff{display:flex;flex-direction:column;gap:3px}
+.rff label{font-size:10px;color:var(--txt3);font-weight:600;text-transform:uppercase}
+.rff input{padding:7px 8px;font-size:12px;font-family:var(--mono);border:1px solid var(--border);border-radius:5px;background:#fff;color:var(--txt);outline:none;-webkit-appearance:none}
+.rff input:focus{border-color:var(--blue)}
+.btn{padding:7px 11px;font-size:12px;font-family:var(--font);font-weight:500;border:1px solid var(--border);border-radius:6px;background:none;color:var(--txt);cursor:pointer;transition:all .15s}
+.btn.primary{background:var(--navy);color:#fff;border-color:transparent}
+.addbtn{display:flex;align-items:center;gap:5px;padding:6px 11px;font-size:12px;font-weight:600;font-family:var(--font);border-radius:6px;cursor:pointer;border:1px dashed var(--border2);background:none;color:var(--blue);transition:all .15s;margin-top:5px}
+.addbtn:hover{background:var(--bg);border-color:var(--blue)}
+/* COLOR PICK */
+.cpick{display:flex;gap:5px;flex-wrap:wrap;margin-top:3px}
+.cp{width:20px;height:20px;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:all .15s}
+.cp.sel{border-color:#fff;box-shadow:0 0 0 2px var(--blue)}
+/* NAME INPUT */
+.nminp{background:none;border:none;border-bottom:1px dashed var(--border2);padding:2px 3px;font-size:14px;font-weight:600;font-family:var(--font);color:var(--txt);outline:none;width:100%;margin-bottom:10px}
+.nminp:focus{border-bottom-color:var(--blue)}
+/* SUMMARY */
+.sgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:11px;margin-bottom:14px}
+.scard{background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:13px;cursor:pointer;transition:box-shadow .15s;position:relative;overflow:hidden}
+.scard:hover{box-shadow:0 4px 12px rgba(0,0,0,.1)}
+.scard-name{font-size:13px;font-weight:600;color:var(--txt);margin-bottom:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding-left:8px}
+.sc-row{display:flex;justify-content:space-between;font-size:12px;padding-left:8px}
+.sc-lbl{color:var(--txt3)}
+.sc-val{font-weight:600;font-family:var(--mono);color:var(--txt)}
+/* FOOTER */
+.footer{background:var(--navy);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;margin-top:14px}
+.footer span{font-size:11px;color:rgba(255,255,255,.35)}
+.footer a{font-size:11px;color:rgba(255,255,255,.4);text-decoration:none}
+.footer a:hover{color:var(--amber)}
+@media print{.topbar,.tabs-bar,.footer,.addbtn,.rnform,.btn{display:none!important}.page{padding:8px}.card{break-inside:avoid}.cw{height:180px}body{background:#fff}}
+@media(max-width:768px){
+  html,body{overflow-x:hidden;max-width:100vw}
+  .page{padding:8px}.two-col{grid-template-columns:1fr;gap:10px}
+  .kpi-strip{grid-template-columns:1fr 1fr 1fr}.kpi:nth-child(4),.kpi:nth-child(5){display:none}
+  .kpi{padding:8px 9px}.kpi-val{font-size:13px}
+  .card-body{padding:10px}.cw{height:190px}
+  .mrow{grid-template-columns:1fr 1fr}.i2{grid-template-columns:1fr 1fr}
+  .rdark{flex-direction:column;gap:10px}
+  .topbar-actions .tb-btn span{display:none}.topbar-actions .tb-btn{padding:6px 8px}
+  .logo-sub{display:none}.sgrid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<nav class="topbar">
+  <a class="logo" href="#">
+    <div class="logo-mark"><svg viewBox="0 0 15 15" fill="none"><path d="M2 13V7.5L7.5 3 13 7.5V13H9.5v-4h-4v4z" stroke="#fff" stroke-width="1.6" stroke-linejoin="round" fill="none"/></svg></div>
+    <div><div class="logo-name">Kalkulačka nemovitostí</div><div class="logo-sub">Portfolio projekce</div></div>
+  </a>
+  <div class="topbar-actions">
+    <button type="button" class="tb-btn" id="btn-save"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 2h8l2 2v8a1 1 0 01-1 1H3a1 1 0 01-1-1V2z"/><path d="M5 2v3h4V2M4 8h6"/></svg><span>Uložit</span></button>
+    <label class="tb-btn" style="cursor:pointer"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 2v7M4 6l3 3 3-3M2 11h10"/></svg><span>Načíst</span><input type="file" id="btn-load" accept=".json" style="display:none"></label>
+    <button type="button" class="tb-btn" style="border-color:rgba(245,158,11,.35);color:var(--amber)" onclick="window.print()"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="10" height="7" rx="1"/><path d="M4 5V3h6v2M4 9h2M4 11h6"/></svg><span>Tisknout</span></button>
+  </div>
+</nav>
+<div class="tabs-bar" id="tabs-bar"></div>
+<div class="hero-strip">
+  <div class="kpi-strip">
+    <div class="kpi"><div class="kpi-label">Hodnota portfolia</div><div class="kpi-val amber" id="kpi-tv">—</div></div>
+    <div class="kpi"><div class="kpi-label">Celkem vloženo</div><div class="kpi-val" id="kpi-ti">—</div></div>
+    <div class="kpi"><div class="kpi-label">Celkem nájem</div><div class="kpi-val teal" id="kpi-tr">—</div></div>
+    <div class="kpi"><div class="kpi-label">Celkem CF</div><div class="kpi-val" id="kpi-tc">—</div></div>
+    <div class="kpi"><div class="kpi-label">Počet nemovitostí</div><div class="kpi-val blue" id="kpi-cn">1</div></div>
+  </div>
+</div>
+<main class="page">
+  <div id="view-sum" style="display:none">
+    <div class="card" style="margin-bottom:14px">
+      <div class="card-hdr"><div class="card-dot" style="background:var(--amber)"></div><div class="card-title">Portfolio — vývoj hodnoty</div></div>
+      <div class="card-body">
+        <div class="legend" id="pf-legend"></div>
+        <div class="pcw"><canvas id="pf-chart"></canvas></div>
+      </div>
+    </div>
+    <div class="sgrid" id="sgrid"></div>
+  </div>
+  <div id="view-prop">
+    <div class="two-col">
+      <div id="lcol"></div>
+      <div id="rcol"></div>
+    </div>
+  </div>
+</main>
+<footer class="footer">
+  <span>Výpočty jsou orientační. Nezohledňují daně ani inflaci.</span>
+  <a href="index.html">← Investiční kalkulačka</a>
+</footer>
+<script>
+const LS='nem-v2';
+const COLORS=['#f59e0b','#4ECDA0','#4A9EE0','#a78bfa','#f87171','#34d399','#fb923c','#60a5fa','#e879f9','#a3e635'];
+let props=[],aid=null,pid=0;
+let charts={};
+
+function np(ov={}){
+  pid++;
+  return{id:pid,name:'Nemovitost '+pid,color:COLORS[(pid-1)%COLORS.length],
+    price:'',yr:new Date().getFullYear(),by:'',growth:5,hor:20,
+    mortg:false,eq:'',mr:5,my:25,ry:5,rr:4,
+    rent:true,rm:'',rg:3,oc:92,
+    cm:'',
+    renovs:[],...ov};
+}
+
+const fmt=n=>new Intl.NumberFormat('cs-CZ',{style:'currency',currency:'CZK',maximumFractionDigits:0}).format(Math.round(n||0));
+const fs=n=>{const a=Math.abs(n||0);if(a>=1000000)return (n/1000000).toFixed(1).replace('.0','')+' M';if(a>=10000)return Math.round(n/1000)+'k';return Math.round(n)+' Kč';};
+const nv=(v,f=0)=>{const p=parseFloat(v);return isNaN(p)?f:p;};
+const ge=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[<>"]/g,c=>({'<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+function pmt(pr,ar,y){if(pr<=0)return 0;if(ar<=0)return pr/(y*12);const r=ar/12,n=y*12;return pr*r*Math.pow(1+r,n)/(Math.pow(1+r,n)-1);}
+
+function sim(p){
+  const price=nv(p.price,0),gr=p.growth/100,hor=p.hor;
+  const loan=p.mortg?Math.max(0,price-nv(p.eq,0)):0;
+  const rg=p.rg/100,oc=p.oc/100;
+  const mc=nv(p.cm,0);
+  let bal=loan,annP=[],annI=[];
+  if(loan>0){
+    let rate=p.mr/100,pay=pmt(loan,rate,p.my);
+    const tot=p.my*12,pd=[];
+    for(let m=0;m<tot;m++){
+      if(m>0&&m%(p.ry*12)===0&&bal>0){rate=p.rr/100;pay=pmt(bal,rate,(tot-m)/12);}
+      const int=bal*rate/12,prin=Math.min(pay-int,bal);
+      bal=Math.max(0,bal-prin);pd[m]={pay,int,prin};
+    }
+    for(let y=0;y<hor;y++){let yp=0,yi=0;for(let m=y*12;m<Math.min((y+1)*12,tot);m++){if(pd[m]){yp+=pd[m].pay;yi+=pd[m].int;}}annP[y]=yp;annI[y]=yi;}
+  } else {for(let y=0;y<hor;y++){annP[y]=0;annI[y]=0;}}
+  const rows=[];let cCF=0,cR=0,cC=0,cM=0,cRv=0,be=null;
+  for(let y=0;y<=hor;y++){
+    const val=price*Math.pow(1+gr,y);
+    const rent=y===0?0:nv(p.rm,0)*Math.pow(1+rg,y-1)*12*(p.rent?oc:0);
+    const cost=y===0?0:mc*12;
+    const mp=y===0?0:(annP[y-1]||0);
+    const rv=p.renovs.filter(r=>r.year===y).reduce((s,r)=>s+r.amount,0);
+    const cf=rent-cost-mp-rv;
+    if(y>0){cR+=rent;cC+=cost;cM+=mp;cRv+=rv;cCF+=cf;}
+    if(be===null&&y>0&&cCF+(val-price)>=0)be=y;
+    rows.push({y,cy:p.yr+y,val,rent,cost,mp,rv,cf,cCF,cR,cC,cM,cRv});
+  }
+  return{rows,be,ti:annI.reduce((s,v)=>s+v,0),price,loan};
+}
+
+function renderTabs(){
+  const bar=ge('tabs-bar');bar.innerHTML='';
+  const st=document.createElement('button');st.type='button';
+  st.className='p-tab sum-tab'+(aid===null?' active':'');
+  st.innerHTML='<span>📊 Přehled</span>';
+  st.addEventListener('click',()=>{aid=null;renderAll();});
+  bar.appendChild(st);
+  props.forEach(p=>{
+    const t=document.createElement('button');t.type='button';
+    t.className='p-tab'+(aid===p.id?' active':'');
+    t.innerHTML=`<div class="tab-dot" style="background:${p.color}"></div><span>${esc(p.name)}</span>${props.length>1?`<button type="button" class="tab-x" data-id="${p.id}">×</button>`:''}`;
+    t.addEventListener('click',e=>{if(e.target.classList.contains('tab-x'))return;aid=p.id;renderAll();});
+    const dx=t.querySelector('.tab-x');
+    if(dx)dx.addEventListener('click',e=>{e.stopPropagation();if(props.length<=1)return;props=props.filter(x=>x.id!==p.id);if(aid===p.id)aid=props[0]?.id||null;renderAll();});
+    bar.appendChild(t);
+  });
+  if(props.length<100){const a=document.createElement('button');a.type='button';a.className='tab-add';a.innerHTML='<svg width="12" height="12" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M2 13V7.5L7.5 3 13 7.5V13H9.5v-4h-4v4z"/></svg> + Přidat nemovitost';a.addEventListener('click',()=>{const p=np();props.push(p);aid=p.id;renderAll();});bar.appendChild(a);}
+}
+
+function renderGKPIs(){
+  let tv=0,ti=0,tr=0,tc=0;
+  props.forEach(p=>{const r=sim(p),l=r.rows[r.rows.length-1];tv+=l?.val||0;ti+=nv(p.price,0);tr+=l?.cR||0;tc+=l?.cCF||0;});
+  ge('kpi-tv').textContent=fs(tv)+' Kč';ge('kpi-ti').textContent=fs(ti)+' Kč';
+  ge('kpi-tr').textContent=fs(tr)+' Kč';
+  const ce=ge('kpi-tc');ce.textContent=(tc>=0?'+':'')+fs(tc)+' Kč';ce.className='kpi-val '+(tc>=0?'teal':'red');
+  ge('kpi-cn').textContent=props.length;
+}
+
+function renderSum(){
+  ge('view-sum').style.display='';ge('view-prop').style.display='none';
+  const grid=ge('sgrid');grid.innerHTML='';
+  props.forEach(p=>{
+    const r=sim(p),l=r.rows[r.rows.length-1];
+    const price=nv(p.price,0),gain=l.val-price;
+    const tot=l.val-price+l.cR-l.cC-l.cM-l.cRv;
+    const d=document.createElement('div');d.className='scard';
+    d.innerHTML=`<div style="position:absolute;left:0;top:0;bottom:0;width:4px;background:${p.color};border-radius:9px 0 0 9px"></div>
+      <div class="scard-name">${esc(p.name)} <span style="font-size:10px;color:var(--txt3);font-weight:400">${p.yr} · ${p.hor}r</span></div>
+      <div class="sc-row"><span class="sc-lbl">Kupní cena</span><span class="sc-val">${fs(price)} Kč</span></div>
+      <div class="sc-row"><span class="sc-lbl">Hodnota za ${p.hor}l</span><span class="sc-val" style="color:var(--amber)">${fs(l.val)} Kč</span></div>
+      <div class="sc-row"><span class="sc-lbl">Zhodnocení</span><span class="sc-val" style="color:var(--teal)">+${fs(gain)} Kč</span></div>
+      <div class="sc-row"><span class="sc-lbl">Celkový výnos</span><span class="sc-val" style="color:${tot>=0?'var(--teal)':'#f87171'}">${tot>=0?'+':''}${fs(tot)} Kč</span></div>
+      ${r.be?`<div class="sc-row"><span class="sc-lbl">Break-even</span><span class="sc-val">rok ${p.yr+r.be}</span></div>`:''}
+      <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:11px;color:var(--blue);font-weight:600;padding-left:8px">Upravit →</div>`;
+    d.addEventListener('click',()=>{aid=p.id;renderAll();});
+    grid.appendChild(d);
+  });
+  // Portfolio chart
+  const canvas=ge('pf-chart');if(!canvas)return;
+  if(charts['pf'])charts['pf'].destroy();
+  const maxH=Math.max(...props.map(p=>p.hor));
+  const minYr=Math.min(...props.map(p=>p.yr));
+  const labels=Array.from({length:maxH+1},(_,i)=>minYr+i);
+  const datasets=props.map(p=>{
+    const r=sim(p),off=p.yr-minYr;
+    const data=Array(maxH+1).fill(null);
+    r.rows.forEach(row=>{data[off+row.y]=Math.round(row.val);});
+    return{label:p.name,data,borderColor:p.color,backgroundColor:p.color+'22',fill:false,tension:.3,pointRadius:1,borderWidth:2};
+  });
+  ge('pf-legend').innerHTML=props.map(p=>`<div class="li"><div class="ld" style="background:${p.color}"></div><span>${esc(p.name)}</span></div>`).join('');
+  charts['pf']=new Chart(canvas,{type:'line',data:{labels,datasets},options:{responsive:true,maintainAspectRatio:false,
+    scales:{x:{grid:{display:false},ticks:{font:{size:10},color:'#6b7280',maxTicksLimit:10}},
+      y:{grid:{color:'#edf0f4'},ticks:{font:{size:10},color:'#6b7280',callback:v=>{const m=v/1000000;return m>=1?(m.toFixed(1)+' M'):Math.round(v/1000)+'k';}}}},
+    plugins:{legend:{display:false},tooltip:{callbacks:{label:i=>`${i.dataset.label}: ${fmt(i.raw)}`}}}}});
+}
+
+function renderProp(p){
+  ge('view-sum').style.display='none';ge('view-prop').style.display='';
+  renderL(p);const r=sim(p);renderR(p,r);
+}
+
+function renderL(p){
+  const col=ge('lcol');
+  col.innerHTML=`
+  <div class="card">
+    <div class="card-hdr"><div class="card-dot" style="background:${p.color}"></div><div class="card-title">Nemovitost</div></div>
+    <div class="card-body">
+      <input type="text" class="nminp" id="pnm" value="${esc(p.name)}" placeholder="Název" maxlength="40">
+      <div class="ig" style="margin-bottom:8px"><div class="il">Barva</div><div class="cpick">${COLORS.map(c=>`<div class="cp${p.color===c?' sel':''}" style="background:${c}" data-c="${c}"></div>`).join('')}</div></div>
+      <div class="i2">
+        <div class="ig"><label class="il">Kupní cena</label><div class="iw"><input type="number" id="pp" value="${p.price}" placeholder="4 500 000" min="0" step="50000"><span class="iu">Kč</span></div></div>
+        <div class="ig"><label class="il">Rok koupě</label><div class="iw"><input type="number" id="pyr" value="${p.yr}" min="2000" max="2050" style="padding-right:10px"></div></div>
+      </div>
+      <div class="ig"><label class="il">Rok narození</label><div class="iw"><input type="number" id="pby" value="${p.by}" placeholder="1985" min="1920" max="2010" style="padding-right:10px"></div></div>
+      <div class="ig"><label class="il">Roční růst ceny</label><div class="sw"><input type="range" id="pgr" min="0" max="15" step="0.5" value="${p.growth}"><div class="sv"><span id="pgr-v">${p.growth}</span> <span>%</span></div></div></div>
+      <div class="ig" style="margin-bottom:0"><label class="il">Horizont</label><div class="sw"><input type="range" id="pho" min="1" max="50" value="${p.hor}"><div class="sv"><span id="pho-v">${p.hor}</span> <span>let</span></div></div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-hdr"><div class="card-dot" style="background:var(--blue)"></div><div class="card-title">Hypotéka</div>
+      <div style="margin-left:auto"><div class="tbar" style="width:auto"><button type="button" class="topt${p.mortg?' sel':''}" id="myes">Ano</button><button type="button" class="topt${!p.mortg?' sel':''}" id="mno">Ne</button></div></div>
+    </div>
+    <div class="card-body" id="mwrap" style="${p.mortg?'':'display:none'}">
+      <div class="i2"><div class="ig"><label class="il">Vlastní zdroje</label><div class="iw"><input type="number" id="peq" value="${p.eq}" placeholder="900 000" min="0" step="50000"><span class="iu">Kč</span></div></div><div class="ig"><label class="il">Sazba</label><div class="iw"><input type="number" id="pmr" value="${p.mr}" step="0.1" min="0" max="20"><span class="iu">%</span></div></div></div>
+      <div class="i2"><div class="ig"><label class="il">Splatnost (let)</label><div class="iw"><input type="number" id="pmy" value="${p.my}" min="1" max="40" style="padding-right:10px"></div></div><div class="ig"><label class="il">Refixace po</label><div class="iw"><input type="number" id="pry" value="${p.ry}" min="1" max="20"><span class="iu">l</span></div></div></div>
+      <div class="ig" style="margin-bottom:0"><label class="il">Sazba po refixaci</label><div class="iw"><input type="number" id="prr" value="${p.rr}" step="0.1" min="0" max="20"><span class="iu">%</span></div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-hdr"><div class="card-dot" style="background:var(--teal)"></div><div class="card-title">Nájem</div>
+      <div style="margin-left:auto"><div class="tbar" style="width:auto"><button type="button" class="topt${p.rent?' sel':''}" id="ryes">Pronajímám</button><button type="button" class="topt${!p.rent?' sel':''}" id="rno">Vlastní</button></div></div>
+    </div>
+    <div class="card-body" id="rwrap" style="${p.rent?'':'display:none'}">
+      <div class="i2"><div class="ig"><label class="il">Měsíční nájem</label><div class="iw"><input type="number" id="prm" value="${p.rm}" placeholder="18 000" min="0" step="500"><span class="iu">Kč</span></div></div><div class="ig"><label class="il">Roční růst</label><div class="iw"><input type="number" id="prg" value="${p.rg}" step="0.5" min="0" max="20"><span class="iu">%</span></div></div></div>
+      <div class="ig" style="margin-bottom:0"><label class="il">Obsazenost</label><div class="sw"><input type="range" id="poc" min="50" max="100" value="${p.oc}"><div class="sv"><span id="poc-v">${p.oc}</span> <span>%</span></div></div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-hdr"><div class="card-dot" style="background:var(--red-tx)"></div><div class="card-title">Provozní náklady / měsíc</div></div>
+    <div class="card-body">
+      <div class="ig" style="margin-bottom:0"><label class="il">Celkové měsíční náklady</label><div class="iw"><input type="number" id="pcm" value="${p.cm}" placeholder="např. 3 000" min="0" step="100"><span class="iu">Kč</span></div></div>
+      <div class="hint">Správa, pojištění, fond oprav, daň — vše dohromady</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-hdr"><div class="card-dot" style="background:var(--violet)"></div><div class="card-title">Jednorázové investice</div></div>
+    <div class="card-body">
+      <div class="rnlist" id="rnlist"></div>
+      <button type="button" class="addbtn" id="rnadd">+ Přidat investici</button>
+      <div class="rnform" id="rnform">
+        <div class="rnrow">
+          <div class="rff" style="flex:2;min-width:90px"><label>Popis</label><input type="text" id="rfdesc" placeholder="kuchyň..."></div>
+          <div class="rff" style="min-width:60px"><label>Rok</label><input type="number" id="rfyr" value="1" min="0" max="50" style="width:64px"></div>
+          <div class="rff" style="min-width:80px"><label>Částka</label><input type="number" id="rfamt" placeholder="250 000" step="10000" style="width:95px"></div>
+          <button type="button" class="btn primary" id="rfok" style="align-self:flex-end">Přidat</button>
+        </div>
+      </div>
+    </div>
+  </div>`;
+  renderRenovs(p);wireL(p);
+}
+
+function renderRenovs(p){
+  const l=ge('rnlist');if(!l)return;l.innerHTML='';
+  if(!p.renovs.length){l.innerHTML='<div style="font-size:11px;color:var(--txt3)">Zatím žádné.</div>';return;}
+  p.renovs.sort((a,b)=>a.year-b.year).forEach((r,i)=>{
+    const d=document.createElement('div');d.className='rntag';
+    d.innerHTML=`<div class="rntxt"><strong>Rok ${r.year}${r.desc?' · '+esc(r.desc):''}</strong> — ${fmt(r.amount)}</div><button type="button" class="rndel" data-i="${i}">×</button>`;
+    d.querySelector('.rndel').addEventListener('click',()=>{p.renovs.splice(i,1);renderRenovs(p);recalc(p);});
+    l.appendChild(d);
+  });
+}
+
+function wireL(p){
+  const sl=(id,vId,key)=>{const e=ge(id);if(!e)return;e.addEventListener('input',ev=>{if(ge(vId))ge(vId).textContent=ev.target.value;p[key]=parseFloat(ev.target.value);recalc(p);});};
+  sl('pgr','pgr-v','growth');sl('pho','pho-v','hor');sl('poc','poc-v','oc');
+  const ni=(id,key)=>{const e=ge(id);if(!e)return;e.addEventListener('input',ev=>{p[key]=ev.target.value;recalc(p);});};
+  ni('pnm','name');ni('pp','price');ni('pyr','yr');ni('pby','by');
+  ni('peq','eq');ni('pmr','mr');ni('pmy','my');ni('pry','ry');ni('prr','rr');
+  ni('prm','rm');ni('prg','rg');
+  ni('pcm','cm');
+  ge('pnm')?.addEventListener('input',e=>{p.name=e.target.value||'Nemovitost';renderTabs();});
+  document.querySelectorAll('.cp').forEach(el=>el.addEventListener('click',()=>{p.color=el.dataset.c;document.querySelectorAll('.cp').forEach(e=>e.classList.toggle('sel',e===el));renderTabs();recalc(p);}));
+  const tog=(yId,nId,key,wId)=>{
+    ge(yId)?.addEventListener('click',()=>{p[key]=true;ge(yId).classList.add('sel');ge(nId).classList.remove('sel');if(ge(wId))ge(wId).style.display='';recalc(p);});
+    ge(nId)?.addEventListener('click',()=>{p[key]=false;ge(nId).classList.add('sel');ge(yId).classList.remove('sel');if(ge(wId))ge(wId).style.display='none';recalc(p);});
+  };
+  tog('myes','mno','mortg','mwrap');tog('ryes','rno','rent','rwrap');
+  ge('rnadd')?.addEventListener('click',()=>ge('rnform').classList.toggle('open'));
+  ge('rfok')?.addEventListener('click',()=>{
+    const amt=Math.abs(parseFloat(ge('rfamt').value)||0);
+    if(!amt){ge('rfamt').style.borderColor='var(--red-tx)';setTimeout(()=>ge('rfamt').style.borderColor='',2000);return;}
+    p.renovs.push({year:parseInt(ge('rfyr').value)||1,amount:amt,desc:ge('rfdesc').value.trim()});
+    ge('rfamt').value='';ge('rfdesc').value='';renderRenovs(p);recalc(p);
+  });
+}
+
+function renderR(p,result){
+  const{rows,be,ti,price,loan}=result,l=rows[rows.length-1],hor=p.hor;
+  const by=p.by?parseInt(p.by):null;
+  const tot=l.val-price+l.cR-l.cC-l.cM-l.cRv;
+  const befPct=be?Math.min(100,Math.round(be/hor*100)):0;
+  const col=ge('rcol');
+  col.innerHTML=`
+  <div class="card">
+    <div class="card-hdr"><div class="card-dot" style="background:${p.color}"></div><div class="card-title">Vývoj</div></div>
+    <div class="card-body">
+      <div id="ctog" class="tbar" style="width:auto;margin-bottom:9px"><button type="button" class="topt sel" data-m="val">Hodnota</button><button type="button" class="topt" data-m="cf">Cash flow</button></div>
+      <div class="legend" id="cleg"></div><div class="cw"><canvas id="pchart"></canvas></div>
+    </div>
+    <div class="mrow" id="pmrow" style="grid-template-columns:repeat(4,1fr)"></div>
+  </div>
+  <div class="card">
+    <div class="card-hdr"><div class="card-dot" style="background:var(--teal)"></div><div class="card-title">Výsledky</div></div>
+    <div class="card-body">
+      <div class="rdark">
+        <div class="rbig">
+          <div class="rlbl">Hodnota nemovitosti</div>
+          <div class="rnum">${fs(l.val)} Kč</div>
+          <div class="rsub">za ${hor} let (${p.yr+hor}${by?', '+(p.yr+hor-by)+' let':''})</div>
+        </div>
+        <div class="rrows">
+          <div class="rrow"><span class="rrl">Kupní cena</span><span class="rrv">${fmt(price)}</span></div>
+          <div class="rrow"><span class="rrl">Celkový nájem</span><span class="rrv teal">${l.cR>0?'+'+fmt(l.cR):'—'}</span></div>
+          <div class="rrow"><span class="rrl">Zaplaceno hypotéka</span><span class="rrv red">${l.cM>0?'−'+fmt(l.cM):'—'}</span></div>
+          <div class="rrow"><span class="rrl">Provozní náklady</span><span class="rrv red">${l.cC>0?'−'+fmt(l.cC):'—'}</span></div>
+          <div class="rrow"><span class="rrl">Investice</span><span class="rrv red">${l.cRv>0?'−'+fmt(l.cRv):'—'}</span></div>
+          <div class="rrow" style="border-top:1px solid rgba(255,255,255,.1);padding-top:5px;margin-top:2px">
+            <span class="rrl" style="font-weight:700;color:rgba(255,255,255,.8)">Celkový výnos</span>
+            <span class="rrv ${tot>=0?'teal':'red'}" style="font-size:14px">${tot>=0?'+':''}${fmt(tot)}</span>
+          </div>
+        </div>
+      </div>
+      ${loan>0&&p.mortg?`<div style="background:var(--bg);border-radius:7px;padding:9px;border:1px solid var(--border);margin-bottom:9px">
+        <div style="font-size:10px;font-weight:600;color:var(--txt2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px">Hypoteční přehled</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px">
+          <div><div style="font-size:9px;color:var(--txt3);margin-bottom:1px">Výše úvěru</div><div style="font-size:12px;font-weight:600;font-family:var(--mono)">${fs(loan)} Kč</div></div>
+          <div><div style="font-size:9px;color:var(--txt3);margin-bottom:1px">Měs. splátka</div><div style="font-size:12px;font-weight:600;font-family:var(--mono)">${fs(pmt(loan,p.mr/100,p.my))} Kč</div></div>
+          <div><div style="font-size:9px;color:var(--txt3);margin-bottom:1px">Úroky celkem</div><div style="font-size:12px;font-weight:600;font-family:var(--mono);color:var(--red-tx)">${fs(ti)} Kč</div></div>
+        </div>
+      </div>`:''}
+      <div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">
+          <span style="font-size:12px;font-weight:600;color:var(--txt2)">Break-even</span>
+          <span style="font-size:12px;font-weight:600;font-family:var(--mono);color:var(--amber)">${be?'rok '+(p.yr+be)+(by?', '+(p.yr+be-by)+' let':''):'V horizontu nedosaženo'}</span>
+        </div>
+        <div class="bebar"><div class="befill" style="width:${befPct}%"></div><span class="belbl">${be?be+' let':''}</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-hdr"><div class="card-dot" style="background:var(--navy)"></div><div class="card-title">Rok po roce</div></div>
+    <div class="cfsc"><table class="cft">
+      <thead><tr><th style="text-align:left">Rok</th><th>Hodnota</th><th>Splátka</th><th>Nájem</th><th>Náklady</th><th>CF</th><th>Kum.CF</th></tr></thead>
+      <tbody id="cfbody"></tbody>
+    </table></div>
+  </div>`;
+  renderChart(p,rows,'val');renderMrow(p,rows);renderCFTable(p,rows);
+  ge('ctog')?.querySelectorAll('.topt').forEach(btn=>{
+    btn.addEventListener('click',()=>{ge('ctog').querySelectorAll('.topt').forEach(b=>b.classList.toggle('sel',b===btn));renderChart(p,rows,btn.dataset.m);});
+  });
+}
+
+function renderChart(p,rows,mode){
+  const canvas=ge('pchart');if(!canvas)return;
+  if(charts[p.id])charts[p.id].destroy();
+  const step=p.hor<=15?2:p.hor<=25?5:10;
+  let ds,leg;
+  if(mode==='val'){
+    ds=[{label:'Hodnota',data:rows.map(r=>Math.round(r.val)),backgroundColor:p.color+'cc',stack:'v'}];
+    leg=`<div class="li"><div class="ld" style="background:${p.color}"></div><span>Hodnota nemovitosti</span></div>`;
+  } else {
+    ds=[{label:'Kum.CF',data:rows.map(r=>Math.round(r.cCF)),backgroundColor:rows.map(r=>r.cCF>=0?'#4ECDA0aa':'#f87171aa'),stack:'c'},
+        {label:'Roční CF',data:rows.map(r=>Math.round(r.cf)),type:'line',borderColor:'#4A9EE0',pointRadius:1,fill:false,tension:.3,borderWidth:2}];
+    leg=`<div class="li"><div class="ld" style="background:#4ECDA0"></div><span>Kum. CF</span></div><div class="li"><div class="ld" style="background:#4A9EE0"></div><span>Roční CF</span></div>`;
+  }
+  if(ge('cleg'))ge('cleg').innerHTML=leg;
+  charts[p.id]=new Chart(canvas,{type:'bar',data:{labels:rows.map(r=>r.cy),datasets:ds},
+    options:{responsive:true,maintainAspectRatio:false,
+      scales:{x:{grid:{display:false},ticks:{font:{size:10},color:'#6b7280',maxTicksLimit:12,callback:(v,i)=>{const yr=rows[i]?.cy;return yr&&(yr-p.yr)%step===0?yr:null;}}},
+        y:{stacked:mode==='val',grid:{color:'#edf0f4'},ticks:{font:{size:10},color:'#6b7280',callback:v=>{const m=v/1000000;return m>=1?(m.toFixed(1)+' M'):Math.round(v/1000)+'k';}}}},
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:i=>`${i.dataset.label}: ${fmt(i.raw)}`}}}}});
+}
+
+function renderMrow(p,rows){
+  const el=ge('pmrow');if(!el)return;
+  const hor=p.hor,marks=[Math.round(hor*.25),Math.round(hor*.5),Math.round(hor*.75),hor];
+  el.innerHTML=marks.map(y=>{const r=rows[y]||rows[rows.length-1];return `<div class="ms"><div class="ms-yr">Rok ${y}</div><div class="ms-val">${fs(r.val)} Kč</div><div class="ms-sub" style="color:${r.cCF>=0?'var(--grn-tx)':'var(--red-tx)'}">CF: ${fs(r.cCF)}</div></div>`;}).join('');
+}
+
+function renderCFTable(p,rows){
+  const tb=ge('cfbody');if(!tb)return;tb.innerHTML='';
+  const hor=p.hor,step=hor<=10?1:hor<=20?2:5;
+  rows.forEach(r=>{
+    if(r.y===0||r.y%step!==0&&r.y!==hor)return;
+    const tr=document.createElement('tr');if(r.y===hor||r.y%10===0)tr.className='hlm';
+    tr.innerHTML=`<td>${r.cy}</td><td>${fs(r.val)} Kč</td><td class="${r.mp>0?'neg':''}">${r.mp>0?'−'+fs(r.mp)+' Kč':'—'}</td><td class="${r.rent>0?'pos':''}">${r.rent>0?'+'+fs(r.rent)+' Kč':'—'}</td><td class="neg">${r.cost>0?'−'+fs(r.cost)+' Kč':'—'}</td><td class="${r.cf>=0?'pos':'neg'}">${fs(r.cf)} Kč</td><td class="${r.cCF>=0?'pos':'neg'}">${fs(r.cCF)} Kč</td>`;
+    tb.appendChild(tr);
+  });
+}
+
+function recalc(p){
+  if(p&&aid===p.id){const r=sim(p);renderR(p,r);}
+  renderGKPIs();saveState();
+}
+
+function renderAll(){
+  renderTabs();renderGKPIs();
+  if(aid===null)renderSum();
+  else{const p=props.find(x=>x.id===aid);if(p)renderProp(p);}
+  saveState();
+}
+
+function saveState(){try{localStorage.setItem(LS,JSON.stringify({props,aid,pid}));}catch(e){}}
+function loadSt(s){if(s.props&&s.props.length){props=s.props;pid=s.pid||props.length;}if(s.aid!==undefined)aid=s.aid;}
+
+ge('btn-save').addEventListener('click',()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify({props,aid,pid},null,2)],{type:'application/json'}));a.download='nemovitosti.json';a.click();});
+ge('btn-load').addEventListener('change',e=>{const r=new FileReader();r.onload=ev=>{try{loadSt(JSON.parse(ev.target.result));renderAll();}catch{alert('Soubor není platný.');}};r.readAsText(e.target.files[0]);});
+
+try{const s=localStorage.getItem(LS);if(s){loadSt(JSON.parse(s));}else{const p=np();props.push(p);aid=p.id;}}catch(e){const p=np();props.push(p);aid=p.id;}
+renderAll();
+</script>
+</body>
+</html>
