@@ -3,7 +3,25 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Celoživotní investiční kalkulačka</title>
+<title>Investiční kalkulačka</title>
+<!-- PWA meta tags -->
+<meta name="application-name" content="Investiční kalkulačka">
+<meta name="description" content="Celoživotní investiční kalkulačka — simulace portfolia po odchodu do důchodu">
+<meta name="theme-color" content="#1a2332">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Kalkulačka">
+<!-- PWA icons for iOS -->
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="apple-touch-icon" sizes="152x152" href="icon-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icon-192.png">
+<!-- Splash screens iOS -->
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<!-- Manifest -->
+<link rel="manifest" href="manifest.json">
+<!-- Favicon -->
+<link rel="icon" type="image/png" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
@@ -369,6 +387,10 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
     <label class="tb-btn" style="cursor:pointer"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 2v7M4 6l3 3 3-3M2 11h10"/></svg><span>Načíst nastavení</span><input type="file" id="btn-load" accept=".json" style="display:none"></label>
     <button class="help-btn" id="btn-help" title="Jak uložit nastavení?">?</button>
     <button class="tb-btn print" onclick="window.print()"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="10" height="7" rx="1"/><path d="M4 5V3h6v2M4 9h2M4 11h6"/></svg><span>Tisknout / PDF</span></button>
+    <button id="pwa-install-btn" class="tb-btn" style="display:none;background:rgba(78,205,160,.15);border-color:rgba(78,205,160,.4);color:var(--teal)" onclick="if(deferredPrompt){deferredPrompt.prompt();deferredPrompt.userChoice.then(()=>{this.style.display='none';})}">
+      <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 2v7M4 6l3 3 3-3M2 11h10"/></svg>
+      <span>Instalovat app</span>
+    </button>
   </div>
 </nav>
 
@@ -2033,6 +2055,28 @@ try{
   renderDepTL('in');renderDepTL('out');renderPhaseTL();
   renderRulesUnified();renderTxTable('in');renderTxTable('out');recalc();
 }
+</script>
+<script>
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('sw.js').then(r=>{
+      console.log('SW registered');
+    }).catch(e=>console.log('SW error:',e));
+  });
+}
+// PWA install prompt
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault();
+  deferredPrompt=e;
+  const btn=document.getElementById('pwa-install-btn');
+  if(btn)btn.style.display='flex';
+});
+window.addEventListener('appinstalled',()=>{
+  const btn=document.getElementById('pwa-install-btn');
+  if(btn)btn.style.display='none';
+  deferredPrompt=null;
+});
 </script>
 </body>
 </html>
