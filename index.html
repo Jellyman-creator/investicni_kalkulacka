@@ -12,14 +12,14 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;overflow:hidden;background:#0f172a;font-family:'DM Sans',sans-serif}
+html,body{height:100%;overflow:hidden;background:#0f172a;font-family:'DM Sans',sans-serif;display:flex;flex-direction:column}
 
 /* ── TOP NAV ── big, impossible to miss */
 .topbar{
   background:#0f172a;
   border-bottom:2px solid rgba(255,255,255,.07);
   display:flex;flex-direction:column;
-  position:relative;z-index:10;flex-shrink:0;
+  flex-shrink:0;z-index:10;
 }
 .topbar-row1{
   height:48px;display:flex;align-items:center;
@@ -43,30 +43,25 @@ html,body{height:100%;overflow:hidden;background:#0f172a;font-family:'DM Sans',s
 }
 .nav-btn:last-child{border-right:none}
 .nav-btn:hover{background:rgba(255,255,255,.06);color:rgba(255,255,255,.75)}
-.nav-btn.active{
-  background:rgba(255,255,255,.08);color:#fff;
-}
+.nav-btn.active{background:rgba(255,255,255,.08);color:#fff}
 .nav-btn.active::after{
   content:'';position:absolute;bottom:0;left:20%;right:20%;
-  height:2px;background:linear-gradient(90deg,#6366f1,#2dd4bf);
-  border-radius:1px;
+  height:3px;background:linear-gradient(90deg,#6366f1,#2dd4bf);
+  border-radius:2px;
 }
 .nav-icon{font-size:22px;line-height:1}
 .nav-label{font-size:12px;font-weight:600;letter-spacing:.01em}
-.nav-default-star{
-  position:absolute;top:6px;right:8px;
-  font-size:9px;color:var(--amber,#fbbf24);
-  opacity:.7;
-}
+.nav-default-star{position:absolute;top:6px;right:8px;font-size:9px;color:#fbbf24;opacity:.7}
 
-.actions{display:flex;gap:5px;flex-shrink:0}
+.actions{display:flex;gap:5px;flex-shrink:0;align-items:center}
 .act-btn{display:flex;align-items:center;gap:5px;padding:6px 10px;font-size:12px;font-weight:500;font-family:'DM Sans',sans-serif;border-radius:7px;cursor:pointer;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.07);color:rgba(255,255,255,.7);transition:all .15s;white-space:nowrap}
 .act-btn:hover{background:rgba(255,255,255,.12);color:#fff}
 .act-btn svg{width:13px;height:13px;flex-shrink:0}
 .act-btn.accent{border-color:rgba(99,102,241,.5);color:#818cf8}
 .act-btn.amber{border-color:rgba(245,158,11,.4);color:#fbbf24}
 
-.frame-wrap{position:fixed;top:0;left:0;right:0;bottom:0;padding-top:var(--nav-h,130px)}
+/* Frame area fills remaining height */
+.frame-wrap{flex:1;position:relative;overflow:hidden}
 .app-frame{position:absolute;inset:0;width:100%;height:100%;border:none;display:none;background:#f4f6f9;opacity:0;transition:opacity .2s ease}
 .app-frame.active{display:block}
 .app-frame.visible{opacity:1}
@@ -152,9 +147,9 @@ html,body{height:100%;overflow:hidden;background:#0f172a;font-family:'DM Sans',s
 </nav>
 
 <div class="frame-wrap">
-  <iframe class="app-frame active" id="frame-finance" src="finance.html" title="Osobní finance"></iframe>
-  <iframe class="app-frame" id="frame-invest" src="" data-src="index.html" title="Investiční kalkulačka"></iframe>
-  <iframe class="app-frame" id="frame-real" src="" data-src="nemovitosti.html" title="Kalkulačka nemovitostí"></iframe>
+  <iframe class="app-frame" id="frame-finance" data-src="finance.html" title="Osobní finance"></iframe>
+  <iframe class="app-frame" id="frame-invest" data-src="investice.html" title="Investiční kalkulačka"></iframe>
+  <iframe class="app-frame" id="frame-real" data-src="nemovitosti.html" title="Kalkulačka nemovitostí"></iframe>
   <div class="loader hidden" id="loader">
     <div class="spinner"></div>
     <div class="loader-text">Načítání…</div>
@@ -172,10 +167,7 @@ const PREF_KEY = 'finzzard-default-app';
 let defaultApp = localStorage.getItem(PREF_KEY) || 'finance';
 let current = defaultApp;
 
-function updateNavHeight(){
-  const h = document.getElementById('topbar')?.offsetHeight || 120;
-  document.querySelector('.frame-wrap').style.paddingTop = h+'px';
-}
+function updateNavHeight(){} // no-op, kept for safety
 
 function setActiveNav(app){
   document.querySelectorAll('.nav-btn').forEach(b=>{
