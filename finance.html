@@ -298,6 +298,8 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:14p
 </style>
 </head>
 <body>
+<div style="position:fixed;bottom:4px;right:6px;font-size:9px;color:rgba(0,0,0,.2);z-index:9999;pointer-events:none;font-family:monospace">Finance v0320-0957</div>
+
 
 <nav class="topbar">
   <div class="logo">
@@ -307,6 +309,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:14p
   <div class="topbar-actions">
     <button type="button" class="tb-btn" id="btn-export"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M7 2v7M4 6l3 3 3-3M2 11h10"/></svg><span>Uložit údaje</span></button>
     <button type="button" class="tb-btn" id="btn-import-open" style="border-color:rgba(99,102,241,.4);color:var(--accent2)"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M7 9V2M4 5l3-3 3 3M2 11h10"/></svg><span>Načíst údaje</span></button>
+    <button type="button" class="tb-btn" onclick="window.print()" style="border-color:rgba(245,158,11,.35);color:var(--amber)"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="10" height="7" rx="1"/><path d="M4 5V3h6v2M4 9h2M4 11h6"/></svg><span>Tisknout / PDF</span></button>
     <a class="tb-btn" href="index.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="8,2 2,7 8,12"/><line x1="2" y1="7" x2="12" y2="7"/></svg><span>Investice</span></a>
   </div>
 </nav>
