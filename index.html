@@ -14,29 +14,60 @@
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;overflow:hidden;background:#0f172a;font-family:'DM Sans',sans-serif}
 
+/* ── TOP NAV ── big, impossible to miss */
 .topbar{
-  height:52px;background:#0f172a;
-  border-bottom:1px solid rgba(255,255,255,.08);
-  display:flex;align-items:center;padding:0 16px;gap:10px;
+  background:#0f172a;
+  border-bottom:2px solid rgba(255,255,255,.07);
+  display:flex;flex-direction:column;
   position:relative;z-index:10;flex-shrink:0;
 }
-.logo{display:flex;align-items:center;gap:9px;text-decoration:none;margin-right:6px;flex-shrink:0}
-.logo-mark{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#6366f1,#2dd4bf)}
-.logo-name{font-size:14px;font-weight:700;color:#fff;letter-spacing:-.02em;white-space:nowrap}
-.nav{display:flex;gap:2px;background:rgba(255,255,255,.06);border-radius:9px;padding:3px;flex-shrink:0}
-.nav-btn{padding:7px 14px;font-size:13px;font-weight:600;font-family:'DM Sans',sans-serif;border:none;background:none;color:rgba(255,255,255,.5);cursor:pointer;border-radius:7px;transition:all .15s;white-space:nowrap;display:flex;align-items:center;gap:6px;-webkit-appearance:none;appearance:none}
-.nav-btn:hover{color:rgba(255,255,255,.8)}
-.nav-btn.active{background:rgba(255,255,255,.15);color:#fff;font-weight:700}
-.nav-icon{font-size:14px;line-height:1}
-.actions{margin-left:auto;display:flex;gap:5px;flex-shrink:0}
-.act-btn{display:flex;align-items:center;gap:5px;padding:6px 11px;font-size:12px;font-weight:500;font-family:'DM Sans',sans-serif;border-radius:7px;cursor:pointer;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.07);color:rgba(255,255,255,.7);transition:all .15s;white-space:nowrap}
+.topbar-row1{
+  height:48px;display:flex;align-items:center;
+  padding:0 16px;justify-content:space-between;
+}
+.logo{display:flex;align-items:center;gap:9px;text-decoration:none;flex-shrink:0}
+.logo-mark{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#6366f1,#2dd4bf);flex-shrink:0}
+.logo-name{font-size:13px;font-weight:700;color:rgba(255,255,255,.8);letter-spacing:-.01em;white-space:nowrap}
+
+/* Big 3-button nav */
+.nav{display:grid;grid-template-columns:1fr 1fr 1fr;background:rgba(255,255,255,.04);border-top:1px solid rgba(255,255,255,.06)}
+.nav-btn{
+  padding:14px 10px;font-size:14px;font-weight:700;
+  font-family:'DM Sans',sans-serif;
+  border:none;background:none;color:rgba(255,255,255,.4);
+  cursor:pointer;transition:all .18s;
+  display:flex;flex-direction:column;align-items:center;gap:5px;
+  -webkit-appearance:none;appearance:none;
+  border-right:1px solid rgba(255,255,255,.06);
+  position:relative;
+}
+.nav-btn:last-child{border-right:none}
+.nav-btn:hover{background:rgba(255,255,255,.06);color:rgba(255,255,255,.75)}
+.nav-btn.active{
+  background:rgba(255,255,255,.08);color:#fff;
+}
+.nav-btn.active::after{
+  content:'';position:absolute;bottom:0;left:20%;right:20%;
+  height:2px;background:linear-gradient(90deg,#6366f1,#2dd4bf);
+  border-radius:1px;
+}
+.nav-icon{font-size:22px;line-height:1}
+.nav-label{font-size:12px;font-weight:600;letter-spacing:.01em}
+.nav-default-star{
+  position:absolute;top:6px;right:8px;
+  font-size:9px;color:var(--amber,#fbbf24);
+  opacity:.7;
+}
+
+.actions{display:flex;gap:5px;flex-shrink:0}
+.act-btn{display:flex;align-items:center;gap:5px;padding:6px 10px;font-size:12px;font-weight:500;font-family:'DM Sans',sans-serif;border-radius:7px;cursor:pointer;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.07);color:rgba(255,255,255,.7);transition:all .15s;white-space:nowrap}
 .act-btn:hover{background:rgba(255,255,255,.12);color:#fff}
 .act-btn svg{width:13px;height:13px;flex-shrink:0}
 .act-btn.accent{border-color:rgba(99,102,241,.5);color:#818cf8}
 .act-btn.amber{border-color:rgba(245,158,11,.4);color:#fbbf24}
 
-.frame-wrap{position:fixed;top:52px;left:0;right:0;bottom:0}
-.app-frame{position:absolute;inset:0;width:100%;height:100%;border:none;display:none;background:#fff;opacity:0;transition:opacity .2s ease}
+.frame-wrap{position:fixed;top:0;left:0;right:0;bottom:0;padding-top:var(--nav-h,130px)}
+.app-frame{position:absolute;inset:0;width:100%;height:100%;border:none;display:none;background:#f4f6f9;opacity:0;transition:opacity .2s ease}
 .app-frame.active{display:block}
 .app-frame.visible{opacity:1}
 
@@ -46,8 +77,24 @@ html,body{height:100%;overflow:hidden;background:#0f172a;font-family:'DM Sans',s
 @keyframes spin{to{transform:rotate(360deg)}}
 .loader-text{font-size:13px;color:rgba(255,255,255,.4)}
 
+/* Default preference popup */
+.pref-popup{
+  position:absolute;top:calc(100% + 6px);right:0;
+  background:#1e293b;border:1px solid rgba(255,255,255,.12);
+  border-radius:10px;padding:10px;min-width:210px;
+  z-index:50;box-shadow:0 8px 24px rgba(0,0,0,.4);
+  display:none;
+}
+.pref-popup.open{display:block}
+.pref-popup-title{font-size:10px;font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;padding:0 4px}
+.pref-opt{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:7px;cursor:pointer;transition:background .12s;font-size:13px;font-weight:500;color:rgba(255,255,255,.7)}
+.pref-opt:hover{background:rgba(255,255,255,.08);color:#fff}
+.pref-opt.active{color:#fff;background:rgba(99,102,241,.2)}
+.pref-opt-icon{font-size:16px}
+.pref-opt-star{margin-left:auto;font-size:12px;color:#fbbf24}
+
 /* Bridge bar */
-.bridge{position:absolute;bottom:0;left:0;right:0;background:rgba(15,23,42,.92);backdrop-filter:blur(8px);border-top:1px solid rgba(255,255,255,.08);padding:10px 16px;display:flex;align-items:center;gap:10px;z-index:20;transform:translateY(100%);transition:transform .3s ease;pointer-events:none}
+.bridge{position:fixed;bottom:0;left:0;right:0;background:rgba(15,23,42,.92);backdrop-filter:blur(8px);border-top:1px solid rgba(255,255,255,.08);padding:10px 16px;display:flex;align-items:center;gap:10px;z-index:20;transform:translateY(100%);transition:transform .3s ease;pointer-events:none}
 .bridge.show{transform:translateY(0);pointer-events:all}
 .bridge-text{font-size:13px;color:rgba(255,255,255,.7);flex:1;line-height:1.4}
 .bridge-text strong{color:#fff}
@@ -55,43 +102,58 @@ html,body{height:100%;overflow:hidden;background:#0f172a;font-family:'DM Sans',s
 .bridge-btn:hover{opacity:.85}
 .bridge-close{width:24px;height:24px;border-radius:6px;border:1px solid rgba(255,255,255,.15);background:none;color:rgba(255,255,255,.5);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
 .bridge-close:hover{color:#fff}
+
+@media(max-width:480px){
+  .topbar-row1{height:44px;padding:0 12px}
   .logo-name{display:none}
-  .nav-btn span{display:none}
-  .nav-btn{padding:7px 10px}
+  .nav-btn{padding:12px 6px}
+  .nav-icon{font-size:20px}
+  .nav-label{font-size:11px}
   .act-btn span{display:none}
   .act-btn{padding:6px 8px}
-  .topbar{padding:0 10px;gap:6px}
 }
 </style>
 </head>
 <body>
 
-<nav class="topbar">
-  <a class="logo" href="#">
-    <div class="logo-mark">
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 14V8L8 3l6 5v6H10v-4H6v4z" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/></svg>
+<nav class="topbar" id="topbar">
+  <div class="topbar-row1">
+    <a class="logo" href="#">
+      <div class="logo-mark">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M2 14V8L8 3l6 5v6H10v-4H6v4z" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/></svg>
+      </div>
+      <span class="logo-name">Finzzard</span>
+    </a>
+    <div class="actions" id="actions"></div>
+    <div style="position:relative">
+      <button type="button" class="act-btn" id="pref-btn" title="Nastavit výchozí aplikaci" style="gap:4px">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="7" cy="7" r="2.5"/><path d="M7 1v1.5M7 11.5V13M1 7h1.5M11.5 7H13M3.05 3.05l1.06 1.06M9.89 9.89l1.06 1.06M10.95 3.05L9.89 4.11M4.11 9.89l-1.06 1.06"/></svg>
+        <span>Výchozí</span>
+      </button>
+      <div class="pref-popup" id="pref-popup">
+        <div class="pref-popup-title">Otevírat jako první</div>
+        <div class="pref-opt" data-app="finance"><span class="pref-opt-icon">💰</span>Finance<span class="pref-opt-star" id="pref-star-finance" style="display:none">★ výchozí</span></div>
+        <div class="pref-opt" data-app="invest"><span class="pref-opt-icon">📈</span>Investice<span class="pref-opt-star" id="pref-star-invest" style="display:none">★ výchozí</span></div>
+        <div class="pref-opt" data-app="real"><span class="pref-opt-icon">🏠</span>Nemovitosti<span class="pref-opt-star" id="pref-star-real" style="display:none">★ výchozí</span></div>
+      </div>
     </div>
-    <span class="logo-name">Finanční nástroje</span>
-  </a>
-
-  <div class="nav">
-    <button class="nav-btn active" data-app="finance" type="button">
-      <span class="nav-icon">💰</span><span>Finance</span>
+  </div>
+  <div class="nav" id="main-nav">
+    <button class="nav-btn" data-app="finance" type="button">
+      <span class="nav-icon">💰</span><span class="nav-label">Finance</span>
     </button>
     <button class="nav-btn" data-app="invest" type="button">
-      <span class="nav-icon">📈</span><span>Investice</span>
+      <span class="nav-icon">📈</span><span class="nav-label">Investice</span>
     </button>
     <button class="nav-btn" data-app="real" type="button">
-      <span class="nav-icon">🏠</span><span>Nemovitosti</span>
+      <span class="nav-icon">🏠</span><span class="nav-label">Nemovitosti</span>
     </button>
   </div>
-
-  <div class="actions" id="actions"></div>
 </nav>
 
 <div class="frame-wrap">
   <iframe class="app-frame active" id="frame-finance" src="finance.html" title="Osobní finance"></iframe>
-  <iframe class="app-frame" id="frame-invest" src="" data-src="investice.html" title="Investiční kalkulačka"></iframe>
+  <iframe class="app-frame" id="frame-invest" src="" data-src="index.html" title="Investiční kalkulačka"></iframe>
   <iframe class="app-frame" id="frame-real" src="" data-src="nemovitosti.html" title="Kalkulačka nemovitostí"></iframe>
   <div class="loader hidden" id="loader">
     <div class="spinner"></div>
@@ -106,7 +168,52 @@ html,body{height:100%;overflow:hidden;background:#0f172a;font-family:'DM Sans',s
 </div>
 
 <script>
-const SVG = {
+const PREF_KEY = 'finzzard-default-app';
+let defaultApp = localStorage.getItem(PREF_KEY) || 'finance';
+let current = defaultApp;
+
+function updateNavHeight(){
+  const h = document.getElementById('topbar')?.offsetHeight || 120;
+  document.querySelector('.frame-wrap').style.paddingTop = h+'px';
+}
+
+function setActiveNav(app){
+  document.querySelectorAll('.nav-btn').forEach(b=>{
+    b.classList.toggle('active', b.dataset.app===app);
+    // Show star on default
+    const star = b.querySelector('.nav-default-star');
+    if(star) star.style.display = b.dataset.app===defaultApp ? '' : 'none';
+  });
+  // Preference popup stars
+  ['finance','invest','real'].forEach(a=>{
+    const el = document.getElementById('pref-star-'+a);
+    if(el) el.style.display = a===defaultApp ? '' : 'none';
+    const opt = document.querySelector(`.pref-opt[data-app="${a}"]`);
+    if(opt) opt.classList.toggle('active', a===defaultApp);
+  });
+}
+
+// Preference popup
+document.getElementById('pref-btn').addEventListener('click', e=>{
+  e.stopPropagation();
+  document.getElementById('pref-popup').classList.toggle('open');
+});
+document.querySelectorAll('.pref-opt').forEach(opt=>{
+  opt.addEventListener('click', ()=>{
+    defaultApp = opt.dataset.app;
+    localStorage.setItem(PREF_KEY, defaultApp);
+    setActiveNav(current);
+    document.getElementById('pref-popup').classList.remove('open');
+    // Toast
+    const names={finance:'Finance',invest:'Investice',real:'Nemovitosti'};
+    const toast = document.createElement('div');
+    toast.style.cssText='position:fixed;top:16px;left:50%;transform:translateX(-50%);background:#1e293b;border:1px solid rgba(99,102,241,.4);color:#fff;font-family:DM Sans,sans-serif;font-size:13px;font-weight:600;padding:9px 18px;border-radius:9px;z-index:999;box-shadow:0 4px 16px rgba(0,0,0,.3)';
+    toast.textContent = '★ Výchozí: '+names[defaultApp];
+    document.body.appendChild(toast);
+    setTimeout(()=>toast.remove(), 2000);
+  });
+});
+document.addEventListener('click', ()=>document.getElementById('pref-popup').classList.remove('open'));
   save:   '<path d="M2 2h8l2 2v8a1 1 0 01-1 1H3a1 1 0 01-1-1V2z"/><path d="M5 2v3h4V2M4 8h6"/>',
   load:   '<path d="M7 9V2M4 5l3-3 3 3M2 11h10"/>',
   print:  '<rect x="2" y="5" width="10" height="7" rx="1"/><path d="M4 5V3h6v2M4 9h2M4 11h6"/>',
@@ -163,25 +270,17 @@ document.querySelectorAll('.nav-btn').forEach(btn=>{
     const app=btn.dataset.app;
     if(app===current)return;
     current=app;
-    document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
+    setActiveNav(app);
     const frame=document.getElementById('frame-'+app);
     const loader=document.getElementById('loader');
-    const needsLoad=!frame.src||frame.src===window.location.href||frame.src===window.location.href+'#';
-
-    // Fade out current, switch, fade in
     document.querySelectorAll('.app-frame.active').forEach(f=>{
       f.classList.remove('visible');
-      setTimeout(()=>f.classList.remove('active'),200);
+      setTimeout(()=>f.classList.remove('active'),180);
     });
-
     setTimeout(()=>{
-      if(needsLoad&&frame.dataset.src){
+      if((!frame.src||frame.src===window.location.href)&&frame.dataset.src){
         loader.classList.remove('hidden');
-        frame.addEventListener('load',()=>{
-          loader.classList.add('hidden');
-          frame.classList.add('visible');
-        },{once:true});
+        frame.addEventListener('load',()=>{loader.classList.add('hidden');frame.classList.add('visible');},{once:true});
         frame.src=frame.dataset.src;
       } else {
         setTimeout(()=>frame.classList.add('visible'),30);
@@ -189,8 +288,8 @@ document.querySelectorAll('.nav-btn').forEach(btn=>{
       frame.classList.add('active');
       renderActions(app);
       hideBridge();
-      setTimeout(()=>showBridge(app), 800);
-    },200);
+      setTimeout(()=>showBridge(app), 900);
+    },180);
   });
 });
 
@@ -234,9 +333,19 @@ function addPdfBtn(bar){
   bar.appendChild(btn);
 }
 
-// Fade in initial frame
-setTimeout(()=>document.getElementById('frame-finance').classList.add('visible'),100);
-setTimeout(()=>showBridge('finance'), 100);
+// Init — activate default app
+setActiveNav(defaultApp);
+const defFrame = document.getElementById('frame-'+defaultApp);
+defFrame.classList.add('active');
+if(!defFrame.src||defFrame.src===window.location.href){
+  if(defFrame.dataset.src) defFrame.src=defFrame.dataset.src;
+}
+defFrame.addEventListener('load',()=>defFrame.classList.add('visible'),{once:true});
+setTimeout(()=>{ if(defFrame.src) defFrame.classList.add('visible'); },300);
+renderActions(defaultApp);
+updateNavHeight();
+window.addEventListener('resize',updateNavHeight);
+setTimeout(()=>showBridge(defaultApp), 2000);
 </script>
 </body>
 </html>

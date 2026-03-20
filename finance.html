@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Finance">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#0f172a;--bg2:#1e293b;--bg3:#334155;
@@ -17,7 +17,7 @@
   --txt:#f1f5f9;--txt2:#94a3b8;--txt3:#64748b;
   --accent:#6366f1;--accent2:#818cf8;
   --teal:#2dd4bf;--amber:#fbbf24;--rose:#fb7185;--green:#4ade80;
-  --font:'Sora',sans-serif;--mono:'JetBrains Mono',monospace;
+  --font:'DM Sans',sans-serif;--mono:'DM Mono',monospace;
   --r:12px;
 }
 *{box-sizing:border-box;margin:0;padding:0;max-width:100%}
@@ -307,7 +307,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:14p
   <div class="topbar-actions">
     <button type="button" class="tb-btn" id="btn-export"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M7 2v7M4 6l3 3 3-3M2 11h10"/></svg><span>Export CSV</span></button>
     <button type="button" class="tb-btn" id="btn-import-open" style="border-color:rgba(99,102,241,.4);color:var(--accent2)"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M7 9V2M4 5l3-3 3 3M2 11h10"/></svg><span>Import dat</span></button>
-    <a class="tb-btn" href="investice.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="8,2 2,7 8,12"/><line x1="2" y1="7" x2="12" y2="7"/></svg><span>Investice</span></a>
+    <a class="tb-btn" href="index.html"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="8,2 2,7 8,12"/><line x1="2" y1="7" x2="12" y2="7"/></svg><span>Investice</span></a>
   </div>
 </nav>
 
@@ -612,7 +612,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:14p
 <footer class="footer">
   <span>Data jsou uložena pouze ve vašem prohlížeči.</span>
   <div style="display:flex;gap:16px">
-    <a href="investice.html">← Investiční kalkulačka</a>
+    <a href="index.html">← Investiční kalkulačka</a>
     <a href="nemovitosti.html">← Nemovitosti</a>
   </div>
 </footer>
@@ -672,18 +672,18 @@ let txTypeFilter='all', txSearchQ='', txCatFilter='';
 
 // ─── DEFAULT CATEGORIES ──────────────────────────────────────────────────────
 const DEFAULT_CATS = [
-  {name:'Bydlení',icon:'🏠',color:'#6366f1'},
-  {name:'Jídlo',icon:'🛒',color:'#f59e0b'},
-  {name:'Doprava',icon:'🚗',color:'#3b82f6'},
-  {name:'Zdraví',icon:'💊',color:'#ec4899'},
-  {name:'Koníčky',icon:'🎮',color:'#8b5cf6'},
-  {name:'Oblečení',icon:'👔',color:'#06b6d4'},
-  {name:'Restaurace',icon:'🍽',color:'#f97316'},
-  {name:'Investice',icon:'📈',color:'#10b981'},
-  {name:'Vzdělání',icon:'📚',color:'#84cc16'},
-  {name:'Ostatní',icon:'📦',color:'#64748b'},
-  {name:'Mzda',icon:'💼',color:'#22c55e'},
-  {name:'Příjem',icon:'💰',color:'#34d399'},
+  {name:'Drobné útraty',  icon:'🪙', color:'#94a3b8'},
+  {name:'Jídlo & restaurace', icon:'🍽', color:'#f59e0b'},
+  {name:'Bydlení',        icon:'🏠', color:'#6366f1'},
+  {name:'Doprava',        icon:'🚗', color:'#3b82f6'},
+  {name:'Zdraví',         icon:'💊', color:'#ec4899'},
+  {name:'Koníčky',        icon:'🎮', color:'#8b5cf6'},
+  {name:'Oblečení',       icon:'👔', color:'#06b6d4'},
+  {name:'Investice',      icon:'📈', color:'#10b981'},
+  {name:'Vzdělání',       icon:'📚', color:'#84cc16'},
+  {name:'Ostatní',        icon:'📦', color:'#64748b'},
+  {name:'Mzda',           icon:'💼', color:'#22c55e'},
+  {name:'Příjem',         icon:'💰', color:'#34d399'},
 ];
 
 // ─── UTILS ───────────────────────────────────────────────────────────────────
@@ -1048,8 +1048,8 @@ function findOrCreateCat(name){
   if(found)return found.id;
   // Keyword guessing
   const keywords={
-    'Jídlo':['jídlo','potraviny','tesco','lidl','albert','billa','kaufland','supermarket','obchod','rohlík','chleba','maso'],
-    'Restaurace':['restaurace','kavárna','kafe','pizza','mcdonald','kfc','burger','sushi','bistro'],
+    'Jídlo & restaurace':['jídlo','potraviny','tesco','lidl','albert','billa','kaufland','supermarket','rohlík','chleba','maso','restaurace','kavárna','kafe','pizza','mcdonald','kfc','burger','sushi','bistro','oběd'],
+    'Drobné útraty':['drobné','káva','noviny','časopis','drobnost'],
     'Doprava':['benzín','nafta','shell','orlen','mhd','jízdenka','parkování','dálniční','auto','doprava','taxi','uber','bolt'],
     'Bydlení':['nájem','nájemné','elektřina','plyn','voda','teplo','internet','tv','pojištění','hypotéka','fond oprav'],
     'Zdraví':['lékárna','doktor','léky','zubar','zubař','nemocnice','zdraví'],
