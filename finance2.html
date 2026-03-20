@@ -1367,7 +1367,7 @@ ge('qt-expense').addEventListener('click',()=>{qaType='expense';ge('qt-expense')
 ge('qt-income').addEventListener('click',()=>{qaType='income';ge('qt-income').className='qa-type-btn sel-income';ge('qt-expense').className='qa-type-btn';});
 
 // Quick add submit
-ge('qa-submit').addEventListener('click',_addTxWithXP);
+ge('qa-submit').addEventListener('click', ()=>_addTxWithXP());
 ge('qa-amount').addEventListener('keydown',e=>{if(e.key==='Enter')_addTxWithXP();});
 ge('qa-date').value=todayStr();
 
