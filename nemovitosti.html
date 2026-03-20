@@ -556,7 +556,7 @@ function renderR(p,result){
       <div>
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">
           <span style="font-size:12px;font-weight:600;color:var(--txt2)">Bod zlomu</span>
-          <span style="font-size:12px;font-weight:600;font-family:var(--mono);color:var(--amber)">${be?'rok '+(p.yr+be)+(by?', '+(parseInt(p.yr)+be-by)+' let':''):'V horizontu nedosaženo'}</span>
+          <span style="font-size:12px;font-weight:600;font-family:var(--mono);color:var(--amber)">${be?'rok '+(parseInt(p.yr)+be)+(by?', '+(parseInt(p.yr)+be-by)+' let':''):'V horizontu nedosaženo'}</span>
         </div>
         <div class="bebar"><div class="befill" style="width:${befPct}%"></div><span class="belbl">${be?be+' let':''}</span></div>
       </div>
