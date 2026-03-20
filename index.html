@@ -3,341 +3,231 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Finanční nástroje</title>
+<title>Finzzard</title>
 <meta name="theme-color" content="#0f172a">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Nástroje">
+<meta name="apple-mobile-web-app-title" content="Finzzard">
 <link rel="manifest" href="manifest.json">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;overflow:hidden;background:#0f172a;font-family:'DM Sans',sans-serif;display:flex;flex-direction:column}
 
-/* ── TOP NAV ── big, impossible to miss */
-.topbar{
-  background:#0f172a;
-  border-bottom:2px solid rgba(255,255,255,.07);
-  display:flex;flex-direction:column;
-  flex-shrink:0;z-index:10;
-}
-.topbar-row1{
-  height:48px;display:flex;align-items:center;
-  padding:0 16px;justify-content:space-between;
-}
-.logo{display:flex;align-items:center;gap:9px;text-decoration:none;flex-shrink:0}
-.logo-mark{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#6366f1,#2dd4bf);flex-shrink:0}
-.logo-name{font-size:13px;font-weight:700;color:rgba(255,255,255,.8);letter-spacing:-.01em;white-space:nowrap}
-
-/* Big 3-button nav */
-.nav{display:grid;grid-template-columns:1fr 1fr 1fr;background:rgba(255,255,255,.04);border-top:1px solid rgba(255,255,255,.06)}
-.nav-btn{
-  padding:14px 10px;font-size:14px;font-weight:700;
+html,body{
+  height:100%;
   font-family:'DM Sans',sans-serif;
-  border:none;background:none;color:rgba(255,255,255,.4);
-  cursor:pointer;transition:all .18s;
+  background:#0f172a;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+
+/* ── NAV ── */
+.nav{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  background:#0f172a;
+  border-bottom:1px solid rgba(255,255,255,.1);
+  flex-shrink:0;
+}
+.nav-btn{
+  padding:14px 8px 12px;
   display:flex;flex-direction:column;align-items:center;gap:5px;
-  -webkit-appearance:none;appearance:none;
+  border:none;background:none;
+  color:rgba(255,255,255,.35);
+  font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;
+  cursor:pointer;transition:all .15s;
   border-right:1px solid rgba(255,255,255,.06);
   position:relative;
 }
 .nav-btn:last-child{border-right:none}
-.nav-btn:hover{background:rgba(255,255,255,.06);color:rgba(255,255,255,.75)}
-.nav-btn.active{background:rgba(255,255,255,.08);color:#fff}
+.nav-btn.active{color:#fff;background:rgba(255,255,255,.07)}
 .nav-btn.active::after{
-  content:'';position:absolute;bottom:0;left:20%;right:20%;
-  height:3px;background:linear-gradient(90deg,#6366f1,#2dd4bf);
-  border-radius:2px;
+  content:'';
+  position:absolute;bottom:0;left:15%;right:15%;
+  height:3px;border-radius:2px 2px 0 0;
+  background:linear-gradient(90deg,#6366f1,#2dd4bf);
 }
-.nav-icon{font-size:22px;line-height:1}
-.nav-label{font-size:12px;font-weight:600;letter-spacing:.01em}
-.nav-default-star{position:absolute;top:6px;right:8px;font-size:9px;color:#fbbf24;opacity:.7}
+.nav-icon{font-size:24px;line-height:1}
 
-.actions{display:flex;gap:5px;flex-shrink:0;align-items:center}
-.act-btn{display:flex;align-items:center;gap:5px;padding:6px 10px;font-size:12px;font-weight:500;font-family:'DM Sans',sans-serif;border-radius:7px;cursor:pointer;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.07);color:rgba(255,255,255,.7);transition:all .15s;white-space:nowrap}
-.act-btn:hover{background:rgba(255,255,255,.12);color:#fff}
-.act-btn svg{width:13px;height:13px;flex-shrink:0}
-.act-btn.accent{border-color:rgba(99,102,241,.5);color:#818cf8}
-.act-btn.amber{border-color:rgba(245,158,11,.4);color:#fbbf24}
+/* ── CONTENT ── */
+.content{
+  flex:1;
+  position:relative;
+  background:#f4f6f9;
+}
 
-/* Frame area fills remaining height */
-.frame-wrap{flex:1;position:relative;overflow:hidden}
-.app-frame{position:absolute;inset:0;width:100%;height:100%;border:none;display:none;background:#f4f6f9;opacity:0;transition:opacity .2s ease}
-.app-frame.active{display:block}
-.app-frame.visible{opacity:1}
+iframe{
+  position:absolute;
+  inset:0;
+  width:100%;height:100%;
+  border:none;
+  display:none;
+  background:#f4f6f9;
+}
+iframe.active{display:block}
 
-.loader{position:absolute;inset:0;background:#0f172a;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;transition:opacity .25s;pointer-events:none;z-index:5}
-.loader.hidden{opacity:0;pointer-events:none}
-.spinner{width:34px;height:34px;border:3px solid rgba(255,255,255,.1);border-top-color:#6366f1;border-radius:50%;animation:spin .7s linear infinite}
+/* ── LOADER ── */
+.loader{
+  position:absolute;inset:0;
+  background:#0f172a;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
+  z-index:10;
+  transition:opacity .3s;
+}
+.loader.gone{opacity:0;pointer-events:none}
+.spinner{
+  width:36px;height:36px;
+  border:3px solid rgba(255,255,255,.1);
+  border-top-color:#6366f1;
+  border-radius:50%;
+  animation:spin .7s linear infinite;
+}
 @keyframes spin{to{transform:rotate(360deg)}}
-.loader-text{font-size:13px;color:rgba(255,255,255,.4)}
+.loader-txt{font-size:13px;color:rgba(255,255,255,.4)}
 
-/* Default preference popup */
+/* ── PREF BTN ── */
+.pref-row{
+  display:flex;justify-content:space-between;align-items:center;
+  background:#0f172a;padding:6px 14px 0;
+  flex-shrink:0;
+}
+.logo-txt{font-size:13px;font-weight:700;color:rgba(255,255,255,.6);letter-spacing:-.01em}
+.logo-txt span{color:#2dd4bf}
+.pref-btn{
+  font-size:11px;color:rgba(255,255,255,.35);
+  background:none;border:1px solid rgba(255,255,255,.1);
+  border-radius:5px;padding:3px 8px;cursor:pointer;
+  font-family:'DM Sans',sans-serif;
+  transition:all .15s;
+}
+.pref-btn:hover{color:rgba(255,255,255,.7);border-color:rgba(255,255,255,.25)}
+
+/* ── PREF POPUP ── */
 .pref-popup{
-  position:absolute;top:calc(100% + 6px);right:0;
-  background:#1e293b;border:1px solid rgba(255,255,255,.12);
-  border-radius:10px;padding:10px;min-width:210px;
-  z-index:50;box-shadow:0 8px 24px rgba(0,0,0,.4);
+  position:fixed;top:60px;right:10px;
+  background:#1e293b;border:1px solid rgba(255,255,255,.15);
+  border-radius:10px;padding:8px;min-width:190px;
+  z-index:100;box-shadow:0 8px 24px rgba(0,0,0,.5);
   display:none;
 }
 .pref-popup.open{display:block}
-.pref-popup-title{font-size:10px;font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;padding:0 4px}
-.pref-opt{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:7px;cursor:pointer;transition:background .12s;font-size:13px;font-weight:500;color:rgba(255,255,255,.7)}
+.pref-ttl{font-size:10px;font-weight:700;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.07em;padding:4px 8px 8px}
+.pref-opt{
+  display:flex;align-items:center;gap:9px;
+  padding:9px 10px;border-radius:7px;
+  cursor:pointer;font-size:13px;font-weight:500;
+  color:rgba(255,255,255,.6);
+  transition:background .12s;
+}
 .pref-opt:hover{background:rgba(255,255,255,.08);color:#fff}
-.pref-opt.active{color:#fff;background:rgba(99,102,241,.2)}
-.pref-opt-icon{font-size:16px}
-.pref-opt-star{margin-left:auto;font-size:12px;color:#fbbf24}
+.pref-opt.sel{background:rgba(99,102,241,.2);color:#fff}
+.pref-opt-star{margin-left:auto;color:#fbbf24;font-size:13px}
 
-/* Bridge bar */
-.bridge{position:fixed;bottom:0;left:0;right:0;background:rgba(15,23,42,.92);backdrop-filter:blur(8px);border-top:1px solid rgba(255,255,255,.08);padding:10px 16px;display:flex;align-items:center;gap:10px;z-index:20;transform:translateY(100%);transition:transform .3s ease;pointer-events:none}
-.bridge.show{transform:translateY(0);pointer-events:all}
-.bridge-text{font-size:13px;color:rgba(255,255,255,.7);flex:1;line-height:1.4}
-.bridge-text strong{color:#fff}
-.bridge-btn{padding:7px 14px;font-size:12px;font-weight:700;font-family:'DM Sans',sans-serif;border:none;border-radius:7px;cursor:pointer;background:linear-gradient(135deg,#6366f1,#2dd4bf);color:#fff;white-space:nowrap;flex-shrink:0;transition:opacity .15s}
-.bridge-btn:hover{opacity:.85}
-.bridge-close{width:24px;height:24px;border-radius:6px;border:1px solid rgba(255,255,255,.15);background:none;color:rgba(255,255,255,.5);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
-.bridge-close:hover{color:#fff}
-
-@media(max-width:480px){
-  .topbar-row1{height:44px;padding:0 12px}
-  .logo-name{display:none}
-  .nav-btn{padding:12px 6px}
+@media(max-width:400px){
+  .nav-btn{padding:12px 4px 10px}
   .nav-icon{font-size:20px}
-  .nav-label{font-size:11px}
-  .act-btn span{display:none}
-  .act-btn{padding:6px 8px}
 }
 </style>
 </head>
 <body>
 
-<nav class="topbar" id="topbar">
-  <div class="topbar-row1">
-    <a class="logo" href="#">
-      <div class="logo-mark">
-        <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M2 14V8L8 3l6 5v6H10v-4H6v4z" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/></svg>
-      </div>
-      <span class="logo-name">Finzzard</span>
-    </a>
-    <div class="actions" id="actions"></div>
-    <div style="position:relative">
-      <button type="button" class="act-btn" id="pref-btn" title="Nastavit výchozí aplikaci" style="gap:4px">
-        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="7" cy="7" r="2.5"/><path d="M7 1v1.5M7 11.5V13M1 7h1.5M11.5 7H13M3.05 3.05l1.06 1.06M9.89 9.89l1.06 1.06M10.95 3.05L9.89 4.11M4.11 9.89l-1.06 1.06"/></svg>
-        <span>Výchozí</span>
-      </button>
-      <div class="pref-popup" id="pref-popup">
-        <div class="pref-popup-title">Otevírat jako první</div>
-        <div class="pref-opt" data-app="finance"><span class="pref-opt-icon">💰</span>Finance<span class="pref-opt-star" id="pref-star-finance" style="display:none">★ výchozí</span></div>
-        <div class="pref-opt" data-app="invest"><span class="pref-opt-icon">📈</span>Investice<span class="pref-opt-star" id="pref-star-invest" style="display:none">★ výchozí</span></div>
-        <div class="pref-opt" data-app="real"><span class="pref-opt-icon">🏠</span>Nemovitosti<span class="pref-opt-star" id="pref-star-real" style="display:none">★ výchozí</span></div>
-      </div>
-    </div>
-  </div>
-  <div class="nav" id="main-nav">
-    <button class="nav-btn" data-app="finance" type="button">
-      <span class="nav-icon">💰</span><span class="nav-label">Finance</span>
-    </button>
-    <button class="nav-btn" data-app="invest" type="button">
-      <span class="nav-icon">📈</span><span class="nav-label">Investice</span>
-    </button>
-    <button class="nav-btn" data-app="real" type="button">
-      <span class="nav-icon">🏠</span><span class="nav-label">Nemovitosti</span>
-    </button>
-  </div>
+<div class="pref-row">
+  <div class="logo-txt">Fin<span>zzard</span></div>
+  <button class="pref-btn" id="pref-btn">★ Výchozí</button>
+</div>
+
+<nav class="nav">
+  <button class="nav-btn" data-app="finance" type="button">
+    <span class="nav-icon">💰</span>Finance
+  </button>
+  <button class="nav-btn" data-app="invest" type="button">
+    <span class="nav-icon">📈</span>Investice
+  </button>
+  <button class="nav-btn" data-app="real" type="button">
+    <span class="nav-icon">🏠</span>Nemovitosti
+  </button>
 </nav>
 
-<div class="frame-wrap">
-  <iframe class="app-frame" id="frame-finance" data-src="finance.html" title="Osobní finance"></iframe>
-  <iframe class="app-frame" id="frame-invest" data-src="investice.html" title="Investiční kalkulačka"></iframe>
-  <iframe class="app-frame" id="frame-real" data-src="nemovitosti.html" title="Kalkulačka nemovitostí"></iframe>
-  <div class="loader hidden" id="loader">
+<div class="content">
+  <iframe id="frame-finance"></iframe>
+  <iframe id="frame-invest"></iframe>
+  <iframe id="frame-real"></iframe>
+  <div class="loader" id="loader">
     <div class="spinner"></div>
-    <div class="loader-text">Načítání…</div>
-  </div>
-  <!-- Cross-section bridge -->
-  <div class="bridge" id="bridge">
-    <div class="bridge-text" id="bridge-text"></div>
-    <button type="button" class="bridge-btn" id="bridge-btn"></button>
-    <button type="button" class="bridge-close" id="bridge-close">×</button>
+    <div class="loader-txt">Načítání…</div>
   </div>
 </div>
 
+<div class="pref-popup" id="pref-popup">
+  <div class="pref-ttl">Otevírat jako první</div>
+  <div class="pref-opt" data-app="finance"><span>💰</span>Finance<span class="pref-opt-star" id="s-finance">★</span></div>
+  <div class="pref-opt" data-app="invest"><span>📈</span>Investice<span class="pref-opt-star" id="s-invest">★</span></div>
+  <div class="pref-opt" data-app="real"><span>🏠</span>Nemovitosti<span class="pref-opt-star" id="s-real">★</span></div>
+</div>
+
 <script>
-const PREF_KEY = 'finzzard-default-app';
-let defaultApp = localStorage.getItem(PREF_KEY) || 'finance';
-let current = defaultApp;
+const SRCS = {
+  finance: 'finance.html',
+  invest:  'investice.html',
+  real:    'nemovitosti.html'
+};
+const PK = 'finzzard-default';
+let def = localStorage.getItem(PK) || 'finance';
+let cur = null;
+const loaded = {};
 
-function updateNavHeight(){} // no-op, kept for safety
+function show(app){
+  if(cur === app) return;
+  // Hide current
+  if(cur) document.getElementById('frame-'+cur).classList.remove('active');
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active', b.dataset.app===app));
+  cur = app;
 
-function setActiveNav(app){
-  document.querySelectorAll('.nav-btn').forEach(b=>{
-    b.classList.toggle('active', b.dataset.app===app);
-    // Show star on default
-    const star = b.querySelector('.nav-default-star');
-    if(star) star.style.display = b.dataset.app===defaultApp ? '' : 'none';
-  });
-  // Preference popup stars
-  ['finance','invest','real'].forEach(a=>{
-    const el = document.getElementById('pref-star-'+a);
-    if(el) el.style.display = a===defaultApp ? '' : 'none';
-    const opt = document.querySelector(`.pref-opt[data-app="${a}"]`);
-    if(opt) opt.classList.toggle('active', a===defaultApp);
-  });
+  const fr = document.getElementById('frame-'+app);
+  fr.classList.add('active');
+
+  if(!loaded[app]){
+    document.getElementById('loader').classList.remove('gone');
+    fr.onload = ()=>{
+      document.getElementById('loader').classList.add('gone');
+      loaded[app] = true;
+    };
+    fr.src = SRCS[app];
+  } else {
+    document.getElementById('loader').classList.add('gone');
+  }
 }
 
+// Nav clicks
+document.querySelectorAll('.nav-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>show(btn.dataset.app));
+});
+
 // Preference popup
+function updatePrefUI(){
+  ['finance','invest','real'].forEach(a=>{
+    document.getElementById('s-'+a).style.display = a===def ? '' : 'none';
+    document.querySelector(`.pref-opt[data-app="${a}"]`).classList.toggle('sel', a===def);
+  });
+}
 document.getElementById('pref-btn').addEventListener('click', e=>{
   e.stopPropagation();
   document.getElementById('pref-popup').classList.toggle('open');
 });
 document.querySelectorAll('.pref-opt').forEach(opt=>{
   opt.addEventListener('click', ()=>{
-    defaultApp = opt.dataset.app;
-    localStorage.setItem(PREF_KEY, defaultApp);
-    setActiveNav(current);
+    def = opt.dataset.app;
+    localStorage.setItem(PK, def);
+    updatePrefUI();
     document.getElementById('pref-popup').classList.remove('open');
-    // Toast
-    const names={finance:'Finance',invest:'Investice',real:'Nemovitosti'};
-    const toast = document.createElement('div');
-    toast.style.cssText='position:fixed;top:16px;left:50%;transform:translateX(-50%);background:#1e293b;border:1px solid rgba(99,102,241,.4);color:#fff;font-family:DM Sans,sans-serif;font-size:13px;font-weight:600;padding:9px 18px;border-radius:9px;z-index:999;box-shadow:0 4px 16px rgba(0,0,0,.3)';
-    toast.textContent = '★ Výchozí: '+names[defaultApp];
-    document.body.appendChild(toast);
-    setTimeout(()=>toast.remove(), 2000);
   });
 });
 document.addEventListener('click', ()=>document.getElementById('pref-popup').classList.remove('open'));
-  save:   '<path d="M2 2h8l2 2v8a1 1 0 01-1 1H3a1 1 0 01-1-1V2z"/><path d="M5 2v3h4V2M4 8h6"/>',
-  load:   '<path d="M7 9V2M4 5l3-3 3 3M2 11h10"/>',
-  print:  '<rect x="2" y="5" width="10" height="7" rx="1"/><path d="M4 5V3h6v2M4 9h2M4 11h6"/>',
-  export: '<path d="M7 2v7M4 6l3 3 3-3M2 11h10"/>',
-  import: '<path d="M7 9V2M4 5l3-3 3 3M2 11h10"/>',
-};
 
-let current = 'finance';
-
-function fw(id){ return document.getElementById('frame-'+id)?.contentWindow; }
-
-function makeBtn(icon, label, cls, onClick){
-  const b = document.createElement('button');
-  b.type='button'; b.className='act-btn'+(cls?' '+cls:'');
-  b.innerHTML=`<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">${icon}</svg><span>${label}</span>`;
-  b.addEventListener('click', onClick);
-  return b;
-}
-
-function filePick(accept, cb){
-  const inp=document.createElement('input');inp.type='file';inp.accept=accept;inp.style.display='none';
-  inp.addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>cb(ev.target.result);r.readAsText(f,'UTF-8');});
-  document.body.appendChild(inp);inp.click();setTimeout(()=>inp.remove(),5000);
-}
-
-function renderActions(app){
-  const bar=document.getElementById('actions');bar.innerHTML='';
-  if(app==='finance'){
-    bar.appendChild(makeBtn(SVG.export,'Export','',()=>{try{fw('finance')?.exportCSV();}catch(e){}}));
-    bar.appendChild(makeBtn(SVG.import,'Import','accent',()=>{try{fw('finance')?.openImportModal();}catch(e){}}));
-  }
-  if(app==='invest'){
-    bar.appendChild(makeBtn(SVG.save,'Uložit','',()=>{
-      try{const w=fw('invest');const s=JSON.stringify(w.getState(),null,2);const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([s],{type:'application/json'}));a.download='kalkulacka.json';a.click();}catch(e){}
-    }));
-    bar.appendChild(makeBtn(SVG.load,'Načíst','',()=>{
-      filePick('.json',text=>{try{fw('invest')?.applyState(JSON.parse(text));}catch(e){}});
-    }));
-    bar.appendChild(makeBtn(SVG.print,'Tisknout','amber',()=>fw('invest')?.print()));
-  }
-  if(app==='real'){
-    bar.appendChild(makeBtn(SVG.save,'Uložit','',()=>{
-      try{const w=fw('real');const s=JSON.stringify({props:w.props,aid:w.aid,pid:w.pid},null,2);const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([s],{type:'application/json'}));a.download='nemovitosti.json';a.click();}catch(e){}
-    }));
-    bar.appendChild(makeBtn(SVG.load,'Načíst','',()=>{
-      filePick('.json',text=>{try{const w=fw('real');w.loadSt(JSON.parse(text));w.renderAll();}catch(e){}});
-    }));
-    bar.appendChild(makeBtn(SVG.print,'Tisknout','amber',()=>fw('real')?.print()));
-  }
-}
-
-document.querySelectorAll('.nav-btn').forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    const app=btn.dataset.app;
-    if(app===current)return;
-    current=app;
-    setActiveNav(app);
-    const frame=document.getElementById('frame-'+app);
-    const loader=document.getElementById('loader');
-    document.querySelectorAll('.app-frame.active').forEach(f=>{
-      f.classList.remove('visible');
-      setTimeout(()=>f.classList.remove('active'),180);
-    });
-    setTimeout(()=>{
-      if((!frame.src||frame.src===window.location.href)&&frame.dataset.src){
-        loader.classList.remove('hidden');
-        frame.addEventListener('load',()=>{loader.classList.add('hidden');frame.classList.add('visible');},{once:true});
-        frame.src=frame.dataset.src;
-      } else {
-        setTimeout(()=>frame.classList.add('visible'),30);
-      }
-      frame.classList.add('active');
-      renderActions(app);
-      hideBridge();
-      setTimeout(()=>showBridge(app), 900);
-    },180);
-  });
-});
-
-// Bridge bar — contextual nudges between sections
-const BRIDGES = {
-  finance: {text:'<strong>Pravidelně spoříte?</strong> Podívejte se, jak vaše úspory porostou v čase.', btn:'Otevřít Investice →', target:'invest'},
-  invest:  {text:'<strong>Vlastníte nebo plánujete nemovitost?</strong> Spočítejte si výnos a hypotéku.', btn:'Otevřít Nemovitosti →', target:'real'},
-  real:    {text:'<strong>Sledujete každodenní výdaje?</strong> Propojte s osobními financemi.', btn:'Otevřít Finance →', target:'finance'},
-};
-const bridgeDismissed = new Set(JSON.parse(localStorage.getItem('bridge-dismissed')||'[]'));
-
-function showBridge(app){
-  const b = BRIDGES[app];
-  if(!b||bridgeDismissed.has(app))return;
-  document.getElementById('bridge-text').innerHTML = b.text;
-  document.getElementById('bridge-btn').textContent = b.btn;
-  document.getElementById('bridge-btn').onclick = ()=>{ switchTo(b.target); hideBridge(); };
-  setTimeout(()=>document.getElementById('bridge').classList.add('show'), 1500);
-}
-function hideBridge(){ document.getElementById('bridge').classList.remove('show'); }
-document.getElementById('bridge-close').addEventListener('click',()=>{
-  hideBridge();
-  bridgeDismissed.add(current);
-  localStorage.setItem('bridge-dismissed', JSON.stringify([...bridgeDismissed]));
-});
-
-function switchTo(app){
-  const btn = document.querySelector(`.nav-btn[data-app="${app}"]`);
-  if(btn) btn.click();
-}
-
-// PDF export helper (premium feature hint)
-function addPdfBtn(bar){
-  const btn = makeBtn('<path d="M4 2h6l3 3v9H4V2z"/><path d="M10 2v3h3M6 9h4M6 11h2"/>', 'Export PDF', 'amber', ()=>{
-    const w = fw(current);
-    if(w && typeof w.print === 'function'){
-      // Trigger print — user can save as PDF
-      w.print();
-    }
-  });
-  bar.appendChild(btn);
-}
-
-// Init — activate default app
-setActiveNav(defaultApp);
-const defFrame = document.getElementById('frame-'+defaultApp);
-defFrame.classList.add('active');
-if(!defFrame.src||defFrame.src===window.location.href){
-  if(defFrame.dataset.src) defFrame.src=defFrame.dataset.src;
-}
-defFrame.addEventListener('load',()=>defFrame.classList.add('visible'),{once:true});
-setTimeout(()=>{ if(defFrame.src) defFrame.classList.add('visible'); },300);
-renderActions(defaultApp);
-updateNavHeight();
-window.addEventListener('resize',updateNavHeight);
-setTimeout(()=>showBridge(defaultApp), 2000);
+// Init
+updatePrefUI();
+show(def);
 </script>
 </body>
 </html>
