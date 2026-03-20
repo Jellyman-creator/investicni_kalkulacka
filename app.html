@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Finanční nástroje</title>
+<meta name="theme-color" content="#0f172a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Nástroje">
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:#0f172a;font-family:'DM Sans',sans-serif}
+
+.topbar{
+  height:52px;background:#0f172a;
+  border-bottom:1px solid rgba(255,255,255,.08);
+  display:flex;align-items:center;padding:0 16px;gap:10px;
+  position:relative;z-index:10;flex-shrink:0;
+}
+.logo{display:flex;align-items:center;gap:9px;text-decoration:none;margin-right:6px;flex-shrink:0}
+.logo-mark{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#6366f1,#2dd4bf)}
+.logo-name{font-size:14px;font-weight:700;color:#fff;letter-spacing:-.02em;white-space:nowrap}
+.nav{display:flex;gap:2px;background:rgba(255,255,255,.06);border-radius:9px;padding:3px;flex-shrink:0}
+.nav-btn{padding:7px 14px;font-size:13px;font-weight:600;font-family:'DM Sans',sans-serif;border:none;background:none;color:rgba(255,255,255,.5);cursor:pointer;border-radius:7px;transition:all .15s;white-space:nowrap;display:flex;align-items:center;gap:6px;-webkit-appearance:none;appearance:none}
+.nav-btn:hover{color:rgba(255,255,255,.8)}
+.nav-btn.active{background:rgba(255,255,255,.15);color:#fff;font-weight:700}
+.nav-icon{font-size:14px;line-height:1}
+.actions{margin-left:auto;display:flex;gap:5px;flex-shrink:0}
+.act-btn{display:flex;align-items:center;gap:5px;padding:6px 11px;font-size:12px;font-weight:500;font-family:'DM Sans',sans-serif;border-radius:7px;cursor:pointer;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.07);color:rgba(255,255,255,.7);transition:all .15s;white-space:nowrap}
+.act-btn:hover{background:rgba(255,255,255,.12);color:#fff}
+.act-btn svg{width:13px;height:13px;flex-shrink:0}
+.act-btn.accent{border-color:rgba(99,102,241,.5);color:#818cf8}
+.act-btn.amber{border-color:rgba(245,158,11,.4);color:#fbbf24}
+
+.frame-wrap{position:fixed;top:52px;left:0;right:0;bottom:0}
+.app-frame{position:absolute;inset:0;width:100%;height:100%;border:none;display:none;background:#fff;opacity:0;transition:opacity .2s ease}
+.app-frame.active{display:block}
+.app-frame.visible{opacity:1}
+
+.loader{position:absolute;inset:0;background:#0f172a;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;transition:opacity .25s;pointer-events:none;z-index:5}
+.loader.hidden{opacity:0;pointer-events:none}
+.spinner{width:34px;height:34px;border:3px solid rgba(255,255,255,.1);border-top-color:#6366f1;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loader-text{font-size:13px;color:rgba(255,255,255,.4)}
+
+/* Bridge bar */
+.bridge{position:absolute;bottom:0;left:0;right:0;background:rgba(15,23,42,.92);backdrop-filter:blur(8px);border-top:1px solid rgba(255,255,255,.08);padding:10px 16px;display:flex;align-items:center;gap:10px;z-index:20;transform:translateY(100%);transition:transform .3s ease;pointer-events:none}
+.bridge.show{transform:translateY(0);pointer-events:all}
+.bridge-text{font-size:13px;color:rgba(255,255,255,.7);flex:1;line-height:1.4}
+.bridge-text strong{color:#fff}
+.bridge-btn{padding:7px 14px;font-size:12px;font-weight:700;font-family:'DM Sans',sans-serif;border:none;border-radius:7px;cursor:pointer;background:linear-gradient(135deg,#6366f1,#2dd4bf);color:#fff;white-space:nowrap;flex-shrink:0;transition:opacity .15s}
+.bridge-btn:hover{opacity:.85}
+.bridge-close{width:24px;height:24px;border-radius:6px;border:1px solid rgba(255,255,255,.15);background:none;color:rgba(255,255,255,.5);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
+.bridge-close:hover{color:#fff}
+  .logo-name{display:none}
+  .nav-btn span{display:none}
+  .nav-btn{padding:7px 10px}
+  .act-btn span{display:none}
+  .act-btn{padding:6px 8px}
+  .topbar{padding:0 10px;gap:6px}
+}
+</style>
+</head>
+<body>
+
+<nav class="topbar">
+  <a class="logo" href="#">
+    <div class="logo-mark">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 14V8L8 3l6 5v6H10v-4H6v4z" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/></svg>
+    </div>
+    <span class="logo-name">Finanční nástroje</span>
+  </a>
+
+  <div class="nav">
+    <button class="nav-btn active" data-app="finance" type="button">
+      <span class="nav-icon">💰</span><span>Finance</span>
+    </button>
+    <button class="nav-btn" data-app="invest" type="button">
+      <span class="nav-icon">📈</span><span>Investice</span>
+    </button>
+    <button class="nav-btn" data-app="real" type="button">
+      <span class="nav-icon">🏠</span><span>Nemovitosti</span>
+    </button>
+  </div>
+
+  <div class="actions" id="actions"></div>
+</nav>
+
+<div class="frame-wrap">
+  <iframe class="app-frame active" id="frame-finance" src="finance.html" title="Osobní finance"></iframe>
+  <iframe class="app-frame" id="frame-invest" src="" data-src="index.html" title="Investiční kalkulačka"></iframe>
+  <iframe class="app-frame" id="frame-real" src="" data-src="nemovitosti.html" title="Kalkulačka nemovitostí"></iframe>
+  <div class="loader hidden" id="loader">
+    <div class="spinner"></div>
+    <div class="loader-text">Načítání…</div>
+  </div>
+  <!-- Cross-section bridge -->
+  <div class="bridge" id="bridge">
+    <div class="bridge-text" id="bridge-text"></div>
+    <button type="button" class="bridge-btn" id="bridge-btn"></button>
+    <button type="button" class="bridge-close" id="bridge-close">×</button>
+  </div>
+</div>
+
+<script>
+const SVG = {
+  save:   '<path d="M2 2h8l2 2v8a1 1 0 01-1 1H3a1 1 0 01-1-1V2z"/><path d="M5 2v3h4V2M4 8h6"/>',
+  load:   '<path d="M7 9V2M4 5l3-3 3 3M2 11h10"/>',
+  print:  '<rect x="2" y="5" width="10" height="7" rx="1"/><path d="M4 5V3h6v2M4 9h2M4 11h6"/>',
+  export: '<path d="M7 2v7M4 6l3 3 3-3M2 11h10"/>',
+  import: '<path d="M7 9V2M4 5l3-3 3 3M2 11h10"/>',
+};
+
+let current = 'finance';
+
+function fw(id){ return document.getElementById('frame-'+id)?.contentWindow; }
+
+function makeBtn(icon, label, cls, onClick){
+  const b = document.createElement('button');
+  b.type='button'; b.className='act-btn'+(cls?' '+cls:'');
+  b.innerHTML=`<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">${icon}</svg><span>${label}</span>`;
+  b.addEventListener('click', onClick);
+  return b;
+}
+
+function filePick(accept, cb){
+  const inp=document.createElement('input');inp.type='file';inp.accept=accept;inp.style.display='none';
+  inp.addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>cb(ev.target.result);r.readAsText(f,'UTF-8');});
+  document.body.appendChild(inp);inp.click();setTimeout(()=>inp.remove(),5000);
+}
+
+function renderActions(app){
+  const bar=document.getElementById('actions');bar.innerHTML='';
+  if(app==='finance'){
+    bar.appendChild(makeBtn(SVG.export,'Export','',()=>{try{fw('finance')?.exportCSV();}catch(e){}}));
+    bar.appendChild(makeBtn(SVG.import,'Import','accent',()=>{try{fw('finance')?.openImportModal();}catch(e){}}));
+  }
+  if(app==='invest'){
+    bar.appendChild(makeBtn(SVG.save,'Uložit','',()=>{
+      try{const w=fw('invest');const s=JSON.stringify(w.getState(),null,2);const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([s],{type:'application/json'}));a.download='kalkulacka.json';a.click();}catch(e){}
+    }));
+    bar.appendChild(makeBtn(SVG.load,'Načíst','',()=>{
+      filePick('.json',text=>{try{fw('invest')?.applyState(JSON.parse(text));}catch(e){}});
+    }));
+    bar.appendChild(makeBtn(SVG.print,'Tisknout','amber',()=>fw('invest')?.print()));
+  }
+  if(app==='real'){
+    bar.appendChild(makeBtn(SVG.save,'Uložit','',()=>{
+      try{const w=fw('real');const s=JSON.stringify({props:w.props,aid:w.aid,pid:w.pid},null,2);const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([s],{type:'application/json'}));a.download='nemovitosti.json';a.click();}catch(e){}
+    }));
+    bar.appendChild(makeBtn(SVG.load,'Načíst','',()=>{
+      filePick('.json',text=>{try{const w=fw('real');w.loadSt(JSON.parse(text));w.renderAll();}catch(e){}});
+    }));
+    bar.appendChild(makeBtn(SVG.print,'Tisknout','amber',()=>fw('real')?.print()));
+  }
+}
+
+document.querySelectorAll('.nav-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const app=btn.dataset.app;
+    if(app===current)return;
+    current=app;
+    document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    const frame=document.getElementById('frame-'+app);
+    const loader=document.getElementById('loader');
+    const needsLoad=!frame.src||frame.src===window.location.href||frame.src===window.location.href+'#';
+
+    // Fade out current, switch, fade in
+    document.querySelectorAll('.app-frame.active').forEach(f=>{
+      f.classList.remove('visible');
+      setTimeout(()=>f.classList.remove('active'),200);
+    });
+
+    setTimeout(()=>{
+      if(needsLoad&&frame.dataset.src){
+        loader.classList.remove('hidden');
+        frame.addEventListener('load',()=>{
+          loader.classList.add('hidden');
+          frame.classList.add('visible');
+        },{once:true});
+        frame.src=frame.dataset.src;
+      } else {
+        setTimeout(()=>frame.classList.add('visible'),30);
+      }
+      frame.classList.add('active');
+      renderActions(app);
+      hideBridge();
+      setTimeout(()=>showBridge(app), 800);
+    },200);
+  });
+});
+
+// Bridge bar — contextual nudges between sections
+const BRIDGES = {
+  finance: {text:'<strong>Pravidelně spoříte?</strong> Podívejte se, jak vaše úspory porostou v čase.', btn:'Otevřít Investice →', target:'invest'},
+  invest:  {text:'<strong>Vlastníte nebo plánujete nemovitost?</strong> Spočítejte si výnos a hypotéku.', btn:'Otevřít Nemovitosti →', target:'real'},
+  real:    {text:'<strong>Sledujete každodenní výdaje?</strong> Propojte s osobními financemi.', btn:'Otevřít Finance →', target:'finance'},
+};
+const bridgeDismissed = new Set(JSON.parse(localStorage.getItem('bridge-dismissed')||'[]'));
+
+function showBridge(app){
+  const b = BRIDGES[app];
+  if(!b||bridgeDismissed.has(app))return;
+  document.getElementById('bridge-text').innerHTML = b.text;
+  document.getElementById('bridge-btn').textContent = b.btn;
+  document.getElementById('bridge-btn').onclick = ()=>{ switchTo(b.target); hideBridge(); };
+  setTimeout(()=>document.getElementById('bridge').classList.add('show'), 1500);
+}
+function hideBridge(){ document.getElementById('bridge').classList.remove('show'); }
+document.getElementById('bridge-close').addEventListener('click',()=>{
+  hideBridge();
+  bridgeDismissed.add(current);
+  localStorage.setItem('bridge-dismissed', JSON.stringify([...bridgeDismissed]));
+});
+
+function switchTo(app){
+  const btn = document.querySelector(`.nav-btn[data-app="${app}"]`);
+  if(btn) btn.click();
+}
+
+// PDF export helper (premium feature hint)
+function addPdfBtn(bar){
+  const btn = makeBtn('<path d="M4 2h6l3 3v9H4V2z"/><path d="M10 2v3h3M6 9h4M6 11h2"/>', 'Export PDF', 'amber', ()=>{
+    const w = fw(current);
+    if(w && typeof w.print === 'function'){
+      // Trigger print — user can save as PDF
+      w.print();
+    }
+  });
+  bar.appendChild(btn);
+}
+
+// Fade in initial frame
+setTimeout(()=>document.getElementById('frame-finance').classList.add('visible'),100);
+setTimeout(()=>showBridge('finance'), 100);
+</script>
+</body>
+</html>

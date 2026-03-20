@@ -76,15 +76,25 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
 .hero-body{font-size:14px;color:rgba(255,255,255,.55);line-height:1.75;max-width:480px;margin-bottom:24px}
 .hero-cta{display:inline-block;background:var(--blue);color:#fff;font-size:14px;font-weight:600;padding:10px 22px;border-radius:8px;cursor:pointer;text-decoration:none;transition:opacity .15s}
 .hero-cta:hover{opacity:.88}
-.kpi-strip{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid rgba(255,255,255,.08);margin-top:28px}
-.kpi{padding:16px 18px;border-right:1px solid rgba(255,255,255,.08);min-width:0;overflow:hidden}
+.kpi-strip{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;border-top:1px solid rgba(255,255,255,.08);margin-top:20px}
+.kpi-hero{border-right:1px solid rgba(78,205,160,.2)!important;background:rgba(78,205,160,.07)}
+.kpi-big{font-size:30px!important;font-weight:700!important;letter-spacing:-.03em;line-height:1.05}
+.kpi{padding:14px 18px;border-right:1px solid rgba(255,255,255,.08);min-width:0;overflow:hidden}
 .kpi:last-child{border-right:none}
 .kpi-label{font-size:10px;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.kpi-val{font-size:17px;font-weight:600;color:#fff;font-family:var(--mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kpi-val{font-size:17px;font-weight:600;color:#fff;font-family:var(--mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:all .4s ease}
 .kpi-val.blue{color:var(--blue)}
 .kpi-val.teal{color:var(--teal)}
+.kpi-hint{font-size:10px;color:rgba(255,255,255,.25);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
-.page{padding:24px;max-width:1100px;margin:0 auto}
+/* Sim table mobile cards */
+.sim-cards{display:none;flex-direction:column;gap:8px;padding:4px 0}
+.sim-card{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px}
+.sim-card-yr{font-size:11px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
+.sim-card-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px 10px}
+.sim-card-row{display:flex;justify-content:space-between;align-items:baseline;gap:4px}
+.sim-card-lbl{font-size:11px;color:var(--txt3)}
+.sim-card-val{font-size:12px;font-weight:600;font-family:var(--mono);color:var(--txt)}
 .top-grid{display:grid;grid-template-columns:340px 1fr;gap:24px;margin-bottom:20px;align-items:start}
 
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:20px}
@@ -341,8 +351,9 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
   .compare-grid{grid-template-columns:1fr}
   .insights-row{grid-template-columns:1fr}
 
-  /* Sim table */
-  .sim-table{font-size:11px;min-width:400px}
+  /* Sim table on mobile → cards */
+  #sim-table-desktop{display:none}
+  #sim-cards{display:flex!important;flex-direction:column;gap:8px;padding:8px}
 
   /* Action buttons */
   #dep-btn-in,#dep-btn-out,#tx-btn-in,#tx-btn-out{font-size:13px;padding:9px 8px}
@@ -403,10 +414,10 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
   </div>
   <div class="hero-body">Většina kalkulaček skončí v den odchodu do důchodu. Tato počítá dál.</div>
   <div class="kpi-strip">
-    <div class="kpi"><div class="kpi-label">Portfolio dnes</div><div class="kpi-val blue" id="kpi-now">0 Kč</div></div>
-    <div class="kpi"><div class="kpi-label">Celkem vloženo</div><div class="kpi-val" id="kpi-invested">0 Kč</div></div>
-    <div class="kpi"><div class="kpi-label">Celkové výnosy</div><div class="kpi-val teal" id="kpi-returns">0 Kč</div></div>
-    <div class="kpi"><div class="kpi-label">Cílová hodnota portfolia</div><div class="kpi-val teal" id="kpi-final">0 Kč</div></div>
+    <div class="kpi kpi-hero"><div class="kpi-label">Cílová hodnota portfolia</div><div class="kpi-val teal kpi-big" id="kpi-final">0 Kč</div><div class="kpi-hint" id="kpi-final-hint"></div></div>
+    <div class="kpi"><div class="kpi-label">Portfolio dnes</div><div class="kpi-val blue" id="kpi-now">0 Kč</div><div class="kpi-hint" id="kpi-now-hint"></div></div>
+    <div class="kpi"><div class="kpi-label">Celkem vloženo</div><div class="kpi-val" id="kpi-invested">0 Kč</div><div class="kpi-hint" id="kpi-invested-hint"></div></div>
+    <div class="kpi"><div class="kpi-label">Celkové výnosy</div><div class="kpi-val teal" id="kpi-returns">0 Kč</div><div class="kpi-hint" id="kpi-returns-hint"></div></div>
   </div>
   <!-- Inflation controls -->
   <div style="display:flex;align-items:center;gap:14px;padding:12px 0;flex-wrap:wrap">
@@ -521,7 +532,16 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
   </div>
 
   <!-- Jednorázové vklady/výběry — merged -->
-  <div class="card">
+  <div id="adv-toggle-bar" style="margin:16px 0 0;display:flex;align-items:center;gap:10px;cursor:pointer" onclick="toggleAdvanced()">
+    <div style="flex:1;height:1px;background:var(--border)"></div>
+    <button type="button" id="adv-toggle-btn" style="display:flex;align-items:center;gap:6px;padding:7px 14px;font-size:12px;font-weight:600;font-family:var(--font);border:1px solid var(--border2);border-radius:20px;background:var(--surface);color:var(--txt2);cursor:pointer;transition:all .15s;white-space:nowrap">
+      <svg id="adv-toggle-icon" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><polyline points="2,4 6,8 10,4"/></svg>
+      Pokročilá nastavení
+    </button>
+    <div style="flex:1;height:1px;background:var(--border)"></div>
+  </div>
+  <div id="adv-sections" style="display:none">
+  <div class="card" style="margin-top:16px">
     <div class="card-hdr"><div class="card-dot" style="background:var(--teal)"></div><div class="card-title">Jednorázové vklady/výběry</div></div>
     <div class="card-body">
       <!-- Two action buttons -->
@@ -680,10 +700,25 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
   <div class="card">
     <div class="card-hdr"><div class="card-dot" style="background:var(--navy)"></div><div class="card-title">Simulace rok po roce</div></div>
     <div class="sim-wrap" style="max-height:200px">
-      <table class="sim-table">
+      <table class="sim-table" id="sim-table-desktop">
         <thead><tr><th style="text-align:center">Rok</th><th style="text-align:right">Rok</th><th>Výnos %</th><th>Měs. vklad</th><th>Jednoráz.</th><th>Výnos Kč</th><th>Kum. vloženo</th><th>Portfolio</th></tr></thead>
         <tbody id="sim-body"></tbody>
       </table>
+      <!-- Mobile cards (shown on small screens) -->
+      <div id="sim-cards" style="display:none"></div>
+    </div>
+  </div>
+  </div><!-- /adv-sections -->
+
+  <!-- CONTEXTUAL BRIDGE -->
+  <div style="margin-top:20px;background:linear-gradient(135deg,#1a2332,#243447);border-radius:12px;padding:18px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+    <div>
+      <div style="font-size:13px;font-weight:600;color:rgba(255,255,255,.9);margin-bottom:3px">Máte i nemovitost v portfoliu?</div>
+      <div style="font-size:12px;color:rgba(255,255,255,.5)">Přidejte ji do kalkulačky nemovitostí a získejte kompletní přehled.</div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button type="button" onclick="window.parent&&window.parent.document.querySelector('[data-app=real]')?.click()" style="padding:9px 16px;font-size:13px;font-weight:600;font-family:var(--font);border:none;background:var(--teal);color:var(--navy);border-radius:8px;cursor:pointer;transition:opacity .15s">🏠 Otevřít Nemovitosti</button>
+      <button type="button" id="btn-pdf" onclick="window.print()" style="padding:9px 16px;font-size:13px;font-weight:600;font-family:var(--font);border:1px solid rgba(255,255,255,.2);background:none;color:rgba(255,255,255,.8);border-radius:8px;cursor:pointer;transition:all .15s">📄 Exportovat PDF</button>
     </div>
   </div>
 
@@ -1567,11 +1602,28 @@ function renderTxTable(kind){
 // KPIs
 function renderKPIs(rows){
   const last=rows[rows.length-1]||{};
+  const first=rows[0]||{};
   const hor=getHorizon();
-  document.getElementById('kpi-now').textContent=fmt(rows[0]?.portfolio||0);
-  document.getElementById('kpi-invested').textContent=fmt((last.cumInit||0)+(last.cumReg||0));
-  document.getElementById('kpi-returns').textContent='+'+fmt(Math.max(0,last.cumGain||0));
-  document.getElementById('kpi-final').textContent=fmtR(last.portfolio||0, hor);
+  const startYr=getStartYear();
+  const by=getBirthYear();
+  const finalVal=last.portfolio||0;
+  const invested=(last.cumInit||0)+(last.cumReg||0);
+  const returns=Math.max(0,last.cumGain||0);
+  const multiplier=invested>0?(finalVal/invested).toFixed(1)+'×':null;
+
+  document.getElementById('kpi-now').textContent=fmt(first.portfolio||0);
+  document.getElementById('kpi-invested').textContent=fmt(invested);
+  document.getElementById('kpi-returns').textContent='+'+fmt(returns);
+  document.getElementById('kpi-final').textContent=fmtR(finalVal, hor);
+
+  // Hints
+  const endYr=startYr+hor;
+  const ageStr=by?(', '+(endYr-by)+' let'):'';
+  const sh=(id,txt)=>{const el=document.getElementById(id);if(el)el.textContent=txt||'';};
+  sh('kpi-final-hint', hor>0?(endYr+ageStr):'');
+  sh('kpi-now-hint', startYr?'výchozí stav':'');
+  sh('kpi-invested-hint', multiplier?('výnos '+multiplier):'');
+  sh('kpi-returns-hint', invested>0?Math.round(returns/Math.max(1,invested)*100)+'% zhodnocení':'');
 }
 
 // INFLATION MODE TOGGLE
@@ -2036,8 +2088,120 @@ function initDefaultPhases(){
 // Always set startYear default before loading saved state
 document.getElementById('startYear').value = new Date().getFullYear();
 
-try{
-  const saved=localStorage.getItem('inv-calc-v9');
+// ─── ADVANCED SECTIONS TOGGLE ────────────────────────────────────────────────
+function toggleAdvanced(){
+  const sec=document.getElementById('adv-sections');
+  const icon=document.getElementById('adv-toggle-icon');
+  const btn=document.getElementById('adv-toggle-btn');
+  const open=sec.style.display==='none';
+  sec.style.display=open?'':'none';
+  btn.innerHTML=(open
+    ?'<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><polyline points="2,8 6,4 10,8"/></svg> Skrýt pokročilá nastavení'
+    :'<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><polyline points="2,4 6,8 10,4"/></svg> Pokročilá nastavení');
+}
+
+// ─── MOBILE SIM CARDS ────────────────────────────────────────────────────────
+function renderSimCards(rows){
+  const el=document.getElementById('sim-cards');
+  if(!el)return;
+  const hor=getHorizon();
+  const step=hor<=10?2:hor<=20?5:10;
+  const milestones=rows.filter(r=>r.yr>0&&(r.yr%step===0||r.yr===hor));
+  el.innerHTML=milestones.map(r=>{
+    const pct=Math.round((r.cumGain||0)/(r.portfolio||1)*100);
+    return `<div style="padding:10px 14px;border-bottom:1px solid var(--border);display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;align-items:center">
+      <div><div style="font-size:10px;color:var(--txt3);margin-bottom:1px">Rok ${r.yr} (${r.calYr})</div><div style="font-size:14px;font-weight:700;color:var(--blue);font-family:var(--mono)">${fmtShort(r.portfolio)}</div></div>
+      <div><div style="font-size:10px;color:var(--txt3);margin-bottom:1px">Vloženo</div><div style="font-size:12px;font-weight:600;font-family:var(--mono)">${fmtShort(r.cumInit+r.cumReg)}</div></div>
+      <div><div style="font-size:10px;color:var(--txt3);margin-bottom:1px">Výnos</div><div style="font-size:12px;font-weight:600;color:var(--teal);font-family:var(--mono)">+${pct}%</div></div>
+    </div>`;
+  }).join('');
+}
+
+// Patch renderSimTable to also render mobile cards and switch visibility
+const _origRenderSimTable = renderSimTable;
+function renderSimTable(rows){
+  _origRenderSimTable(rows);
+  renderSimCards(rows);
+}
+
+// Switch table/cards based on screen width
+function updateSimLayout(){
+  const mobile=window.innerWidth<600;
+  const tbl=document.getElementById('sim-table-desktop');
+  const cds=document.getElementById('sim-cards');
+  if(tbl)tbl.style.display=mobile?'none':'';
+  if(cds)cds.style.display=mobile?'':'none';
+}
+window.addEventListener('resize',updateSimLayout);
+updateSimLayout();
+
+// ─── ONBOARDING WIZARD ───────────────────────────────────────────────────────
+function showOnboarding(){
+  const overlay=document.createElement('div');
+  overlay.id='onboarding-overlay';
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(15,23,42,.85);z-index:900;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(6px)';
+  overlay.innerHTML=`
+    <div style="background:#fff;border-radius:16px;width:100%;max-width:460px;overflow:hidden;box-shadow:0 25px 60px rgba(0,0,0,.35)">
+      <div style="background:linear-gradient(135deg,#1a2332,#243447);padding:24px 24px 20px">
+        <div style="font-size:11px;font-weight:600;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Vítejte v kalkulačce</div>
+        <div style="font-size:22px;font-weight:600;color:#fff;line-height:1.25">Za kolik budete mít<br>dost na důchod?</div>
+        <div style="font-size:13px;color:rgba(255,255,255,.5);margin-top:8px">3 otázky a máte výsledek</div>
+      </div>
+      <div style="padding:24px" id="wiz-body">
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <div>
+            <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:6px">Kolik máte teď naspořeno?</label>
+            <div style="position:relative"><input id="wiz-start" type="number" placeholder="0" min="0" step="50000" style="width:100%;padding:11px 46px 11px 13px;font-size:15px;font-family:'DM Mono',monospace;border:1px solid #dde1e7;border-radius:8px;outline:none;transition:border .15s"><span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:12px;color:#6b7280;pointer-events:none">Kč</span></div>
+            <div style="font-size:11px;color:#9ca3af;margin-top:4px">Pokud začínáte od nuly, nechte prázdné</div>
+          </div>
+          <div>
+            <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:6px">Kolik měsíčně odkládáte na investice?</label>
+            <div style="position:relative"><input id="wiz-monthly" type="number" placeholder="5 000" min="0" step="500" style="width:100%;padding:11px 46px 11px 13px;font-size:15px;font-family:'DM Mono',monospace;border:1px solid #dde1e7;border-radius:8px;outline:none;transition:border .15s"><span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:12px;color:#6b7280;pointer-events:none">Kč/m</span></div>
+          </div>
+          <div>
+            <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:6px">Váš rok narození</label>
+            <input id="wiz-by" type="number" placeholder="např. 1985" min="1940" max="2005" style="width:100%;padding:11px 13px;font-size:15px;font-family:'DM Mono',monospace;border:1px solid #dde1e7;border-radius:8px;outline:none;transition:border .15s">
+          </div>
+        </div>
+        <button type="button" id="wiz-submit" style="width:100%;margin-top:20px;padding:13px;font-size:15px;font-weight:700;font-family:'DM Sans',sans-serif;border:none;background:linear-gradient(135deg,#1a2332,#4A9EE0);color:#fff;border-radius:10px;cursor:pointer;transition:opacity .15s">Ukázat výsledek →</button>
+        <button type="button" id="wiz-skip" style="width:100%;margin-top:8px;padding:9px;font-size:13px;font-family:'DM Sans',sans-serif;border:none;background:none;color:#9ca3af;cursor:pointer">Přeskočit — zadat ručně</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+
+  // Focus first empty field
+  setTimeout(()=>document.getElementById('wiz-start')?.focus(),100);
+
+  document.getElementById('wiz-submit').addEventListener('click',()=>{
+    const start=parseFloat(document.getElementById('wiz-start').value)||0;
+    const monthly=parseFloat(document.getElementById('wiz-monthly').value)||5000;
+    const by=parseInt(document.getElementById('wiz-by').value)||0;
+    const curYear=new Date().getFullYear();
+    const retireAge=65;
+    const hor=by>0?Math.max(5,Math.min(70,retireAge-(curYear-by))):30;
+
+    document.getElementById('startAmount').value=start||'';
+    document.getElementById('startYear').value=curYear;
+    document.getElementById('birthYear').value=by||'';
+    document.getElementById('horizon').value=hor;
+    document.getElementById('horizon-slider').value=hor;
+    document.getElementById('horizon-val').textContent=hor;
+
+    if(monthly>0){
+      depIn=[{from:1,to:hor,val:monthly}];
+    }
+    closeOnboarding();
+    renderDepTL('in');renderDepTL('out');recalc();
+  });
+  document.getElementById('wiz-skip').addEventListener('click',closeOnboarding);
+}
+
+function closeOnboarding(){
+  document.getElementById('onboarding-overlay')?.remove();
+  localStorage.setItem('inv-onboarded','1');
+}
+
+try{const saved=localStorage.getItem('inv-calc-v9');
   if(saved){
     applyState(JSON.parse(saved));
     // Safety: if phases ended up empty, reinitialize
@@ -2047,6 +2211,8 @@ try{
     prevHorizon=getHorizon();initDefaultPhases();
     renderDepTL('in');renderDepTL('out');renderPhaseTL();
     renderRulesUnified();renderTxTable('in');renderTxTable('out');recalc();
+    // Show onboarding on first ever visit
+    if(!localStorage.getItem('inv-onboarded')) setTimeout(showOnboarding, 400);
   }
 }catch(e){
   console.warn('Init error:',e);
