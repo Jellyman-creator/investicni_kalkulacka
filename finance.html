@@ -36,8 +36,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:14p
 .tb-btn svg{width:13px;height:13px}
 
 /* NAV TABS */
-.nav-tabs{background:var(--bg2);border-bottom:1px solid var(--border);display:flex;overflow-x:auto;scrollbar-width:none;padding:0 12px}
-.nav-tabs::-webkit-scrollbar{display:none}
+.nav-tabs{display:none}
 .view{display:none}.view.active{display:block}
 .nav-tab{padding:12px 16px;font-size:13px;font-weight:500;font-family:var(--font);border:none;background:none;color:var(--txt3);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all .15s}
 .nav-tab:hover{color:var(--txt2)}
@@ -296,6 +295,27 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:14p
   .logo-sub{display:none}
   .tx-del{opacity:.7}
 }
+
+/* Bottom navigation */
+.bottom-nav{
+  position:fixed;bottom:0;left:0;right:0;
+  background:var(--bg2);border-top:1px solid var(--border);
+  display:flex;z-index:150;flex-shrink:0;
+}
+.bottom-nav-btn{
+  flex:1;padding:10px 4px 12px;
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  border:none;background:none;color:var(--txt3);
+  cursor:pointer;font-family:var(--font);font-size:9px;font-weight:600;
+  text-transform:uppercase;letter-spacing:.04em;
+  transition:all .15s;-webkit-appearance:none;
+}
+.bottom-nav-btn:hover{color:var(--txt2)}
+.bottom-nav-btn.active{color:var(--accent2)}
+.bottom-nav-btn.active .bnb-icon{background:rgba(99,102,241,.15);border-radius:8px}
+.bnb-icon{font-size:18px;padding:3px 10px;transition:all .15s}
+/* Push page content above bottom nav */
+.page{padding-bottom:72px!important}
 </style>
 </head>
 <body><script>if(window.self!==window.top){document.addEventListener('DOMContentLoaded',()=>{const t=document.querySelector('.topbar');if(t)t.style.display='none';})}</script>
@@ -316,14 +336,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:14p
   </div>
 </nav>
 
-<div class="nav-tabs">
-  <button type="button" class="nav-tab active" data-view="dashboard">📊 Přehled</button>
-  <button type="button" class="nav-tab" data-view="transactions">📋 Transakce</button>
-  <button type="button" class="nav-tab" data-view="recurring">🔁 Pravidelné</button>
-  <button type="button" class="nav-tab" data-view="categories">🏷 Kategorie</button>
-  <button type="button" class="nav-tab" data-view="goals">🎯 Cíle</button>
-  <button type="button" class="nav-tab" data-view="badges" id="badges-tab">🏅 Odměny</button>
-</div>
+<div class="nav-tabs"></div><!-- tabs hidden, using bottom nav -->
 
 <main class="page">
 
@@ -385,7 +398,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:14p
       <div class="card">
         <div class="card-hdr"><div class="card-title">Trend výdajů (6 měsíců)</div></div>
         <div class="card-body" style="padding:10px">
-          <div class="chart-wrap" style="height:180px"><canvas id="trend-chart"></canvas></div>
+          <div class="chart-wrap" style="height:200px"><canvas id="trend-chart"></canvas></div>
         </div>
       </div>
     </div>
@@ -1267,6 +1280,16 @@ function doImport(){
 
 // ─── WIRE EVENTS ─────────────────────────────────────────────────────────────
 // Nav tabs
+document.querySelectorAll('.bottom-nav-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.bottom-nav-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+    btn.classList.add('active');
+    ge('view-'+btn.dataset.view)?.classList.add('active');
+    renderAll();
+    if(btn.dataset.view==='badges') renderBadgesView();
+  });
+});
 document.querySelectorAll('.nav-tab').forEach(btn=>{
   btn.addEventListener('click',()=>{
     document.querySelectorAll('.nav-tab').forEach(b=>b.classList.remove('active'));
@@ -1443,7 +1466,7 @@ const BADGES = [
 // Weekly challenges (rotate by week number)
 const CHALLENGE_POOL = [
   {id:'c_log3',    icon:'📅', title:'Logujte 3 dny',    desc:'Zadejte výdaje alespoň 3 různé dny tento týden.',    xp:50,  check:(txs)=>{const days=new Set(txs.map(t=>t.date));return days.size>=3;}},
-  {id:'c_food',    icon:'🥗', title:'Jídlo pod 3 000',  desc:'Udržte výdaje za jídlo pod 3 000 Kč tento týden.',   xp:75,  check:(txs,cats)=>{const foodCat=cats.find(c=>c.name==='Jídlo');const sum=txs.filter(t=>t.catId===foodCat?.id&&t.type==='expense').reduce((s,t)=>s+t.amount,0);return foodCat&&sum>0&&sum<3000;}},
+  {id:'c_food', hidden:true,    icon:'🥗', title:'Jídlo pod 3 000',  desc:'Udržte výdaje za jídlo pod 3 000 Kč tento týden.',   xp:75,  check:(txs,cats)=>{const foodCat=cats.find(c=>c.name==='Jídlo');const sum=txs.filter(t=>t.catId===foodCat?.id&&t.type==='expense').reduce((s,t)=>s+t.amount,0);return foodCat&&sum>0&&sum<3000;}},
   {id:'c_5cats',   icon:'🗂', title:'5 kategorií',      desc:'Použijte alespoň 5 různých kategorií výdajů.',       xp:60,  check:(txs)=>{return new Set(txs.filter(t=>t.type==='expense').map(t=>t.catId)).size>=5;}},
   {id:'c_daily7',  icon:'🔥', title:'7 dní v řadě',     desc:'Zadejte výdaj každý den tento týden.',                xp:100, check:(txs)=>{const days=new Set(txs.map(t=>t.date));return[0,1,2,3,4,5,6].every(d=>{const dt=new Date();dt.setDate(dt.getDate()-d);return days.has(dt.toISOString().slice(0,10));});}},
   {id:'c_save',    icon:'💰', title:'Ušetřete 1 000',   desc:'Mějte bilanci alespoň +1 000 Kč za tento týden.',    xp:80,  check:(txs)=>{const bal=txs.reduce((s,t)=>s+(t.type==='income'?t.amount:-t.amount),0);return bal>=1000;}},
@@ -1452,7 +1475,8 @@ const CHALLENGE_POOL = [
 function getWeekChallenge(){
   const now=new Date();
   const week=Math.floor((now-new Date(now.getFullYear(),0,1))/604800000);
-  return CHALLENGE_POOL[week%CHALLENGE_POOL.length];
+  const visible=CHALLENGE_POOL.filter(c=>!c.hidden);
+  return visible[week%visible.length];
 }
 
 function saveGstate(){ try{localStorage.setItem(GLS,JSON.stringify(gstate));}catch(e){} }
@@ -1708,5 +1732,14 @@ renderBadgesView();
 checkBadges();
 maybeShowCheckin();
 </script>
+
+<nav class="bottom-nav">
+  <button type="button" class="bottom-nav-btn active" data-view="dashboard"><span class="bnb-icon">📊</span>Přehled</button>
+  <button type="button" class="bottom-nav-btn" data-view="transactions"><span class="bnb-icon">📋</span>Transakce</button>
+  <button type="button" class="bottom-nav-btn" data-view="recurring"><span class="bnb-icon">🔁</span>Pravidelné</button>
+  <button type="button" class="bottom-nav-btn" data-view="categories"><span class="bnb-icon">🏷</span>Kategorie</button>
+  <button type="button" class="bottom-nav-btn" data-view="goals"><span class="bnb-icon">🎯</span>Cíle</button>
+  <button type="button" class="bottom-nav-btn" id="badges-tab" data-view="badges"><span class="bnb-icon">🏅</span>Odměny</button>
+</nav>
 </body>
 </html>
