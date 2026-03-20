@@ -177,9 +177,9 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
     <div><div class="logo-name">Kalkulačka nemovitostí</div><div class="logo-sub">Portfolio projekce</div></div>
   </a>
   <div class="topbar-actions">
-    <button type="button" class="tb-btn" id="btn-save"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 2h8l2 2v8a1 1 0 01-1 1H3a1 1 0 01-1-1V2z"/><path d="M5 2v3h4V2M4 8h6"/></svg><span>Uložit</span></button>
-    <label class="tb-btn" style="cursor:pointer"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 2v7M4 6l3 3 3-3M2 11h10"/></svg><span>Načíst</span><input type="file" id="btn-load" accept=".json" style="display:none"></label>
-    <button type="button" class="tb-btn" style="border-color:rgba(245,158,11,.35);color:var(--amber)" onclick="window.print()"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="10" height="7" rx="1"/><path d="M4 5V3h6v2M4 9h2M4 11h6"/></svg><span>Tisknout</span></button>
+    <button type="button" class="tb-btn" id="btn-save"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 2h8l2 2v8a1 1 0 01-1 1H3a1 1 0 01-1-1V2z"/><path d="M5 2v3h4V2M4 8h6"/></svg><span>Uložit údaje</span></button>
+    <label class="tb-btn" style="cursor:pointer"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 2v7M4 6l3 3 3-3M2 11h10"/></svg><span>Načíst údaje</span><input type="file" id="btn-load" accept=".json" style="display:none"></label>
+    <button type="button" class="tb-btn" style="border-color:rgba(245,158,11,.35);color:var(--amber)" onclick="window.print()"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="10" height="7" rx="1"/><path d="M4 5V3h6v2M4 9h2M4 11h6"/></svg><span>Tisknout / PDF</span></button>
   </div>
 </nav>
 <div class="tabs-bar" id="tabs-bar"></div>
@@ -223,7 +223,7 @@ let charts={};
 function np(ov={}){
   pid++;
   return{id:pid,name:'Nemovitost '+pid,color:COLORS[(pid-1)%COLORS.length],
-    price:'',yr:new Date().getFullYear(),by:'',growth:5,hor:20,
+    price:'',yr:new Date().getFullYear(),by:null,growth:5,hor:20,
     mortg:false,eq:'',mr:5,my:25,refixes:[],
     rent:true,rm:'',rg:3,oc:92,
     cm:'',cg:2,
@@ -349,10 +349,10 @@ function renderSum(){
   const canvas=ge('pf-chart');if(!canvas)return;
   if(charts['pf'])charts['pf'].destroy();
   const maxH=Math.max(...props.map(p=>p.hor));
-  const minYr=Math.min(...props.map(p=>p.yr));
+  const minYr=Math.min(...props.map(p=>parseInt(p.yr)||2024));
   const labels=Array.from({length:maxH+1},(_,i)=>minYr+i);
   const datasets=props.map(p=>{
-    const r=sim(p),off=p.yr-minYr;
+    const r=sim(p),off=(parseInt(p.yr)||2024)-minYr;
     const data=Array(maxH+1).fill(null);
     r.rows.forEach(row=>{data[off+row.y]=Math.round(row.val);});
     return{label:p.name,data,borderColor:p.color,backgroundColor:p.color+'22',fill:false,tension:.3,pointRadius:1,borderWidth:2};
@@ -471,8 +471,8 @@ function renderRefixes(p){
 function wireL(p){
   const sl=(id,vId,key)=>{const e=ge(id);if(!e)return;e.addEventListener('input',ev=>{if(ge(vId))ge(vId).textContent=ev.target.value;p[key]=parseFloat(ev.target.value);recalc(p);});};
   sl('pgr','pgr-v','growth');sl('pho','pho-v','hor');sl('poc','poc-v','oc');
-  const ni=(id,key)=>{const e=ge(id);if(!e)return;e.addEventListener('input',ev=>{p[key]=ev.target.value;recalc(p);});};
-  ni('pnm','name');ni('pp','price');ni('pyr','yr');ni('pby','by');
+  const ni=(id,key,num=false)=>{const e=ge(id);if(!e)return;e.addEventListener('input',ev=>{p[key]=num?parseFloat(ev.target.value)||0:ev.target.value;recalc(p);});};
+  ni('pnm','name');ni('pp','price',true);ni('pyr','yr',true);ni('pby','by',true);
   ni('peq','eq');ni('pmr','mr');ni('pmy','my');
   ni('prm','rm');ni('prg','rg');
   ni('pcm','cm');ni('pcg','cg');

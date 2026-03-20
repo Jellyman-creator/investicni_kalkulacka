@@ -394,8 +394,8 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
     <div><div class="logo-name">Celoživotní investiční kalkulačka</div><div class="logo-sub">Simulace portfolia</div></div>
   </a>
   <div class="topbar-actions">
-    <button class="tb-btn" id="btn-save"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 2h8l2 2v8a1 1 0 01-1 1H3a1 1 0 01-1-1V2z"/><path d="M5 2v3h4V2M4 8h6"/></svg><span>Uložit nastavení</span></button>
-    <label class="tb-btn" style="cursor:pointer"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 2v7M4 6l3 3 3-3M2 11h10"/></svg><span>Načíst nastavení</span><input type="file" id="btn-load" accept=".json" style="display:none"></label>
+    <button class="tb-btn" id="btn-save"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 2h8l2 2v8a1 1 0 01-1 1H3a1 1 0 01-1-1V2z"/><path d="M5 2v3h4V2M4 8h6"/></svg><span>Uložit údaje</span></button>
+    <label class="tb-btn" style="cursor:pointer"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 2v7M4 6l3 3 3-3M2 11h10"/></svg><span>Načíst údaje</span><input type="file" id="btn-load" accept=".json" style="display:none"></label>
     <button class="help-btn" id="btn-help" title="Jak uložit nastavení?">?</button>
     <button class="tb-btn print" onclick="window.print()"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="10" height="7" rx="1"/><path d="M4 5V3h6v2M4 9h2M4 11h6"/></svg><span>Tisknout / PDF</span></button>
     <button id="pwa-install-btn" class="tb-btn" style="display:none;background:rgba(78,205,160,.15);border-color:rgba(78,205,160,.4);color:var(--teal)" onclick="if(deferredPrompt){deferredPrompt.prompt();deferredPrompt.userChoice.then(()=>{this.style.display='none';})}">

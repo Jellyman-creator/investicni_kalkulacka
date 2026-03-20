@@ -173,16 +173,19 @@ const SRCS = {
   real:    'nemovitosti.html'
 };
 const PK = 'finzzard-default';
+const LAST_KEY = 'finzzard-last';
 let def = localStorage.getItem(PK) || 'finance';
+// sessionStorage remembers tab across F5/reload, localStorage remembers default
+let startTab = sessionStorage.getItem(LAST_KEY) || def;
 let cur = null;
 const loaded = {};
 
 function show(app){
   if(cur === app) return;
-  // Hide current
   if(cur) document.getElementById('frame-'+cur).classList.remove('active');
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active', b.dataset.app===app));
   cur = app;
+  sessionStorage.setItem(LAST_KEY, app); // remember for refresh
 
   const fr = document.getElementById('frame-'+app);
   fr.classList.add('active');
@@ -225,9 +228,9 @@ document.querySelectorAll('.pref-opt').forEach(opt=>{
 });
 document.addEventListener('click', ()=>document.getElementById('pref-popup').classList.remove('open'));
 
-// Init
+// Init — restore last tab or default
 updatePrefUI();
-show(def);
+show(startTab);
 </script>
 </body>
 </html>
