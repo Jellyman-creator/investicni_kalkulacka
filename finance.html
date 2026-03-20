@@ -316,9 +316,18 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:14p
 .bnb-icon{font-size:18px;padding:3px 10px;transition:all .15s}
 /* Push page content above bottom nav */
 .page{padding-bottom:72px!important}
+.recur-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 7px;background:rgba(99,102,241,.15);border:1px solid rgba(99,102,241,.3);border-radius:4px;font-size:10px;font-weight:700;color:var(--accent2)}
+.tx-recur-tag{font-size:10px;color:var(--accent2)}
+#qa-recurring-opts{display:none}
+#qa-recurring-opts.visible{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 </style>
 </head>
-<body><script>if(window.self!==window.top){document.addEventListener('DOMContentLoaded',()=>{const t=document.querySelector('.topbar');if(t)t.style.display='none';})}</script>
+<body><script>if(window.self!==window.top){document.addEventListener('DOMContentLoaded',()=>{
+  const logo=document.querySelector('.logo');if(logo)logo.style.display='none';
+  const nav=document.querySelector('.logo+div,#logo-spacer');
+  const tb=document.querySelector('.topbar');
+  if(tb){tb.style.justifyContent='flex-end';tb.style.height='44px';}
+})}</script>
 
 <div style="position:fixed;bottom:4px;right:6px;font-size:9px;color:rgba(0,0,0,.2);z-index:9999;pointer-events:none;font-family:monospace">Finance v0320-0957</div>
 
@@ -385,6 +394,22 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:14p
         <div class="qa-field" style="flex:2;min-width:120px"><label>Poznámka</label><input type="text" id="qa-note" class="qa-note" placeholder="volitelná poznámka..."></div>
         <div class="qa-field"><label>Datum</label><input type="date" id="qa-date" class="qa-date"></div>
         <button type="button" class="qa-submit" id="qa-submit">Uložit</button>
+      </div>
+      <!-- Recurring option -->
+      <div style="display:flex;align-items:center;gap:10px;margin-top:8px;padding:8px 10px;background:rgba(255,255,255,.04);border-radius:8px;flex-wrap:wrap">
+        <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--txt2);cursor:pointer;user-select:none">
+          <input type="checkbox" id="qa-recurring" style="accent-color:var(--accent);width:14px;height:14px">
+          <span>🔁 Pravidelná transakce</span>
+        </label>
+        <div id="qa-recurring-opts" style="display:none;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <select id="qa-freq" style="padding:5px 8px;font-size:12px;font-family:var(--font);border:1px solid var(--border);border-radius:6px;background:var(--bg2);color:var(--txt);outline:none;-webkit-appearance:none">
+            <option value="monthly">každý měsíc</option>
+            <option value="weekly">každý týden</option>
+            <option value="daily">každý den</option>
+            <option value="yearly">každý rok</option>
+          </select>
+          <span style="font-size:11px;color:var(--txt3)">— uloží se jako pravidelná a bude se automaticky přidávat</span>
+        </div>
       </div>
     </div>
     <!-- Charts row -->
@@ -856,7 +881,7 @@ function renderTxList(el,txs){
       const cat=getCat(t.catId);
       const div=document.createElement('div');div.className='tx-item';
       div.innerHTML=`<div class="tx-cat-dot" style="background:${cat.color}22">${cat.icon}</div>
-        <div class="tx-info"><div class="tx-name">${t.note||cat.name}</div><div class="tx-meta">${cat.name}</div></div>
+        <div class="tx-info"><div class="tx-name">${t.note||cat.name}${t.recurId?'<span class="tx-recur-tag">🔁</span>':''}</div><div class="tx-meta">${cat.name}${t.recurId?'<span class="recur-badge">pravidelná</span>':''}</div></div>
         <div class="tx-amount ${t.type==='expense'?'neg':'pos'}">${t.type==='expense'?'−':'+'}${fmtS(t.amount)}</div>
         <button type="button" class="tx-del" data-id="${t.id}">×</button>`;
       div.querySelector('.tx-del').addEventListener('click',e=>{e.stopPropagation();deleteTx(t.id);});
@@ -994,13 +1019,44 @@ function addTransaction(){
   const catId=parseInt(ge('qa-cat').value);
   const note=ge('qa-note').value.trim();
   const date=ge('qa-date').value||todayStr();
+  const isRecurring=ge('qa-recurring')?.checked;
+  const freq=ge('qa-freq')?.value||'monthly';
+
+  // Save as one-time transaction
   state.txIdCounter++;
   state.transactions.push({id:state.txIdCounter,date,type:qaType,catId,amount,note});
+
+  // If recurring: also save to recurring list
+  if(isRecurring){
+    const cat=getCat(catId);
+    const freqLabels={monthly:'měsíčně',weekly:'týdně',daily:'denně',yearly:'ročně'};
+    state.recIdCounter++;
+    const dayOfMonth=parseInt(date.slice(8,10))||1;
+    state.recurring.push({
+      id:state.recIdCounter,
+      type:qaType,catId,amount,
+      name:(note||cat.name)+' ('+freqLabels[freq]+')',
+      day:Math.min(dayOfMonth,28),
+      freq
+    });
+    saveState();
+    // Show recurring confirmation toast
+    const toast=document.createElement('div');
+    toast.style.cssText='position:fixed;top:70px;left:50%;transform:translateX(-50%);background:rgba(99,102,241,.9);color:#fff;font-size:13px;font-weight:600;padding:10px 18px;border-radius:9px;z-index:800;box-shadow:0 4px 16px rgba(0,0,0,.3);text-align:center;font-family:var(--font)';
+    toast.innerHTML='🔁 Uloženo jako pravidelná transakce<br><span style="font-size:11px;opacity:.8">Bude se automaticky přidávat '+freqLabels[freq]+'</span>';
+    document.body.appendChild(toast);
+    setTimeout(()=>toast.remove(),3500);
+    // Reset checkbox
+    ge('qa-recurring').checked=false;
+    ge('qa-recurring-opts').classList.remove('visible');
+  }
+
   ge('qa-amount').value='';ge('qa-note').value='';
   saveState();renderAll();
-  // Flash submit button
-  const btn=ge('qa-submit');btn.textContent='✓';btn.style.background='var(--teal)';
-  setTimeout(()=>{btn.textContent='Uložit';btn.style.background='';},800);
+  const btn=ge('qa-submit');
+  btn.textContent=isRecurring?'✓ + 🔁':'✓';
+  btn.style.background='var(--teal)';
+  setTimeout(()=>{btn.textContent='Uložit';btn.style.background='';},1000);
 }
 
 // ─── EXPORT CSV ──────────────────────────────────────────────────────────────
@@ -1311,9 +1367,15 @@ ge('qt-expense').addEventListener('click',()=>{qaType='expense';ge('qt-expense')
 ge('qt-income').addEventListener('click',()=>{qaType='income';ge('qt-income').className='qa-type-btn sel-income';ge('qt-expense').className='qa-type-btn';});
 
 // Quick add submit
-ge('qa-submit').addEventListener('click',addTransaction);
-ge('qa-amount').addEventListener('keydown',e=>{if(e.key==='Enter')addTransaction();});
+ge('qa-submit').addEventListener('click',_addTxWithXP);
+ge('qa-amount').addEventListener('keydown',e=>{if(e.key==='Enter')_addTxWithXP();});
 ge('qa-date').value=todayStr();
+
+// Recurring checkbox toggle
+ge('qa-recurring')?.addEventListener('change',e=>{
+  const opts=ge('qa-recurring-opts');
+  if(opts) opts.classList.toggle('visible',e.target.checked);
+});
 
 // Show all transactions
 ge('show-all-tx')?.addEventListener('click',()=>{
@@ -1695,7 +1757,8 @@ function maybeShowCheckin(){
       state.transactions.push({id:state.txIdCounter,date:today,type:'expense',catId:selectedCat,amount:amt,note:document.getElementById('ci-note').value.trim()});
       saveState();
       const isNew=updateStreak();
-      if(isNew)addXP(10,document.getElementById('ci-ok'));
+      addXP(isNew?10:5,document.getElementById('ci-ok'));
+      checkBadges();renderStreakBar();
       ci.classList.add('hidden');
       renderAll();
     },{once:true});
@@ -1706,20 +1769,16 @@ function maybeShowCheckin(){
   },3000);
 }
 
-// Patch addTransaction to trigger streak + XP
-const _origAddTx=addTransaction;
-function addTransaction(){
+// Patch addTransaction to trigger streak + XP (arrow fn to avoid hoisting conflict)
+const _addTxWithXP = ()=>{
   const before=state.transactions.length;
-  _origAddTx();
+  addTransaction();
   if(state.transactions.length>before){
     const isNew=updateStreak();
-    if(isNew) addXP(10, document.getElementById('qa-submit'));
-    else addXP(5, document.getElementById('qa-submit'));
-    checkBadges();
-    renderStreakBar();
-    renderWeeklyChallenge();
+    addXP(isNew?10:5, document.getElementById('qa-submit'));
+    checkBadges();renderStreakBar();renderWeeklyChallenge();
   }
-}
+};
 
 // ─── INIT ────────────────────────────────────────────────────────────────────
 loadState();
