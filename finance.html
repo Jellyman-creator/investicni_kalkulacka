@@ -309,7 +309,16 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:14p
 #qa-recurring-opts.visible{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 </style>
 </head>
-<body>
+<body><script>
+if(window.self!==window.top){
+  document.addEventListener('DOMContentLoaded',function(){
+    var logo=document.querySelector('.logo');
+    if(logo)logo.style.display='none';
+    var topbar=document.querySelector('.topbar');
+    if(topbar)topbar.style.justifyContent='flex-end';
+  });
+}
+</script>
 
 
 <nav class="topbar">
