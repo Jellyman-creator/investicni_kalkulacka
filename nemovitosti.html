@@ -351,17 +351,55 @@ function renderSum(){
   const maxH=Math.max(...props.map(p=>p.hor));
   const minYr=Math.min(...props.map(p=>parseInt(p.yr)||2024));
   const labels=Array.from({length:maxH+1},(_,i)=>minYr+i);
-  const datasets=props.map(p=>{
+
+  // Build stacked datasets — each fills above the previous
+  const datasets=props.map((p,pi)=>{
     const r=sim(p),off=(parseInt(p.yr)||2024)-minYr;
     const data=Array(maxH+1).fill(null);
     r.rows.forEach(row=>{data[off+row.y]=Math.round(row.val);});
-    return{label:p.name,data,borderColor:p.color,backgroundColor:p.color+'22',fill:false,tension:.3,pointRadius:1,borderWidth:2};
+    return{
+      label:p.name,
+      data,
+      borderColor:p.color,
+      backgroundColor:p.color+'55',
+      fill:pi===0?'origin':'stack',  // first fills from 0, others stack on previous
+      tension:.3,
+      pointRadius:0,
+      pointHoverRadius:4,
+      borderWidth:2,
+      stack:'portfolio'
+    };
   });
+
   ge('pf-legend').innerHTML=props.map(p=>`<div class="li"><div class="ld" style="background:${p.color}"></div><span>${esc(p.name)}</span></div>`).join('');
-  charts['pf']=new Chart(canvas,{type:'line',data:{labels,datasets},options:{responsive:true,maintainAspectRatio:false,
-    scales:{x:{grid:{display:false},ticks:{font:{size:10},color:'#6b7280',maxTicksLimit:10}},
-      y:{grid:{color:'#edf0f4'},ticks:{font:{size:10},color:'#6b7280',callback:v=>{const m=v/1000000;return m>=1?(m.toFixed(1)+' M'):Math.round(v/1000)+'k';}}}},
-    plugins:{legend:{display:false},tooltip:{callbacks:{label:i=>`${i.dataset.label}: ${fmt(i.raw)}`}}}}});
+  charts['pf']=new Chart(canvas,{
+    type:'line',
+    data:{labels,datasets},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      scales:{
+        x:{grid:{display:false},ticks:{font:{size:10},color:'#6b7280',maxTicksLimit:10}},
+        y:{
+          stacked:true,
+          grid:{color:'#edf0f4'},
+          ticks:{font:{size:10},color:'#6b7280',callback:v=>{const m=v/1000000;return m>=1?(m.toFixed(1)+' M'):Math.round(v/1000)+'k';}}
+        }
+      },
+      plugins:{
+        legend:{display:false},
+        tooltip:{
+          mode:'index',
+          callbacks:{
+            label:i=>`${i.dataset.label}: ${fmt(i.raw)}`,
+            footer:items=>{
+              const total=items.reduce((s,i)=>s+(i.raw||0),0);
+              return items.length>1?'Celkem: '+fmt(total):'';
+            }
+          }
+        }
+      }
+    }
+  });
 }
 
 function renderProp(p){
