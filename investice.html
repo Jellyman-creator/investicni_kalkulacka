@@ -421,7 +421,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
   </div>
   <div class="hero-body">Většina kalkulaček skončí v den odchodu do důchodu. Tato počítá dál.</div>
   <div class="kpi-strip">
-    <div class="kpi kpi-hero"><div class="kpi-label">Cílová hodnota portfolia</div><div class="kpi-val teal kpi-big" id="kpi-final">0 Kč</div><div class="kpi-hint" id="kpi-final-hint"></div></div>
+    <div class="kpi kpi-hero"><div class="kpi-label">Cílová hodnota portfolia</div><div class="kpi-val teal kpi-big" id="kpi-final">0 Kč</div><div id="kpi-final-real" style="font-size:13px;font-weight:600;color:#7fd8bb;font-family:var(--mono);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div><div class="kpi-hint" id="kpi-final-hint"></div></div>
     <div class="kpi"><div class="kpi-label">Portfolio dnes</div><div class="kpi-val blue" id="kpi-now">0 Kč</div><div class="kpi-hint" id="kpi-now-hint"></div></div>
     <div class="kpi"><div class="kpi-label">Celkem vloženo</div><div class="kpi-val" id="kpi-invested">0 Kč</div><div class="kpi-hint" id="kpi-invested-hint"></div></div>
     <div class="kpi"><div class="kpi-label">Celkové výnosy</div><div class="kpi-val teal" id="kpi-returns">0 Kč</div><div class="kpi-hint" id="kpi-returns-hint"></div></div>
@@ -1739,11 +1739,13 @@ function renderKPIs(rows){
   retEl.style.color=returns<0?'var(--red-tx)':'';
   document.getElementById('kpi-final').textContent=fmt(finalVal);
   const realFinal=hor>0?finalVal/Math.pow(1+getInflation(),hor):finalVal;
+  const realEl=document.getElementById('kpi-final-real');
+  if(realEl)realEl.textContent=hor>0?('≈ '+fmt(realFinal)+' v dnešní kupní síle'):'';
 
   const endYr=startYr+hor;
   const ageStr=by?(', '+(endYr-by)+' let'):'';
   const sh=(id,txt)=>{const el=document.getElementById(id);if(el)el.textContent=txt||'';};
-  sh('kpi-final-hint', hor>0?(endYr+ageStr+' · reálně '+fmt(realFinal)):'');
+  sh('kpi-final-hint', hor>0?(endYr+ageStr):'');
   sh('kpi-now-hint', startYr?'výchozí stav':'');
   sh('kpi-invested-hint', multiplier?('výnos '+multiplier):'');
   sh('kpi-returns-hint', invested>0?(retPct+'% z vloženého'):'');
