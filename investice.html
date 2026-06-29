@@ -1808,7 +1808,7 @@ function renderMilestones(rows){
   marks.forEach(yr=>{
     const r=rows.find(r=>r.yr===yr);if(!r)return;
     const d=document.createElement('div');d.className='ms';
-    d.innerHTML=`<div class="ms-yr">Rok ${yr}</div><div class="ms-val">${fmtR(r.portfolio,yr)}</div><div class="ms-gain">+${fmt(Math.max(0,r.cumRet))} výnosy</div>`;
+    d.innerHTML=`<div class="ms-yr">Rok ${yr}</div><div class="ms-val">${fmtR(r.portfolio,yr)}</div><div class="ms-gain">+${fmt(Math.max(0,r.cumGain))} výnosy</div>`;
     el.appendChild(d);
   });
 }
@@ -1824,7 +1824,7 @@ function renderChart(rows){
       {label:'Počáteční vklad',data:rows.map(r=>Math.round(r.initPart)),backgroundColor:'#3b82f6',stack:'s'},
       {label:'Pravidelné vklady',data:rows.map(r=>Math.round(r.regPart)),backgroundColor:'#60a5fa',stack:'s'},
       {label:'Zhodnocení',data:rows.map(r=>Math.round(r.gainPart)),backgroundColor:'#4ECDA0',stack:'s'},
-      {label:'Reálná hodnota',type:'line',data:rows.map(r=>r.yr>0?Math.round(r.portfolio/Math.pow(1+getInflation(),r.yr)):Math.round(r.portfolio)),borderColor:'#f59e0b',borderWidth:2,borderDash:[5,4],pointRadius:0,pointHoverRadius:4,fill:false,tension:0.3,order:0},
+      {label:'Reálná hodnota',type:'line',data:rows.map(r=>Math.round(Math.max(0,r.portfolio)/Math.pow(1+getInflation(),r.yr))),borderColor:'#f59e0b',borderWidth:2,borderDash:[5,4],pointRadius:0,pointHoverRadius:4,fill:false,tension:0.3,order:0},
     ]},
     options:{responsive:true,maintainAspectRatio:false,
       scales:{
