@@ -527,6 +527,11 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
             <input type="number" id="tei-val" step="500" min="0" placeholder="např. 5 000" style="width:100%">
           </div>
         </div>
+        <!-- Row 3: Valorizace -->
+        <div style="display:flex;align-items:center;gap:10px;padding-top:2px;flex-wrap:wrap">
+          <button type="button" id="tei-indexovat" style="padding:5px 12px;font-size:12px;font-family:var(--font);font-weight:600;border-radius:5px;border:1px solid var(--grn-bd);background:var(--grn-lt);color:var(--grn-tx);cursor:pointer;transition:all .15s;white-space:nowrap">↑ Valorizovat o inflaci</button>
+          <div id="tei-indexovat-hint" style="font-size:11px;color:var(--txt3);line-height:1.4"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -850,9 +855,20 @@ function ensureFullCoverage(){
 // SIMULATE
 function getMonthlyNet(yr){
   if(yr===0)return 0;
+  const inf=getInflation();
   let net=0;
-  for(const s of depIn){if(yr>=s.from&&yr<=s.to)net+=s.val;}
-  for(const s of depOut){if(yr>=s.from&&yr<=s.to)net-=s.val;}
+  for(const s of depIn){
+    if(yr>=s.from&&yr<=s.to){
+      const factor=s.indexovat!==false?Math.pow(1+inf,yr-1):1;
+      net+=s.val*factor;
+    }
+  }
+  for(const s of depOut){
+    if(yr>=s.from&&yr<=s.to){
+      const factor=s.indexovat!==false?Math.pow(1+inf,yr-1):1;
+      net-=s.val*factor;
+    }
+  }
   return net;
 }
 function getTxNet(yr){
@@ -1110,7 +1126,7 @@ function renderDepTL(kind){
              :`background:#fde8e8;color:#8B2500;border:2px solid #F87171;`);
     const lbl=document.createElement('span');
     lbl.style.cssText='pointer-events:none;padding:0 8px;overflow:hidden;text-overflow:ellipsis;';
-    lbl.textContent=(isIn?'+':'−')+fmtV(seg.val);
+    lbl.textContent=(isIn?'+':'−')+fmtV(seg.val)+(seg.indexovat!==false?' ↑':'');
     el.appendChild(lbl);
     // Body drag — triggered by mousedown/touchstart on segment body (not handle)
     const startBodyDrag=ev=>{
@@ -1182,7 +1198,38 @@ function syncDepEditorUnified(kind,idx){
   document.getElementById('tei-val').value=s.val||'';
   document.getElementById('tl-editor-in').dataset.kind=kind;
   document.getElementById('tl-editor-in').dataset.idx=idx;
+  syncIndexovatBtn(s);
   updateDepEditorHints();
+}
+
+function syncIndexovatBtn(seg){
+  const btn=document.getElementById('tei-indexovat');
+  const hint=document.getElementById('tei-indexovat-hint');
+  if(!btn||!seg)return;
+  const on=seg.indexovat!==false;
+  if(on){
+    btn.textContent='↑ Valorizovat o inflaci';
+    btn.style.cssText='padding:5px 12px;font-size:12px;font-family:var(--font);font-weight:600;border-radius:5px;border:1px solid var(--grn-bd);background:var(--grn-lt);color:var(--grn-tx);cursor:pointer;transition:all .15s;white-space:nowrap';
+    const inf=getInflation();
+    const nomStart=fmt(seg.val*Math.pow(1+inf,seg.from-1));
+    const nomEnd=fmt(seg.val*Math.pow(1+inf,seg.to-1));
+    hint.textContent=`Rok ${seg.from}: ${nomStart} → Rok ${seg.to}: ${nomEnd} (nom.)`;
+  } else {
+    btn.textContent='= Fixní částka';
+    btn.style.cssText='padding:5px 12px;font-size:12px;font-family:var(--font);font-weight:600;border-radius:5px;border:1px solid var(--border);background:var(--bg);color:var(--txt2);cursor:pointer;transition:all .15s;white-space:nowrap';
+    hint.textContent='Částka zůstává stejná bez ohledu na inflaci';
+  }
+}
+
+function toggleIndexovat(){
+  const ed=document.getElementById('tl-editor-in');
+  const kind=ed.dataset.kind||'in';
+  const idx=parseInt(ed.dataset.idx);
+  const arr=kind==='in'?depIn:depOut;
+  if(isNaN(idx)||!arr[idx])return;
+  arr[idx].indexovat=arr[idx].indexovat===false?true:false;
+  syncIndexovatBtn(arr[idx]);
+  renderDepTL('in');renderDepTL('out');recalc();
 }
 // Unified live editor for single tl-editor-in
 function bindDepLive(){
@@ -1200,9 +1247,11 @@ function bindDepLive(){
       arr[idx]={...arr[idx],from:f,to:t,val:v};
       fixOverlaps(arr);
       updateDepEditorHints();
+      syncIndexovatBtn(arr[idx]);
       renderDepTL('in');renderDepTL('out');recalc();
     });
   });
+  document.getElementById('tei-indexovat').addEventListener('click',toggleIndexovat);
 }
 
 function addDepSeg(kind){
@@ -1219,7 +1268,7 @@ function addDepSeg(kind){
   for(const s of arr){if(start>=s.from&&start<=s.to)start=s.to+1;}
   start=Math.min(start,hor);
 
-  const newSeg={from:start,to:Math.min(start+9,hor),val:0};
+  const newSeg={from:start,to:Math.min(start+9,hor),val:0,indexovat:true};
   arr.push(newSeg);
   const ni=arr.length-1;
   openDepEditor(kind,ni);
@@ -1648,7 +1697,17 @@ document.getElementById('mode-real').addEventListener('click',()=>{
   document.getElementById('real-mode-note').style.display='';
   recalc();
 });
-document.getElementById('inflation-rate').addEventListener('input',()=>recalc());
+document.getElementById('inflation-rate').addEventListener('input',()=>{
+  // Refresh nominal preview hint in open editor
+  const ed=document.getElementById('tl-editor-in');
+  if(ed&&ed.classList.contains('open')){
+    const kind=ed.dataset.kind||'in';
+    const idx=parseInt(ed.dataset.idx);
+    const arr=kind==='in'?depIn:depOut;
+    if(!isNaN(idx)&&arr[idx])syncIndexovatBtn(arr[idx]);
+  }
+  recalc();
+});
 
 // MONTHLY DRAWDOWN CALCULATOR
 let trSliderOffset=0; // year offset from slider (negative = earlier, positive = later)
