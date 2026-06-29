@@ -775,6 +775,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
 const MAX_YR=70;
 const fmt=n=>new Intl.NumberFormat('cs-CZ',{style:'currency',currency:'CZK',maximumFractionDigits:0}).format(Math.round(n||0));
 const fmtPct=n=>((n||0)*100).toFixed(1)+' %';
+const fmtShort=n=>{n=Math.round(n||0);const a=Math.abs(n);if(a>=1e6)return (n/1e6).toFixed(a>=1e7?0:1)+' M';if(a>=1e3)return Math.round(n/1e3)+'k';return n+'';};
 const num=(v,f=0)=>{const p=parseFloat(v);return isNaN(p)?f:p;};
 
 // Real value adjustment
@@ -1966,6 +1967,7 @@ function renderSimTable(rows){
     tr.innerHTML=`<td>${r.yr}</td><td style="text-align:right">${r.calYr}</td><td style="text-align:right">${fmtPct(r.rate)}</td><td style="text-align:right">${r.monthly!==0?fmt(r.monthly):'—'}</td><td style="text-align:right" class="${r.tx>0?'pos':r.tx<0?'neg':''}">${r.tx!==0?fmt(r.tx):'—'}</td><td style="text-align:right" class="${r.gain>0?'pos':r.gain<0?'neg':''}">${r.yr>0?fmt(r.gain):'—'}</td><td style="text-align:right">${fmt((r.cumInit||0)+(r.cumReg||0))}</td><td style="text-align:right;font-weight:600">${fmt(r.portfolio)}</td><td style="text-align:right;color:var(--txt3)">${r.yr>0?fmt(r.portfolio/Math.pow(1+getInflation(),r.yr)):fmt(r.portfolio)}</td>`;
     tb.appendChild(tr);
   });
+  if(typeof renderSimCards==='function')renderSimCards(rows);
 }
 
 function renderDepletionWarning(rows){
@@ -2250,12 +2252,7 @@ function renderSimCards(rows){
   }).join('');
 }
 
-// Patch renderSimTable to also render mobile cards and switch visibility
-const _origRenderSimTable = renderSimTable;
-function renderSimTable(rows){
-  _origRenderSimTable(rows);
-  renderSimCards(rows);
-}
+// renderSimTable already calls renderSimCards directly (see above)
 
 // Switch table/cards based on screen width
 function updateSimLayout(){
