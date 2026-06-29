@@ -468,7 +468,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
       <div class="card">
         <div class="card-hdr"><div class="card-dot" style="background:var(--blue)"></div><div class="card-title">Vývoj portfolia</div></div>
         <div class="card-body">
-          <div class="legend"><div class="legend-item"><div class="legend-dot" style="background:#3b82f6"></div><span>Počáteční vklad</span></div><div class="legend-item"><div class="legend-dot" style="background:#60a5fa"></div><span>Pravidelné vklady</span></div><div class="legend-item"><div class="legend-dot" style="background:#4ECDA0"></div><span>Zhodnocení</span></div></div>
+          <div class="legend"><div class="legend-item"><div class="legend-dot" style="background:#3b82f6"></div><span>Počáteční vklad</span></div><div class="legend-item"><div class="legend-dot" style="background:#60a5fa"></div><span>Pravidelné vklady</span></div><div class="legend-item"><div class="legend-dot" style="background:#4ECDA0"></div><span>Zhodnocení</span></div><div class="legend-item"><div class="legend-dot" style="background:none;border:2px dashed #f59e0b;border-radius:2px"></div><span style="color:var(--txt3)">Reálná hodnota (kupní síla)</span></div></div>
           <div class="chart-wrap"><canvas id="main-chart"></canvas></div>
         </div>
         <div class="milestones-row" id="main-milestones"></div>
@@ -701,7 +701,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
     <div class="card-hdr"><div class="card-dot" style="background:var(--navy)"></div><div class="card-title">Simulace rok po roce</div></div>
     <div class="sim-wrap" style="max-height:200px">
       <table class="sim-table" id="sim-table-desktop">
-        <thead><tr><th style="text-align:center">Rok</th><th style="text-align:right">Rok</th><th>Výnos %</th><th>Měs. vklad</th><th>Jednoráz.</th><th>Výnos Kč</th><th>Kum. vloženo</th><th>Portfolio</th></tr></thead>
+        <thead><tr><th style="text-align:center">Rok</th><th style="text-align:right">Rok</th><th>Výnos %</th><th>Měs. vklad</th><th>Jednoráz.</th><th>Výnos Kč</th><th>Kum. vloženo</th><th>Portfolio (nom.)</th><th>Reálná hodnota</th></tr></thead>
         <tbody id="sim-body"></tbody>
       </table>
       <!-- Mobile cards (shown on small screens) -->
@@ -1614,13 +1614,14 @@ function renderKPIs(rows){
   document.getElementById('kpi-now').textContent=fmt(first.portfolio||0);
   document.getElementById('kpi-invested').textContent=fmt(invested);
   document.getElementById('kpi-returns').textContent='+'+fmt(returns);
-  document.getElementById('kpi-final').textContent=fmtR(finalVal, hor);
+  document.getElementById('kpi-final').textContent=fmt(finalVal);
+  const realFinal=hor>0?finalVal/Math.pow(1+getInflation(),hor):finalVal;
 
   // Hints
   const endYr=startYr+hor;
   const ageStr=by?(', '+(endYr-by)+' let'):'';
   const sh=(id,txt)=>{const el=document.getElementById(id);if(el)el.textContent=txt||'';};
-  sh('kpi-final-hint', hor>0?(endYr+ageStr):'');
+  sh('kpi-final-hint', hor>0?(endYr+ageStr+' · reálně '+fmt(realFinal)):'');
   sh('kpi-now-hint', startYr?'výchozí stav':'');
   sh('kpi-invested-hint', multiplier?('výnos '+multiplier):'');
   sh('kpi-returns-hint', invested>0?Math.round(returns/Math.max(1,invested)*100)+'% zhodnocení':'');
@@ -1759,9 +1760,10 @@ function renderTargetIncome(rows){
   }
 
   document.getElementById('target-result').style.display='';
+  const realMonthlyPmt=monthlyPmt/Math.pow(1+getInflation(),refYr);
   document.getElementById('tr-monthly').textContent=fmt(monthlyPmt);
   document.getElementById('tr-monthly-sub').textContent=
-    `měsíčně od ${refCalYr}${ageAtRef?' ('+ageAtRef+' let)':''} do ${sy+hor}${ageAtEnd?' ('+ageAtEnd+' let)':''}`;
+    `měsíčně od ${refCalYr}${ageAtRef?' ('+ageAtRef+' let)':''} do ${sy+hor}${ageAtEnd?' ('+ageAtEnd+' let)':''} · reálně ${fmt(realMonthlyPmt)}/měs.`;
   document.getElementById('tr-peak').textContent=fmt(refPortfolio);
   document.getElementById('tr-peak-label').textContent=usedWithdrawal?'Portfolio při zahájení výběrů':'Vrchol portfolia';
   document.getElementById('tr-capital').textContent=fmt(capital);
@@ -1822,6 +1824,7 @@ function renderChart(rows){
       {label:'Počáteční vklad',data:rows.map(r=>Math.round(r.initPart)),backgroundColor:'#3b82f6',stack:'s'},
       {label:'Pravidelné vklady',data:rows.map(r=>Math.round(r.regPart)),backgroundColor:'#60a5fa',stack:'s'},
       {label:'Zhodnocení',data:rows.map(r=>Math.round(r.gainPart)),backgroundColor:'#4ECDA0',stack:'s'},
+      {label:'Reálná hodnota',type:'line',data:rows.map(r=>r.yr>0?Math.round(r.portfolio/Math.pow(1+getInflation(),r.yr)):Math.round(r.portfolio)),borderColor:'#f59e0b',borderWidth:2,borderDash:[5,4],pointRadius:0,pointHoverRadius:4,fill:false,tension:0.3,order:0},
     ]},
     options:{responsive:true,maintainAspectRatio:false,
       scales:{
@@ -1831,7 +1834,7 @@ function renderChart(rows){
       plugins:{legend:{display:false},tooltip:{callbacks:{
         title:([i])=>`Rok ${i.label}`,
         label:i=>`${i.dataset.label}: ${fmt(i.raw)}`,
-        footer:items=>{const r=rows[items[0].dataIndex];return `Portfolio celkem: ${fmt(r.portfolio)}`;}
+        footer:items=>{const r=rows[items[0].dataIndex];const real=r.yr>0?r.portfolio/Math.pow(1+getInflation(),r.yr):r.portfolio;return `Portfolio nom.: ${fmt(r.portfolio)}\nReálná hodnota: ${fmt(real)}`;}
       }}}
     }
   });
@@ -1844,7 +1847,7 @@ function renderSimTable(rows){
   rows.forEach(r=>{
     const tr=document.createElement('tr');
     if(ms.has(r.yr))tr.className='milestone';
-    tr.innerHTML=`<td>${r.yr}</td><td style="text-align:right">${r.calYr}</td><td style="text-align:right">${fmtPct(r.rate)}</td><td style="text-align:right">${r.monthly!==0?fmt(r.monthly):'—'}</td><td style="text-align:right" class="${r.tx>0?'pos':r.tx<0?'neg':''}">${r.tx!==0?fmt(r.tx):'—'}</td><td style="text-align:right" class="${r.gain>0?'pos':r.gain<0?'neg':''}">${r.yr>0?fmt(r.gain):'—'}</td><td style="text-align:right">${fmt((r.cumInit||0)+(r.cumReg||0))}</td><td style="text-align:right;font-weight:600">${fmtR(r.portfolio,r.yr)}</td>`;
+    tr.innerHTML=`<td>${r.yr}</td><td style="text-align:right">${r.calYr}</td><td style="text-align:right">${fmtPct(r.rate)}</td><td style="text-align:right">${r.monthly!==0?fmt(r.monthly):'—'}</td><td style="text-align:right" class="${r.tx>0?'pos':r.tx<0?'neg':''}">${r.tx!==0?fmt(r.tx):'—'}</td><td style="text-align:right" class="${r.gain>0?'pos':r.gain<0?'neg':''}">${r.yr>0?fmt(r.gain):'—'}</td><td style="text-align:right">${fmt((r.cumInit||0)+(r.cumReg||0))}</td><td style="text-align:right;font-weight:600">${fmt(r.portfolio)}</td><td style="text-align:right;color:var(--txt3)">${r.yr>0?fmt(r.portfolio/Math.pow(1+getInflation(),r.yr)):fmt(r.portfolio)}</td>`;
     tb.appendChild(tr);
   });
 }
