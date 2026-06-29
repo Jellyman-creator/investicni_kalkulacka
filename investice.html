@@ -905,7 +905,8 @@ function simulate(){
   let portfolio=start;
   let cumInit=start;   // initial lump sum (never changes after yr 0)
   let cumReg=0;        // cumulative regular monthly deposits (positive only)
-  let cumGain=0;       // cumulative gains (can decrease with portfolio)
+  let cumGain=0;       // legacy (kept for chart stacking)
+  let totalGain=0;     // true sum of annual gains — can be negative
   for(let yr=0;yr<=hor;yr++){
     const rate=getRateForYear(yr);
     const monthly=getMonthlyNet(yr);
@@ -913,23 +914,21 @@ function simulate(){
     const tx=getTxNet(yr);
     let gain=0;
     if(yr===0){
-      // yr 0: add one-off transactions to initial
       if(tx>0) cumInit+=tx;
       portfolio=cumInit;
     } else {
       gain=(portfolio+(annDep+tx)/2)*rate;
       portfolio+=annDep+tx+gain;
       if(annDep>0) cumReg+=annDep;
-      // cumGain = whatever is left after subtracting deposits
       cumGain=Math.max(0, portfolio-cumInit-cumReg);
+      totalGain+=gain;
     }
-    // For chart: portfolio = cumInit + cumReg + gains (clamped when portfolio falls)
     const portPos=Math.max(0,portfolio);
     const initPart=Math.min(cumInit, portPos);
     const regPart=Math.min(cumReg, Math.max(0, portPos-initPart));
     const gainPart=Math.max(0, portPos-initPart-regPart);
     rows.push({yr,calYr:startYr+yr,rate,monthly,annDep,tx,gain,
-      cumInit,cumReg,cumGain,
+      cumInit,cumReg,cumGain,totalGain,
       initPart,regPart,gainPart,
       portfolio,depleted:portfolio<0});
   }
@@ -1711,23 +1710,26 @@ function renderKPIs(rows){
   const by=getBirthYear();
   const finalVal=last.portfolio||0;
   const invested=(last.cumInit||0)+(last.cumReg||0);
-  const returns=Math.max(0,last.cumGain||0);
+  const returns=last.totalGain||0;
   const multiplier=invested>0?(finalVal/invested).toFixed(1)+'×':null;
+  const retPct=invested>0?Math.round(returns/invested*100):0;
 
   document.getElementById('kpi-now').textContent=fmt(first.portfolio||0);
   document.getElementById('kpi-invested').textContent=fmt(invested);
-  document.getElementById('kpi-returns').textContent='+'+fmt(returns);
+  const retEl=document.getElementById('kpi-returns');
+  retEl.textContent=(returns>=0?'+':'')+fmt(returns);
+  retEl.className='kpi-val '+(returns>=0?'teal':'');
+  retEl.style.color=returns<0?'var(--red-tx)':'';
   document.getElementById('kpi-final').textContent=fmt(finalVal);
   const realFinal=hor>0?finalVal/Math.pow(1+getInflation(),hor):finalVal;
 
-  // Hints
   const endYr=startYr+hor;
   const ageStr=by?(', '+(endYr-by)+' let'):'';
   const sh=(id,txt)=>{const el=document.getElementById(id);if(el)el.textContent=txt||'';};
   sh('kpi-final-hint', hor>0?(endYr+ageStr+' · reálně '+fmt(realFinal)):'');
   sh('kpi-now-hint', startYr?'výchozí stav':'');
   sh('kpi-invested-hint', multiplier?('výnos '+multiplier):'');
-  sh('kpi-returns-hint', invested>0?Math.round(returns/Math.max(1,invested)*100)+'% zhodnocení':'');
+  sh('kpi-returns-hint', invested>0?(retPct+'% z vloženého'):'');
 }
 
 // INFLATION MODE TOGGLE
@@ -1921,7 +1923,8 @@ function renderMilestones(rows){
   marks.forEach(yr=>{
     const r=rows.find(r=>r.yr===yr);if(!r)return;
     const d=document.createElement('div');d.className='ms';
-    d.innerHTML=`<div class="ms-yr">Rok ${yr}</div><div class="ms-val">${fmtR(r.portfolio,yr)}</div><div class="ms-gain">+${fmt(Math.max(0,r.cumGain))} výnosy</div>`;
+    const g=r.totalGain||0;
+    d.innerHTML=`<div class="ms-yr">Rok ${yr}</div><div class="ms-val">${fmtR(r.portfolio,yr)}</div><div class="ms-gain" style="color:${g>=0?'var(--grn-tx)':'var(--red-tx)'}">${g>=0?'+':''}${fmt(g)} výnosy</div>`;
     el.appendChild(d);
   });
 }
