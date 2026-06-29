@@ -575,6 +575,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
           <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap">
             <div class="rb-field" style="flex:0 0 auto"><label>Každých X let</label><select id="rbin-every" style="min-width:130px"><option value="1">každý rok</option><option value="2">každé 2 roky</option><option value="3">každé 3 roky</option><option value="5" selected>každých 5 let</option><option value="10">každých 10 let</option></select></div>
             <div class="rb-field" style="flex:1;min-width:120px"><label id="rb-desc-label">Popis</label><input type="text" id="rbin-desc" class="wide" placeholder="např. prodej nemovitosti atp." style="width:100%"></div>
+            <button type="button" id="rbin-indexovat" style="align-self:flex-end;padding:8px 12px;font-size:12px;font-family:var(--font);font-weight:600;border-radius:6px;border:1px solid var(--grn-bd);background:var(--grn-lt);color:var(--grn-tx);cursor:pointer;white-space:nowrap;transition:all .15s">↑ Valorizovat</button>
             <button type="button" class="btn primary" id="rbin-add" style="align-self:flex-end;white-space:nowrap">Přidat</button>
           </div>
         </div>
@@ -582,7 +583,11 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
       </div>
       <!-- Manual view -->
       <div id="txin-manual" style="display:none">
-        <div class="tx-scroll" style="max-height:220px"><table class="tx-table"><thead><tr><th style="width:55px;text-align:center">Rok</th><th style="width:70px">Rok</th><th class="r">Částka (Kč)</th><th>Popis</th></tr></thead><tbody id="tbody-in"></tbody></table></div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+          <button type="button" id="tx-manual-indexovat" style="padding:5px 12px;font-size:12px;font-family:var(--font);font-weight:600;border-radius:5px;border:1px solid var(--grn-bd);background:var(--grn-lt);color:var(--grn-tx);cursor:pointer;transition:all .15s;white-space:nowrap">↑ Valorizovat vše o inflaci</button>
+          <span id="tx-manual-indexovat-hint" style="font-size:11px;color:var(--txt3)">Částky jsou v dnešních cenách</span>
+        </div>
+        <div class="tx-scroll" style="max-height:220px"><table class="tx-table"><thead><tr><th style="width:55px;text-align:center">Rok</th><th style="width:70px">Rok</th><th class="r">Částka (Kč)</th><th class="r">Nom. (s inf.)</th><th>Popis</th></tr></thead><tbody id="tbody-in"></tbody></table></div>
         <div class="hint" style="margin-top:6px">Kladná = vklad (zelená) · Záporná = výběr (červená)</div>
       </div>
     </div>
@@ -801,6 +806,8 @@ let depIn=[], depOut=[];
 let txIn =Array.from({length:MAX_YR+1},(_,i)=>({yr:i,val:0,desc:''}));
 let txOut=Array.from({length:MAX_YR+1},(_,i)=>({yr:i,val:0,desc:''}));
 let rulesIn=[],rulesOut=[];
+let rbinIndexovat=true;   // current state of the rule-form toggle
+let txManualIndexovat=true; // global toggle for manual tx table
 let phases=[]; // {from,to,rate,name,custom}
 let selIn=null,selOut=null,selPh=null,drag=null;
 let modeIn='repeat',modeOut='repeat';
@@ -872,9 +879,23 @@ function getMonthlyNet(yr){
   return net;
 }
 function getTxNet(yr){
+  const inf=getInflation();
+  if(rulesIn.length>0||rulesOut.length>0){
+    let inV=0,outV=0;
+    for(const r of rulesIn){
+      if(yr>=r.from&&yr<=r.to&&(yr-r.from)%(r.every||1)===0)
+        inV+=r.val*(r.indexovat!==false?Math.pow(1+inf,yr-1):1);
+    }
+    for(const r of rulesOut){
+      if(yr>=r.from&&yr<=r.to&&(yr-r.from)%(r.every||1)===0)
+        outV+=r.val*(r.indexovat!==false?Math.pow(1+inf,yr-1):1);
+    }
+    return inV-outV;
+  }
   const inV=txIn[yr]?num(txIn[yr].val):0;
   const outV=txOut[yr]?num(txOut[yr].val):0;
-  return inV-outV;
+  const factor=txManualIndexovat?Math.pow(1+inf,yr-1):1;
+  return inV*factor-outV*factor;
 }
 function simulate(){
   const start=num(document.getElementById('startAmount').value||'0',0);
@@ -1505,6 +1526,19 @@ const origRenderRules=renderRules;
 // Rule editing state
 let editingRule=null; // {kind, idx}
 
+function setRbinIndexovat(on){
+  rbinIndexovat=on;
+  const btn=document.getElementById('rbin-indexovat');
+  if(!btn)return;
+  if(on){
+    btn.textContent='↑ Valorizovat';
+    btn.style.cssText='align-self:flex-end;padding:8px 12px;font-size:12px;font-family:var(--font);font-weight:600;border-radius:6px;border:1px solid var(--grn-bd);background:var(--grn-lt);color:var(--grn-tx);cursor:pointer;white-space:nowrap;transition:all .15s';
+  } else {
+    btn.textContent='= Fixní';
+    btn.style.cssText='align-self:flex-end;padding:8px 12px;font-size:12px;font-family:var(--font);font-weight:600;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--txt2);cursor:pointer;white-space:nowrap;transition:all .15s';
+  }
+}
+
 function fillRuleForm(kind, idx){
   const rule=(kind==='in'?rulesIn:rulesOut)[idx];
   if(!rule)return;
@@ -1514,6 +1548,7 @@ function fillRuleForm(kind, idx){
   document.getElementById('rbin-to').value=rule.to;
   document.getElementById('rbin-every').value=rule.every;
   document.getElementById('rbin-desc').value=rule.desc||'';
+  setRbinIndexovat(rule.indexovat!==false);
   editingRule={kind,idx};
   // Change button label
   document.getElementById('rbin-add').textContent='Uložit změny';
@@ -1538,7 +1573,8 @@ function renderRulesUnified(){
     tag.className='rule-tag'+(r.kind==='out'?' neg':'')+(isEditing?' rule-editing':'');
     tag.style.cursor='pointer';
     if(isEditing)tag.style.cssText+='outline:2px solid var(--blue);outline-offset:1px;';
-    tag.innerHTML=`<div class="rule-tag-text"><strong>${sign}${new Intl.NumberFormat('cs-CZ',{maximumFractionDigits:0}).format(r.val)} Kč</strong> — ${ev}, roky ${r.from}–${r.to}${r.desc?' · '+r.desc:''}</div>
+    const idxMark=r.indexovat!==false?' ↑':'';
+    tag.innerHTML=`<div class="rule-tag-text"><strong>${sign}${new Intl.NumberFormat('cs-CZ',{maximumFractionDigits:0}).format(r.val)} Kč${idxMark}</strong> — ${ev}, roky ${r.from}–${r.to}${r.desc?' · '+r.desc:''}</div>
       <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--txt3);flex-shrink:0;cursor:pointer"><path d="M9.5 2.5l2 2L4 12H2v-2L9.5 2.5z"/></svg>
       <button type="button" class="rule-del" data-kind="${r.kind}" data-i="${r.i}" title="Smazat">×</button>`;
     // Click on tag text or pencil → edit
@@ -1595,17 +1631,33 @@ function addRule(kind){
   }
   if(editingRule){
     const arr=editingRule.kind==='in'?rulesIn:rulesOut;
-    arr[editingRule.idx]={...arr[editingRule.idx],val,from:Math.max(1,from),to:Math.min(Math.max(from,to),MAX_YR),every,desc};
+    arr[editingRule.idx]={...arr[editingRule.idx],val,from:Math.max(1,from),to:Math.min(Math.max(from,to),MAX_YR),every,desc,indexovat:rbinIndexovat};
     editingRule=null;
     document.getElementById('rbin-add').textContent='Přidat';
   } else {
-    (kind==='in'?rulesIn:rulesOut).push({val,from:Math.max(1,from),to:Math.min(Math.max(from,to),MAX_YR),every,desc,id:++ruleId});
+    (kind==='in'?rulesIn:rulesOut).push({val,from:Math.max(1,from),to:Math.min(Math.max(from,to),MAX_YR),every,desc,id:++ruleId,indexovat:rbinIndexovat});
   }
   applyRules();renderRulesUnified();renderTxTable('in');recalc();
   document.getElementById('rbin-val').value='';
   document.getElementById('rbin-desc').value='';
 }
 document.getElementById('rbin-add').addEventListener('click',()=>addRule(txKind||'in'));
+document.getElementById('rbin-indexovat').addEventListener('click',()=>setRbinIndexovat(!rbinIndexovat));
+document.getElementById('tx-manual-indexovat').addEventListener('click',()=>{
+  txManualIndexovat=!txManualIndexovat;
+  const btn=document.getElementById('tx-manual-indexovat');
+  const hint=document.getElementById('tx-manual-indexovat-hint');
+  if(txManualIndexovat){
+    btn.textContent='↑ Valorizovat vše o inflaci';
+    btn.style.cssText='padding:5px 12px;font-size:12px;font-family:var(--font);font-weight:600;border-radius:5px;border:1px solid var(--grn-bd);background:var(--grn-lt);color:var(--grn-tx);cursor:pointer;transition:all .15s;white-space:nowrap';
+    hint.textContent='Částky jsou v dnešních cenách';
+  } else {
+    btn.textContent='= Fixní částky';
+    btn.style.cssText='padding:5px 12px;font-size:12px;font-family:var(--font);font-weight:600;border-radius:5px;border:1px solid var(--border);background:var(--bg);color:var(--txt2);cursor:pointer;transition:all .15s;white-space:nowrap';
+    hint.textContent='Nominální — bez přepočtu na inflaci';
+  }
+  renderTxTable('in');renderTxTable('out');recalc();
+});
 
 // TOGGLE — only 'in' toggle exists now (one-off merged card)
 ['in'].forEach(kind=>{
@@ -1633,7 +1685,9 @@ function renderTxTable(kind){
     const row=arr[i]||{yr:i,val:0,desc:''};
     const isNeg=kind==='out'&&row.val>0||kind==='in'&&row.val<0;
     const tr=document.createElement('tr');
-    tr.innerHTML=`<td style="text-align:center;color:var(--txt3)">${i}</td><td style="text-align:right;color:var(--txt3)">${sy+i}</td><td class="r"><input type="number" value="${row.val}" step="1000" data-i="${i}" data-k="${kind}" class="txi" style="text-align:right${isNeg?';color:var(--red-tx);font-weight:600':''}"></td><td><input type="text" value="${row.desc||''}" placeholder="popis…" data-i="${i}" data-k="${kind}" class="txd"></td>`;
+    const nomVal=txManualIndexovat&&row.val?row.val*Math.pow(1+getInflation(),i-1):null;
+    const nomStr=nomVal&&Math.abs(nomVal-row.val)>1?`<span style="font-size:11px;color:var(--txt3)">${fmt(nomVal)}</span>`:'—';
+    tr.innerHTML=`<td style="text-align:center;color:var(--txt3)">${i}</td><td style="text-align:right;color:var(--txt3)">${sy+i}</td><td class="r"><input type="number" value="${row.val}" step="1000" data-i="${i}" data-k="${kind}" class="txi" style="text-align:right${isNeg?';color:var(--red-tx);font-weight:600':''}"></td><td class="r">${nomStr}</td><td><input type="text" value="${row.desc||''}" placeholder="popis…" data-i="${i}" data-k="${kind}" class="txd"></td>`;
     tb.appendChild(tr);
   }
   tb.querySelectorAll('.txi').forEach(inp=>inp.addEventListener('input',e=>{
