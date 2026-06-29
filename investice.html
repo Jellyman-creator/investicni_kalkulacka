@@ -1971,9 +1971,23 @@ function renderSimTable(rows){
 function renderDepletionWarning(rows){
   const depleted=rows.filter(r=>r.depleted);
   const firstDepleted=depleted[0];
-  const msg=firstDepleted
-    ?`⚠ Výběry překračují hodnotu portfolia od roku ${firstDepleted.calYr} (rok ${firstDepleted.yr})`
-    :null;
+  let msg=null;
+  if(firstDepleted){
+    // Portfolio value the year before it went negative
+    const prevRow=rows.find(r=>r.yr===firstDepleted.yr-1)||rows[0];
+    const capital=Math.max(0,prevRow.portfolio);
+    const hor=getHorizon();
+    const yearsLeft=hor-prevRow.yr;
+    const monthsLeft=yearsLeft*12;
+    // Use the phase rate at that year for annuity calc
+    const rate=getRateForYear(prevRow.yr);
+    const rm=Math.pow(1+rate,1/12)-1;
+    const maxMonthly=monthsLeft>0
+      ?(rm>0?capital*rm/(1-Math.pow(1+rm,-monthsLeft)):capital/monthsLeft)
+      :0;
+    msg=`⚠ Portfolio vyčerpáno od roku ${firstDepleted.calYr} (rok ${firstDepleted.yr}). `
+      +`Maximální bezpečný výběr z hodnoty ${fmt(capital)} v roce ${prevRow.calYr}: ${fmt(maxMonthly)}/měs.`;
+  }
 
   // Helper: show/hide warning in a container
   function setWarn(id, text){
