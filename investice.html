@@ -172,6 +172,13 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
 .toggle-opt{padding:7px 16px;font-size:13px;font-weight:500;font-family:var(--font);border:none;background:none;color:var(--txt3);cursor:pointer;border-radius:6px;transition:all .15s;white-space:nowrap}
 .toggle-opt.sel{background:var(--surface);color:var(--txt);box-shadow:0 1px 3px rgba(0,0,0,.1)}
 
+/* Valorizace segmented toggle — shows current state explicitly */
+.idx-toggle{display:inline-flex;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:2px;flex-shrink:0}
+.idx-opt{padding:5px 11px;font-size:11px;font-weight:600;font-family:var(--font);border:none;background:none;color:var(--txt3);cursor:pointer;border-radius:4px;transition:all .15s;white-space:nowrap}
+.idx-opt[aria-pressed="true"]{background:var(--grn-lt);color:var(--grn-tx);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.idx-opt.fix[aria-pressed="true"]{background:var(--surface);color:var(--txt)}
+.idx-lbl{font-size:11px;font-weight:600;color:var(--txt2);white-space:nowrap}
+
 .rule-builder{padding:14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;margin-bottom:12px}
 .rb-row{display:flex;gap:9px;flex-wrap:wrap;align-items:flex-end}
 .rb-field{display:flex;flex-direction:column;gap:4px}
@@ -529,8 +536,12 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
         </div>
         <!-- Row 3: Valorizace -->
         <div style="display:flex;align-items:center;gap:10px;padding-top:2px;flex-wrap:wrap">
-          <button type="button" id="tei-indexovat" style="padding:5px 12px;font-size:12px;font-family:var(--font);font-weight:600;border-radius:5px;border:1px solid var(--grn-bd);background:var(--grn-lt);color:var(--grn-tx);cursor:pointer;transition:all .15s;white-space:nowrap">↑ Valorizovat o inflaci</button>
-          <div id="tei-indexovat-hint" style="font-size:11px;color:var(--txt3);line-height:1.4"></div>
+          <span class="idx-lbl">Zadaná částka:</span>
+          <div class="idx-toggle" id="tei-indexovat">
+            <button type="button" class="idx-opt" data-idx="1">↑ Roste s inflací</button>
+            <button type="button" class="idx-opt fix" data-idx="0">= Stejná každý rok</button>
+          </div>
+          <div id="tei-indexovat-hint" style="font-size:11px;color:var(--txt3);line-height:1.4;flex-basis:100%"></div>
         </div>
       </div>
     </div>
@@ -575,7 +586,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
           <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap">
             <div class="rb-field" style="flex:0 0 auto"><label>Každých X let</label><select id="rbin-every" style="min-width:130px"><option value="1">každý rok</option><option value="2">každé 2 roky</option><option value="3">každé 3 roky</option><option value="5" selected>každých 5 let</option><option value="10">každých 10 let</option></select></div>
             <div class="rb-field" style="flex:1;min-width:120px"><label id="rb-desc-label">Popis</label><input type="text" id="rbin-desc" class="wide" placeholder="např. prodej nemovitosti atp." style="width:100%"></div>
-            <button type="button" id="rbin-indexovat" style="align-self:flex-end;padding:8px 12px;font-size:12px;font-family:var(--font);font-weight:600;border-radius:6px;border:1px solid var(--grn-bd);background:var(--grn-lt);color:var(--grn-tx);cursor:pointer;white-space:nowrap;transition:all .15s">↑ Valorizovat</button>
+            <div style="display:flex;flex-direction:column;gap:4px;align-self:flex-end"><label style="font-size:11px;color:var(--txt3);font-weight:600;text-transform:uppercase;letter-spacing:.03em">Zadaná částka</label><div class="idx-toggle" id="rbin-indexovat"><button type="button" class="idx-opt" data-idx="1">↑ Roste s inflací</button><button type="button" class="idx-opt fix" data-idx="0">= Stejná</button></div></div>
             <button type="button" class="btn primary" id="rbin-add" style="align-self:flex-end;white-space:nowrap">Přidat</button>
           </div>
         </div>
@@ -583,9 +594,13 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:15p
       </div>
       <!-- Manual view -->
       <div id="txin-manual" style="display:none">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
-          <button type="button" id="tx-manual-indexovat" style="padding:5px 12px;font-size:12px;font-family:var(--font);font-weight:600;border-radius:5px;border:1px solid var(--grn-bd);background:var(--grn-lt);color:var(--grn-tx);cursor:pointer;transition:all .15s;white-space:nowrap">↑ Valorizovat vše o inflaci</button>
-          <span id="tx-manual-indexovat-hint" style="font-size:11px;color:var(--txt3)">Částky jsou v dnešních cenách</span>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap">
+          <span class="idx-lbl">Zadané částky:</span>
+          <div class="idx-toggle" id="tx-manual-indexovat">
+            <button type="button" class="idx-opt" data-idx="1">↑ Rostou s inflací</button>
+            <button type="button" class="idx-opt fix" data-idx="0">= Stejné každý rok</button>
+          </div>
+          <span id="tx-manual-indexovat-hint" style="font-size:11px;color:var(--txt3)"></span>
         </div>
         <div class="tx-scroll" style="max-height:220px"><table class="tx-table"><thead><tr><th style="width:55px;text-align:center">Rok</th><th style="width:70px">Rok</th><th class="r">Částka (Kč)</th><th class="r">Nom. (s inf.)</th><th>Popis</th></tr></thead><tbody id="tbody-in"></tbody></table></div>
         <div class="hint" style="margin-top:6px">Kladná = vklad (zelená) · Záporná = výběr (červená)</div>
@@ -1223,32 +1238,38 @@ function syncDepEditorUnified(kind,idx){
   updateDepEditorHints();
 }
 
+// Highlight the active option in a .idx-toggle segmented control
+function setIdxToggle(containerId,on){
+  const c=document.getElementById(containerId);
+  if(!c)return;
+  c.querySelectorAll('.idx-opt').forEach(b=>{
+    b.setAttribute('aria-pressed', (b.dataset.idx==='1')===on ? 'true':'false');
+  });
+}
+
 function syncIndexovatBtn(seg){
-  const btn=document.getElementById('tei-indexovat');
   const hint=document.getElementById('tei-indexovat-hint');
-  if(!btn||!seg)return;
+  if(!seg)return;
   const on=seg.indexovat!==false;
+  setIdxToggle('tei-indexovat',on);
+  if(!hint)return;
   if(on){
-    btn.textContent='↑ Valorizovat o inflaci';
-    btn.style.cssText='padding:5px 12px;font-size:12px;font-family:var(--font);font-weight:600;border-radius:5px;border:1px solid var(--grn-bd);background:var(--grn-lt);color:var(--grn-tx);cursor:pointer;transition:all .15s;white-space:nowrap';
     const inf=getInflation();
     const nomStart=fmt(seg.val*Math.pow(1+inf,seg.from-1));
     const nomEnd=fmt(seg.val*Math.pow(1+inf,seg.to-1));
-    hint.textContent=`Rok ${seg.from}: ${nomStart} → Rok ${seg.to}: ${nomEnd} (nom.)`;
+    hint.textContent=`Zadáváte v dnešních cenách · nominálně rok ${seg.from}: ${nomStart} → rok ${seg.to}: ${nomEnd}`;
   } else {
-    btn.textContent='= Fixní částka';
-    btn.style.cssText='padding:5px 12px;font-size:12px;font-family:var(--font);font-weight:600;border-radius:5px;border:1px solid var(--border);background:var(--bg);color:var(--txt2);cursor:pointer;transition:all .15s;white-space:nowrap';
-    hint.textContent='Částka zůstává stejná bez ohledu na inflaci';
+    hint.textContent='Stejná nominální částka po celou dobu (neroste s inflací)';
   }
 }
 
-function toggleIndexovat(){
+function setSegIndexovat(on){
   const ed=document.getElementById('tl-editor-in');
   const kind=ed.dataset.kind||'in';
   const idx=parseInt(ed.dataset.idx);
   const arr=kind==='in'?depIn:depOut;
   if(isNaN(idx)||!arr[idx])return;
-  arr[idx].indexovat=arr[idx].indexovat===false?true:false;
+  arr[idx].indexovat=on;
   syncIndexovatBtn(arr[idx]);
   renderDepTL('in');renderDepTL('out');recalc();
 }
@@ -1272,7 +1293,9 @@ function bindDepLive(){
       renderDepTL('in');renderDepTL('out');recalc();
     });
   });
-  document.getElementById('tei-indexovat').addEventListener('click',toggleIndexovat);
+  document.getElementById('tei-indexovat').querySelectorAll('.idx-opt').forEach(b=>{
+    b.addEventListener('click',()=>setSegIndexovat(b.dataset.idx==='1'));
+  });
 }
 
 function addDepSeg(kind){
@@ -1528,15 +1551,7 @@ let editingRule=null; // {kind, idx}
 
 function setRbinIndexovat(on){
   rbinIndexovat=on;
-  const btn=document.getElementById('rbin-indexovat');
-  if(!btn)return;
-  if(on){
-    btn.textContent='↑ Valorizovat';
-    btn.style.cssText='align-self:flex-end;padding:8px 12px;font-size:12px;font-family:var(--font);font-weight:600;border-radius:6px;border:1px solid var(--grn-bd);background:var(--grn-lt);color:var(--grn-tx);cursor:pointer;white-space:nowrap;transition:all .15s';
-  } else {
-    btn.textContent='= Fixní';
-    btn.style.cssText='align-self:flex-end;padding:8px 12px;font-size:12px;font-family:var(--font);font-weight:600;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--txt2);cursor:pointer;white-space:nowrap;transition:all .15s';
-  }
+  setIdxToggle('rbin-indexovat',on);
 }
 
 function fillRuleForm(kind, idx){
@@ -1642,22 +1657,23 @@ function addRule(kind){
   document.getElementById('rbin-desc').value='';
 }
 document.getElementById('rbin-add').addEventListener('click',()=>addRule(txKind||'in'));
-document.getElementById('rbin-indexovat').addEventListener('click',()=>setRbinIndexovat(!rbinIndexovat));
-document.getElementById('tx-manual-indexovat').addEventListener('click',()=>{
-  txManualIndexovat=!txManualIndexovat;
-  const btn=document.getElementById('tx-manual-indexovat');
-  const hint=document.getElementById('tx-manual-indexovat-hint');
-  if(txManualIndexovat){
-    btn.textContent='↑ Valorizovat vše o inflaci';
-    btn.style.cssText='padding:5px 12px;font-size:12px;font-family:var(--font);font-weight:600;border-radius:5px;border:1px solid var(--grn-bd);background:var(--grn-lt);color:var(--grn-tx);cursor:pointer;transition:all .15s;white-space:nowrap';
-    hint.textContent='Částky jsou v dnešních cenách';
-  } else {
-    btn.textContent='= Fixní částky';
-    btn.style.cssText='padding:5px 12px;font-size:12px;font-family:var(--font);font-weight:600;border-radius:5px;border:1px solid var(--border);background:var(--bg);color:var(--txt2);cursor:pointer;transition:all .15s;white-space:nowrap';
-    hint.textContent='Nominální — bez přepočtu na inflaci';
-  }
-  renderTxTable('in');renderTxTable('out');recalc();
+document.getElementById('rbin-indexovat').querySelectorAll('.idx-opt').forEach(b=>{
+  b.addEventListener('click',()=>setRbinIndexovat(b.dataset.idx==='1'));
 });
+function setTxManualIndexovat(on){
+  txManualIndexovat=on;
+  setIdxToggle('tx-manual-indexovat',on);
+  const hint=document.getElementById('tx-manual-indexovat-hint');
+  if(hint)hint.textContent=on?'Zadáváte v dnešních cenách (sloupec vpravo ukazuje nominálně)':'Stejné nominální částky bez ohledu na inflaci';
+  renderTxTable('in');renderTxTable('out');recalc();
+}
+document.getElementById('tx-manual-indexovat').querySelectorAll('.idx-opt').forEach(b=>{
+  b.addEventListener('click',()=>setTxManualIndexovat(b.dataset.idx==='1'));
+});
+// Initialize all valorizace toggles to their default visual state
+setRbinIndexovat(true);
+setIdxToggle('tx-manual-indexovat',true);
+document.getElementById('tx-manual-indexovat-hint').textContent='Zadáváte v dnešních cenách (sloupec vpravo ukazuje nominálně)';
 
 // TOGGLE — only 'in' toggle exists now (one-off merged card)
 ['in'].forEach(kind=>{
